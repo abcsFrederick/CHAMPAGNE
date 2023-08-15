@@ -70,22 +70,22 @@ def cli():
     """NextFlow-powered commandline tool to do a thing.
     \b
     For more options, run:
-    TOOL_NAME command --help"""
+    CHAMPAGNE command --help"""
     pass
 
 
 help_msg_extra = """
 \b
 CLUSTER EXECUTION:
-TOOL_NAME run ... -profile [profile],[profile],...
+CHAMPAGNE run ... -profile [profile],[profile],...
 For information on Nextflow config and profiles see:
 https://www.nextflow.io/docs/latest/config.html#config-profiles
 \b
 RUN EXAMPLES:
-Required:           TOOL_NAME run --input [file]
-Specify threads:    TOOL_NAME run ... --threads [threads]
-Enable conda:       TOOL_NAME run ... --use-conda
-Add NextFlow args:  TOOL_NAME run ... -work-dir workDir -with-docker
+Required:           CHAMPAGNE run --input [file]
+Specify threads:    CHAMPAGNE run ... --threads [threads]
+Enable conda:       CHAMPAGNE run ... --use-conda
+Add NextFlow args:  CHAMPAGNE run ... -work-dir workDir -with-docker
 """
 
 
@@ -144,7 +144,7 @@ def citation(**kwargs):
 
 cli.add_command(run)
 cli.add_command(config)
-# cli.add_command(citation) # uncomment if TOOL_NAME is published in a journal or Zenodo
+# cli.add_command(citation) # uncomment if CHAMPAGNE is published in a journal or Zenodo
 
 
 def main():

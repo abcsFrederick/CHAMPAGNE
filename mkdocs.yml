@@ -1,12 +1,12 @@
 # Project Information
-site_name: TOOL_NAME Pipeline
-site_author: Samantha Sevilla, Ph.D.
+site_name: CHAMPAGNE
+site_author: CCR Collaborative Bioinformatics Resource
 site_description: >-
-  TOOL_NAME Pipeline
+  CHAMPAGNE
 # Repository
-repo_name: CCBR/TOOL_NAME
-repo_url: https://github.com/CCBR/TOOL_NAME
-edit_uri: https://github.com/CCBR/TOOL_NAME/edit/main/docs/
+repo_name: CCBR/CHAMPAGNE
+repo_url: https://github.com/CCBR/CHAMPAGNE
+edit_uri: https://github.com/CCBR/CHAMPAGNE/edit/main/docs/
 
 # Copyright
 copyright: Copyright &copy; 2023 CCBR

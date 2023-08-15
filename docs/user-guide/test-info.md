@@ -1,4 +1,4 @@
-This should walk the user through the steps of running the pipeline using test data
+TODO This should walk the user through the steps of running the pipeline using test data
 
 # 5. Pipeline Tutorial
 
