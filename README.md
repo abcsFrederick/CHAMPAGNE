@@ -1,6 +1,6 @@
 # CHAMPAGNE 🍾
 
-CHromAtin iMmuno PrecipitAtion sequencinG aNalysis pipEline
+**CH**rom**A**tin i**M**muno **P**recipit**A**tion sequencin**G** a**N**alysis pip**E**line
 
  🚧**This project is under active development. It is not yet ready for production use.** 🚧
 
@@ -19,7 +19,7 @@ pip3 install -e .
 Run the example
 
 ```sh
-TOOL_NAME run --input "Hello world"
+champagne run --input "Hello world"
 ```
 
 ## Developer notes
@@ -45,7 +45,7 @@ Keep the changelog up to date with any user-facing changes in `docs/CHANGELOG.md
 ## References
 
 This repo was originally generated from the [CCBR Nextflow Template](https://github.com/CCBR/CCBR_NextflowTemplate).
-The template takes inspiration from nektool[^1] and the nf-core template. If you plan to contribute your pipeline to nf-core, don't use this template -- instead follow their instructions[^2].
+The template takes inspiration from nektool[^1] and the nf-core template. If you plan to contribute your pipeline to nf-core, don't use this template -- instead follow nf-core's instructions[^2].
 
 [^1]: nektool https://github.com/beardymcjohnface/nektool
 [^2]: instructions for nf-core pipelines https://nf-co.re/docs/contributing/tutorials/creating_with_nf_core
