@@ -22,25 +22,13 @@ Run the example
 champagne run --input "Hello world"
 ```
 
-## Developer notes
+## Help & Contributing
 
-### Use pre-commit hooks
+Come across a **bug**? Open an [issue](https://github.com/CCBR/CHAMPAGNE/issues) and include a minimal reproducible example.
 
-Pre-commit can automatically format your code, check for spelling errors, etc. every time you commit.
+Have a **question**? Ask it in [discussions](https://github.com/CCBR/CHAMPAGNE/discussions).
 
-Install [pre-commit](https://pre-commit.com/#installation) if you haven't already,
-then run `pre-commit install` to install the hooks specified in `.pre-commit-config.yaml`.
-Pre-commit will run the hooks every time you commit.
-
-### Versions
-
-Increment the version number following semantic versioning[^3] in `src/CHAMPAGNE/VERSION`
-
-[^3]: semantic versioning guidelines https://semver.org/
-
-### Changelog
-
-Keep the changelog up to date with any user-facing changes in `docs/CHANGELOG.md`
+Want to **contribute** to this project? Check out the [contributing guidelines](docs/CONTRIBUTING.md).
 
 ## References
 
