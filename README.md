@@ -2,7 +2,7 @@
 
 **CH**rom**A**tin i**M**muno **P**recipit**A**tion sequencin**G** a**N**alysis pip**E**line
 
- 🚧**This project is under active development. It is not yet ready for production use.** 🚧
+🚧**This project is under active development. It is not yet ready for production use.** 🚧
 
 ## Getting started
 

@@ -1,4 +1,3 @@
-
 # 4. Expected Outputs
 
 TODO The following directories are created under the WORKDIR/results directory:
