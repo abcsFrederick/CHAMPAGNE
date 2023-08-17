@@ -26,3 +26,11 @@ repos:
     rev: "v2.7.1"
     hooks:
       - id: prettier
+        stages: [commit]
+  # enforce commit format
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v2.3.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: []
