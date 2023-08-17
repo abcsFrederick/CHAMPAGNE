@@ -1,3 +1,4 @@
+default_stages: [commit]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v1.2.3
@@ -26,7 +27,6 @@ repos:
     rev: v2.7.1
     hooks:
       - id: prettier
-        stages: [commit]
   # enforce commit format
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v2.3.0
