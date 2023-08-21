@@ -37,3 +37,7 @@ results/
 
 # macOS
 .DS_Store
+
+# code editors
+.vscode/
+*.code-workspace
