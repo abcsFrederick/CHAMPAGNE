@@ -3,13 +3,12 @@
 process TRIM_SE {
   tag { sample_id }
   publishDir "$params.outdir/$sample_id", mode: 'symlink'
-  container 'nciccbr/ncigb_cutadapt_v1.18:latest'
 
   input:
     tuple val(sample_id), path(fastq)
 
   output:
-    path("${sample_id}.cutadapt.fastq")
+    tuple val(sample_id), path("${sample_id}.cutadapt.fastq")
 
   script:
   """
