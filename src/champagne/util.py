@@ -81,7 +81,7 @@ def write_config(_config, file):
 
 def load_hpc_modules():
     subprocess.run(
-        'if [ $HOSTNAME == "biowulf.nih.gov" ]; then module load nextflow; module load singularity; fi',
+        'if [ $HOSTNAME == "biowulf.nih.gov" ]; then module load nextflow && module load singularity; fi',
         shell=True,
     )
 
@@ -129,10 +129,11 @@ def run_nextflow(
         msg_box("Runtime parameters", errmsg=yaml.dump(nf_config, Dumper=yaml.Dumper))
 
     if configfile:
-        copy_config(
-            local_config=configfile,
-            system_config=nek_base(os.path.join("workflow", "nextflow.config")),
-        )
+        if not os.path.exists(configfile):
+            copy_config(
+                local_config=configfile,
+                system_config=nek_base(os.path.join("workflow", "nextflow.config")),
+            )
 
         # add threads
         if threads:  # when threads=None, uses max available
