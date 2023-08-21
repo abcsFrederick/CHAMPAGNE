@@ -16,10 +16,10 @@ Install the tool in edit mode:
 pip3 install -e .
 ```
 
-Run the example
+Run the test dataset
 
 ```sh
-champagne run --input "Hello world"
+champagne run -profile singularity --outdir results/test --reads src/champagne/workflow/data/test/nf-core/*.fastq.gz
 ```
 
 ## Help & Contributing
