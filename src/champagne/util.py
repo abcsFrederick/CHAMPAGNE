@@ -135,7 +135,7 @@ def run_nextflow(
         )
 
         # add threads
-        if threads:
+        if threads:  # when threads=None, uses max available
             append_config_block(scope="executor", cpus=threads)
 
         # Use conda

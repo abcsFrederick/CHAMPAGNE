@@ -26,8 +26,11 @@ def common_options(func):
             help="Custom config file",
             show_default=True,
         ),
-        click.option(
-            "--threads", help="Number of threads to use", default=1, show_default=True
+        click.option(  # when threads=None, uses max available
+            "--threads",
+            help="Number of threads to use",
+            default=None,
+            show_default=True,
         ),
         click.option(
             "--use-conda/--no-use-conda",
@@ -76,6 +79,7 @@ For information on Nextflow config and profiles see:
 https://www.nextflow.io/docs/latest/config.html#config-profiles
 \b
 RUN EXAMPLES:
+Use singularity:    champagne run ... -profile singularity
 Specify threads:    champagne run ... --threads [threads]
 Enable conda:       champagne run ... --use-conda
 Add NextFlow args:  champagne run ... -work-dir workDir -with-docker
