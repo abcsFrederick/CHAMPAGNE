@@ -1,6 +1,6 @@
 log.info """\
-         C H A M P A G N E 🍾
-         ====================
+         CHAMPAGNE 🍾
+         =============
          NF version   : $nextflow.version
          runName      : $workflow.runName
          username     : $workflow.userName
@@ -17,6 +17,7 @@ log.info """\
          .stripIndent()
 
 include { TRIM_SE } from "./modules/local/trim.nf"
+include { FASTQC } from "./modules/local/qc.nf"
 
 workflow convert2fasta {
   Channel.fromPath(params.input) | any2fasta | view
@@ -26,5 +27,5 @@ workflow {
   raw_fastqs = Channel
                     .fromPath(params.reads)
                     .map { file -> tuple(file.simpleName, file) }
-  TRIM_SE(raw_fastqs)
+  raw_fastqs | TRIM_SE | FASTQC
 }
