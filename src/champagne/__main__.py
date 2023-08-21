@@ -21,12 +21,6 @@ def common_options(func):
     """Common options decorator for use with click commands."""
     options = [
         click.option(
-            "--paramsfile",
-            default="params.yaml",
-            help="Custom params file",
-            show_default=True,
-        ),
-        click.option(
             "--configfile",
             default="nextflow.config",
             help="Custom config file",
@@ -82,7 +76,6 @@ For information on Nextflow config and profiles see:
 https://www.nextflow.io/docs/latest/config.html#config-profiles
 \b
 RUN EXAMPLES:
-Required:           champagne run --input [file]
 Specify threads:    champagne run ... --threads [threads]
 Enable conda:       champagne run ... --use-conda
 Add NextFlow args:  champagne run ... -work-dir workDir -with-docker
@@ -95,21 +88,15 @@ Add NextFlow args:  champagne run ... -work-dir workDir -with-docker
         help_option_names=["-h", "--help"], ignore_unknown_options=True
     ),
 )
-@click.option("--input", "_input", help="Input file/directory", type=str, required=True)
 @common_options
-def run(_input, **kwargs):
+def run(**kwargs):
     """Run My Nektool"""
-    # Config to add or update in configfile
-    merge_config = {
-        "input": _input,
-    }
-
+    # optional: merge config from CLI with nf config
     # run!
     run_nextflow(
         nextfile_path=nek_base(
             os.path.join("workflow", "main.nf")
         ),  # Full path to Nextflow file
-        merge_config=merge_config,
         **kwargs,
     )
 
@@ -121,18 +108,11 @@ def run(_input, **kwargs):
     help="Copy template config to file",
     show_default=True,
 )
-@click.option(
-    "--paramsfile", default="params.yaml", help="Custom params file", show_default=True
-)
-def config(configfile, paramsfile, **kwargs):
+def config(configfile, **kwargs):
     """Copy the system default config files"""
     copy_config(
         local_config=configfile,
         system_config=nek_base(os.path.join("workflow", "nextflow.config")),
-    )
-    copy_config(
-        local_config=paramsfile,
-        system_config=nek_base(os.path.join("workflow", "params.yaml")),
     )
 
 

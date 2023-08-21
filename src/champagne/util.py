@@ -79,17 +79,18 @@ def write_config(_config, file):
         yaml.dump(_config, stream)
 
 
+def load_hpc_modules():
+    subprocess.run(
+        'if [ $HOSTNAME == "biowulf.nih.gov" ]; then module load nextflow; module load singularity; fi',
+        shell=True,
+    )
+
+
 class OrderedCommands(click.Group):
     """Preserve the order of subcommands when printing --help"""
 
     def list_commands(self, ctx: click.Context):
         return list(self.commands)
-
-
-"""RUN A NEXTFLOW FILE
-Hopefully you shouldn't need to tweak this function at all.
-- You must provide a Nextflow file, all else is optional
-- Highly recommend supplying a params file and a config file"""
 
 
 def run_nextflow(
