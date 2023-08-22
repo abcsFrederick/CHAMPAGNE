@@ -2,7 +2,7 @@
 site_name: CHAMPAGNE
 site_author: CCR Collaborative Bioinformatics Resource
 site_description: >-
-  CHAMPAGNE
+  CHromAtin iMmuno PrecipitAtion sequencinG aNalysis pipEline
 # Repository
 repo_name: CCBR/CHAMPAGNE
 repo_url: https://github.com/CCBR/CHAMPAGNE

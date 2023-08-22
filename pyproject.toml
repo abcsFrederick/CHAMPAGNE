@@ -8,7 +8,7 @@ build-backend = 'setuptools.build_meta'
 [project]
 name = 'CHAMPAGNE'
 dynamic = ['version','readme']
-description = "One-line description of your tool."
+description = "CHromAtin iMmuno PrecipitAtion sequencinG aNalysis pipEline"
 keywords = ["bioinformatics", "nextflow"]
 authors = [
     {name = "Kelly Sovacool", email = "kelly.sovacool@nih.gov"},
