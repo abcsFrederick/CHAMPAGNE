@@ -15,4 +15,9 @@ process FASTQC {
         -t $task.cpus \
         -o .
     """
+
+    stub:
+    """
+    touch ${sample_id}_fastqc.html ${sample_id}.cutadapt_fastqc.html
+    """
 }

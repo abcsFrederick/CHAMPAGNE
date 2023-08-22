@@ -16,10 +16,22 @@ Install the tool in edit mode:
 pip3 install -e .
 ```
 
-Run the test dataset
+Run the test dataset using the test profile:
+
+```sh
+champagne run -profile test,singularity
+```
+
+or specify the reads and outdir explicitly:
 
 ```sh
 champagne run -profile singularity --outdir results/test --reads src/champagne/workflow/data/test/nf-core/*.fastq.gz
+```
+
+Launch a stub run:
+
+```sh
+champagne run -profile test -stub
 ```
 
 ## Help & Contributing

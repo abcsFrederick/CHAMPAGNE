@@ -23,4 +23,9 @@ process TRIM_SE {
     -o ${sample_id}.cutadapt.fastq \
     $fastq
   """
+
+  stub:
+  """
+  touch ${sample_id}.cutadapt.fastq
+  """
 }
