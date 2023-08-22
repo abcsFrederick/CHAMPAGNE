@@ -79,13 +79,6 @@ def write_config(_config, file):
         yaml.dump(_config, stream)
 
 
-def load_hpc_modules():
-    subprocess.run(
-        'if [ $HOSTNAME == "biowulf.nih.gov" ]; then module load nextflow && module load singularity; fi',
-        shell=True,
-    )
-
-
 class OrderedCommands(click.Group):
     """Preserve the order of subcommands when printing --help"""
 
