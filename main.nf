@@ -20,10 +20,6 @@ include { TRIM_SE } from "./modules/local/trim.nf"
 include { FASTQC as FASTQC_RAW } from "./modules/local/qc.nf"
 include { FASTQC as FASTQC_TRIMMED } from "./modules/local/qc.nf"
 
-workflow convert2fasta {
-  Channel.fromPath(params.input) | any2fasta | view
-}
-
 workflow {
   raw_fastqs = Channel
                     .fromPath(params.reads)
