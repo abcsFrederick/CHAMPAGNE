@@ -14,7 +14,8 @@ import click
 
 
 def nek_base(rel_path):
-    return os.path.join(os.path.dirname(os.path.realpath(__file__)), rel_path)
+    basedir = os.path.split(os.path.dirname(os.path.realpath(__file__)))[0]
+    return os.path.join(basedir, rel_path)
 
 
 def get_version():
@@ -104,7 +105,7 @@ def run_nextflow(
         # copy sys default params if needed
         copy_config(
             local_config=paramsfile,
-            system_config=nek_base(os.path.join("workflow", "params.yaml")),
+            system_config=nek_base(os.path.join("params.yaml")),
         )
 
         # read the params

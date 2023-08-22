@@ -1,7 +1,7 @@
 """
-Entrypoint for My Nektool
+Entrypoint for CHAMPAGNE CLI
 
-Check out the wiki for a detailed look at customising this file:
+Check out the wiki for a detailed look at customizing this file:
 https://github.com/beardymcjohnface/Snaketool/wiki/Customising-your-Snaketool
 """
 
@@ -47,7 +47,7 @@ def common_options(func):
         ),
         click.option(
             "--conda-prefix",
-            default=nek_base(os.path.join("workflow", "conda")),
+            default=nek_base(os.path.join("conda")),
             help="Custom conda env directory",
             type=click.Path(),
             show_default=False,
@@ -64,10 +64,10 @@ def common_options(func):
 )
 @click.version_option(get_version(), "-v", "--version", is_flag=True)
 def cli():
-    """NextFlow-powered commandline tool to do a thing.
-    \b
+    """CHromAtin iMmuno PrecipitAtion sequencinG aNalysis pipEline
+
     For more options, run:
-    champagne command --help"""
+    champagne [command] --help"""
     pass
 
 
@@ -94,13 +94,11 @@ Add NextFlow args:  champagne run ... -work-dir workDir -with-docker
 )
 @common_options
 def run(**kwargs):
-    """Run My Nektool"""
+    """Run the workflow"""
     # optional: merge config from CLI with nf config
     # run!
     run_nextflow(
-        nextfile_path=nek_base(
-            os.path.join("workflow", "main.nf")
-        ),  # Full path to Nextflow file
+        nextfile_path=nek_base(os.path.join("main.nf")),  # Full path to Nextflow file
         **kwargs,
     )
 

@@ -6,7 +6,7 @@ requires = [
 build-backend = 'setuptools.build_meta'
 
 [project]
-name = 'champagne'
+name = 'CHAMPAGNE'
 dynamic = ['version','readme']
 description = "One-line description of your tool."
 keywords = ["bioinformatics", "nextflow"]
@@ -56,8 +56,8 @@ Documentation = "https://ccbr.github.io/CHAMPAGNE"
 Repository = "https://github.com/CCBR/CHAMPAGNE"
 Changelog = "https://github.com/CCBR/CHAMPAGNE/blob/main/docs/CHANGELOG.md"
 
-[tools.setuptools]
-packages = ["champagne"]
+[tool.setuptools.package-dir]
+champagne = "src"
 
 [tool.setuptools.dynamic]
 version = {file = "src/VERSION"}
