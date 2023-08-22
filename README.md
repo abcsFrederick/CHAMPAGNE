@@ -25,7 +25,7 @@ champagne run -profile test,singularity
 or specify the reads and outdir explicitly:
 
 ```sh
-champagne run -profile singularity --outdir results/test --reads src/champagne/workflow/data/test/nf-core/*.fastq.gz
+champagne run -profile singularity --outdir results/test --reads data/test/nf-core/*.fastq.gz
 ```
 
 Launch a stub run:
