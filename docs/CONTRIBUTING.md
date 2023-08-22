@@ -12,10 +12,10 @@ Pre-commit will run the hooks every time you commit.
 
 ### Versions
 
-Increment the version number following semantic versioning[^3] in `src/champagne/VERSION`.
+Increment the version number following semantic versioning[^3] in the `VERSION` file.
 
 [^3]: semantic versioning guidelines https://semver.org/
 
 ### Changelog
 
-Keep the changelog up to date with any user-facing changes in `docs/CHANGELOG.md`.
+Keep the changelog up to date with all changes in `docs/CHANGELOG.md`.
