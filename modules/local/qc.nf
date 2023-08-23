@@ -1,10 +1,10 @@
 
 process FASTQC {
     tag { sample_id }
-    publishDir "$params.outdir/qc/$sample_id", mode: 'copy'
+    publishDir "$params.outdir/qc/$sample_id/fastqc_$fqtype", mode: 'copy'
 
     input:
-        tuple val(sample_id), path(fastq)
+        tuple val(sample_id), path(fastq), val(fqtype)
     output:
         path("${sample_id}*.html")
 
@@ -18,18 +18,18 @@ process FASTQC {
 
     stub:
     """
-    touch ${sample_id}_fastqc.html ${sample_id}.cutadapt_fastqc.html
+    touch ${sample_id}_fastqc.html
     """
 }
 
 process FASTQ_SCREEN {
     tag { sample_id }
-    publishDir "$params.outdir/qc/$sample_id", mode: 'copy'
+    publishDir "$params.outdir/qc/$sample_id/fastq_screen", mode: 'copy'
 
     input:
         tuple val(sample_id), path(fastq), path(conf)
     output:
-        path("${sample_id}.*_screen.*")
+        path("${sample_id}*_screen.*")
 
     script:
     """
@@ -39,7 +39,7 @@ process FASTQ_SCREEN {
     stub:
     """
     for EXT in html txt png; do
-        touch ${sample_id}.cutadapt_screen.\${EXT}
+        touch ${sample_id}.trimmed_screen.\${EXT}
     done
     """
 }

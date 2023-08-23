@@ -8,7 +8,7 @@ process TRIM_SE {
     tuple val(sample_id), path(fastq)
 
   output:
-    tuple val(sample_id), path("${sample_id}.cutadapt.fastq")
+    tuple val(sample_id), path("${sample_id}.fastq")
 
   script:
   """
@@ -20,12 +20,12 @@ process TRIM_SE {
     -m ${params.cutadapt.minlen} \
     -b file:${params.cutadapt.adapters} \
     -j $task.cpus \
-    -o ${sample_id}.cutadapt.fastq \
+    -o ${sample_id}.fastq \
     $fastq
   """
 
   stub:
   """
-  touch ${sample_id}.cutadapt.fastq
+  touch ${sample_id}.fastq
   """
 }
