@@ -1,7 +1,3 @@
-"""MISC FUNCTIONS
-You shouldn't need to tweak these much if at all
-"""
-
 import sys
 import os
 import subprocess
@@ -145,7 +141,7 @@ def run_nextflow(
         nextflow_command += ["-c", configfile]
 
         # display the runtime configuration
-        msg_box("Launcher Configuration", errmsg=open(configfile, "r").read())
+        # msg_box("Launcher Configuration", errmsg=open(configfile, "r").read()) // TODO verbose flag to toggle printing config?
 
     # add any additional Nextflow commands
     if nextflow_args:
@@ -153,10 +149,9 @@ def run_nextflow(
 
     # Run Nextflow!!!
     nextflow_command = " ".join(str(nf) for nf in nextflow_command)
+    if os.environ["HOSTNAME"] == "biowulf.nih.gov":
+        nextflow_command = "module load nextflow && " + nextflow_command
     msg_box("Nextflow command", errmsg=nextflow_command)
-    if not subprocess.run(nextflow_command, shell=True).returncode == 0:
-        msg("Error: Nextflow failed")
-        sys.exit(1)
-    else:
-        msg("Nextflow finished successfully")
-    return 0
+    subprocess.run(
+        nextflow_command, shell=True, check=True, executable="/bin/bash"
+    )  # TODO what if bash isn't here? can we do "/usr/bin/env bash" instead?
