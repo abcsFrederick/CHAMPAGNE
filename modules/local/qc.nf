@@ -1,7 +1,7 @@
 
 process FASTQC {
     tag { sample_id }
-    publishDir "$params.outdir/$sample_id/qc/", mode: 'copy'
+    publishDir "$params.outdir/qc/$sample_id", mode: 'copy'
 
     input:
         tuple val(sample_id), path(fastq)
@@ -24,17 +24,23 @@ process FASTQC {
 
 process FASTQ_SCREEN {
     tag { sample_id }
-    publishDir "$params.outdir/$sample_id/qc/", mode: 'copy'
+    publishDir "$params.outdir/qc/$sample_id", mode: 'copy'
 
     input:
-        tuple val(sample_id), path(fastq)
-        path(conf)
+        tuple val(sample_id), path(fastq), path(conf)
     output:
-        path("${sample_id}_screen.*")
+        path("${sample_id}.*_screen.*")
 
     script:
     """
     fastq_screen -c $conf --threads $task.cpus $fastq
+    """
+
+    stub:
+    """
+    for EXT in html txt png; do
+        touch ${sample_id}.cutadapt_screen.\${EXT}
+    done
     """
 }
 /* // TODO -- hard to deal with on biowulf. come back to this later. have to copy entire db to lscratch on biowulf.

@@ -25,7 +25,10 @@ workflow {
   raw_fastqs = Channel
                     .fromPath(params.reads)
                     .map { file -> tuple(file.simpleName, file) }
-  raw_fastqs | FASTQC_RAW
-  raw_fastqs | TRIM_SE | FASTQC_TRIMMED
-  FASTQ_SCREEN(raw_fastqs, Channel.fromPath(params.fastq_screen.conf))
+  raw_fastqs | FASTQC_RAW // TODO override outfile as raw vs trimmed depending on input?
+  raw_fastqs | TRIM_SE
+  trimmed_fastqs = TRIM_SE.out
+  trimmed_fastqs | FASTQC_TRIMMED
+  //trimmed_fastqs = TRIM_SE.out | map { it -> it[1] } | collect // obtain list of just fastqs without sample_ids
+  trimmed_fastqs.combine(Channel.fromPath(params.fastq_screen.conf)) | FASTQ_SCREEN
 }
