@@ -43,6 +43,32 @@ process FASTQ_SCREEN {
     done
     """
 }
+
+process ALIGN_BLACKLIST {
+    tag { sample_id }
+    publishDir "$params.outdir/qc/$sample_id/align/", mode: 'copy'
+
+    input:
+        tuple val(sample_id), path(fastq)
+        path(blacklist_files)
+
+    output:
+        path("${sample_id}.no_blacklist.fastq.gz")
+
+    script: // TODO use samtools -f4 for single-end and -f12 for paired to get unmapped reads https://broadinstitute.github.io/picard/explain-flags.html
+    """
+    bwa mem -t $task.cpus $params.align.blacklist $fastq |\
+    samtools view -@ $task.cpus -f4 -b |\
+    samtools bam2fq |\
+    pigz -p $task.cpus > ${sample_id}.no_blacklist.fastq.gz
+    """
+
+    stub:
+    """
+    touch ${sample_id}.no_blacklist.fastq.gz
+    """
+}
+
 /* // TODO -- hard to deal with on biowulf. come back to this later. have to copy entire db to lscratch on biowulf.
 process KRAKEN_SE {
     tag { sample_id }

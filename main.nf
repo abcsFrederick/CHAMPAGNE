@@ -20,6 +20,7 @@ include { TRIM_SE } from "./modules/local/trim.nf"
 include { FASTQC as FASTQC_RAW } from "./modules/local/qc.nf"
 include { FASTQC as FASTQC_TRIMMED } from "./modules/local/qc.nf"
 include { FASTQ_SCREEN } from "./modules/local/qc.nf"
+include { ALIGN_BLACKLIST } from "./modules/local/qc.nf"
 
 workflow {
   raw_fastqs = Channel
@@ -31,4 +32,8 @@ workflow {
   trimmed_fastqs.combine(Channel.value("trimmed")) | FASTQC_TRIMMED
   //trimmed_fastqs = TRIM_SE.out | map { it -> it[1] } | collect // obtain list of just fastqs without sample_ids
   trimmed_fastqs.combine(Channel.fromPath(params.fastq_screen.conf)) | FASTQ_SCREEN
+  blacklist_files = Channel
+                    .fromPath("${params.align.index_dir}${params.align.blacklist}*")
+                    .collect()
+  ALIGN_BLACKLIST(trimmed_fastqs, blacklist_files)
 }
