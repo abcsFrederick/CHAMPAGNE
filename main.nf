@@ -19,6 +19,7 @@ log.info """\
 include { TRIM_SE } from "./modules/local/trim.nf"
 include { FASTQC as FASTQC_RAW } from "./modules/local/qc.nf"
 include { FASTQC as FASTQC_TRIMMED } from "./modules/local/qc.nf"
+include { FASTQ_SCREEN } from "./modules/local/qc.nf"
 
 workflow {
   raw_fastqs = Channel
@@ -26,4 +27,5 @@ workflow {
                     .map { file -> tuple(file.simpleName, file) }
   raw_fastqs | FASTQC_RAW
   raw_fastqs | TRIM_SE | FASTQC_TRIMMED
+  FASTQ_SCREEN(raw_fastqs, Channel.fromPath(params.fastq_screen.conf))
 }

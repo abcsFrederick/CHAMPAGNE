@@ -16,9 +16,9 @@ process TRIM_SE {
     --nextseq-trim=2 \
     --trim-n \
     -n 5 -O 5 \
-    -q ${params.leadingquality},${params.trailingquality} \
-    -m ${params.minlen} \
-    -b file:${params.adapters} \
+    -q ${params.cutadapt.leadingquality},${params.cutadapt.trailingquality} \
+    -m ${params.cutadapt.minlen} \
+    -b file:${params.cutadapt.adapters} \
     -j $task.cpus \
     -o ${sample_id}.cutadapt.fastq \
     $fastq
