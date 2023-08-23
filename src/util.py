@@ -141,7 +141,7 @@ def run_nextflow(
         nextflow_command += ["-c", configfile]
 
         # display the runtime configuration
-        # msg_box("Launcher Configuration", errmsg=open(configfile, "r").read()) // TODO verbose flag to toggle printing config?
+        # msg_box("Launcher Configuration", errmsg=open(configfile, "r").read()) # TODO verbose flag to toggle printing config?
 
     # add any additional Nextflow commands
     if nextflow_args:
@@ -150,8 +150,6 @@ def run_nextflow(
     # Run Nextflow!!!
     nextflow_command = " ".join(str(nf) for nf in nextflow_command)
     if os.environ["HOSTNAME"] == "biowulf.nih.gov":
-        nextflow_command = "module load nextflow && " + nextflow_command
+        nextflow_command = f'bash -c "module load nextflow && {nextflow_command}"'
     msg_box("Nextflow command", errmsg=nextflow_command)
-    subprocess.run(
-        nextflow_command, shell=True, check=True, executable="/bin/bash"
-    )  # TODO what if bash isn't here? can we do "/usr/bin/env bash" instead?
+    subprocess.run(nextflow_command, shell=True, check=True)
