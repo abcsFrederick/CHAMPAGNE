@@ -98,7 +98,7 @@ def run_nextflow(
         if not os.path.exists(configfile):
             copy_config(
                 local_config=configfile,
-                system_config=nek_base(os.path.join("workflow", "nextflow.config")),
+                system_config=nek_base("nextflow.config"),
             )
 
         # add threads

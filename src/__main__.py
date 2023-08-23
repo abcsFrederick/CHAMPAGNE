@@ -94,7 +94,7 @@ def config(configfile, **kwargs):
     """Copy the system default config files"""
     copy_config(
         local_config=configfile,
-        system_config=nek_base(os.path.join("workflow", "nextflow.config")),
+        system_config=nek_base("nextflow.config"),
     )
 
 
