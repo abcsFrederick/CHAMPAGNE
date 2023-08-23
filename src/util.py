@@ -89,34 +89,10 @@ def run_nextflow(
     nextfile_path=None,
     merge_config=None,
     threads=None,
-    use_conda=False,
-    conda_frontend=None,
-    conda_prefix=None,
     nextflow_args=None,
 ):
     """Run a Nextflow workfile"""
     nextflow_command = ["nextflow", "run", nextfile_path]
-
-    if paramsfile:
-        # copy sys default params if needed
-        copy_config(
-            local_config=paramsfile,
-            system_config=nek_base(os.path.join("params.yaml")),
-        )
-
-        # read the params
-        nf_config = read_config(paramsfile)
-
-        # merge in command line params if provided
-        if merge_config:
-            update_config(nf_config, merge_config)
-
-        # update params file
-        write_config(nf_config, paramsfile)
-        nextflow_command += ["-params-file", paramsfile]
-
-        # display the runtime params
-        msg_box("Runtime parameters", errmsg=yaml.dump(nf_config, Dumper=yaml.Dumper))
 
     if configfile:
         if not os.path.exists(configfile):
@@ -128,15 +104,6 @@ def run_nextflow(
         # add threads
         if threads:  # when threads=None, uses max available
             append_config_block(scope="executor", cpus=threads)
-
-        # Use conda
-        if use_conda:
-            if conda_frontend == "mamba":
-                append_config_block(
-                    scope="conda", useMamba='"true"', cacheDir=f'"{conda_prefix}"'
-                )
-            else:
-                append_config_block(scope="conda", cacheDir=f'"{conda_prefix}"')
 
         nextflow_command += ["-c", configfile]
 

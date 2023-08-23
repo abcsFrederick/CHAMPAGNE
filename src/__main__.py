@@ -32,26 +32,6 @@ def common_options(func):
             default=None,
             show_default=True,
         ),
-        click.option(
-            "--use-conda/--no-use-conda",
-            default=False,
-            help="Use conda for Nextflow processes",
-            show_default=True,
-        ),
-        click.option(
-            "--conda-frontend",
-            type=click.Choice(["mamba", "conda"], case_sensitive=True),
-            default="mamba",
-            help="Specify Conda frontend",
-            show_default=True,
-        ),
-        click.option(
-            "--conda-prefix",
-            default=nek_base(os.path.join("conda")),
-            help="Custom conda env directory",
-            type=click.Path(),
-            show_default=False,
-        ),
         click.argument("nextflow_args", nargs=-1),
     ]
     for option in reversed(options):
