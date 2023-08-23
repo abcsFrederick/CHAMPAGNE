@@ -61,7 +61,6 @@ https://www.nextflow.io/docs/latest/config.html#config-profiles
 RUN EXAMPLES:
 Use singularity:    champagne run ... -profile singularity
 Specify threads:    champagne run ... --threads [threads]
-Enable conda:       champagne run ... --use-conda
 Add NextFlow args:  champagne run ... -work-dir workDir -with-docker
 """
 
