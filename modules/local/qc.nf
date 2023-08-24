@@ -1,7 +1,7 @@
 
 process FASTQC {
     tag { sample_id }
-    publishDir "$params.outdir/qc/$sample_id/fastqc_$fqtype", mode: 'copy'
+    publishDir "$params.outdir/qc/$sample_id/fastqc_$fqtype", mode: "$params.filePublishMode"
 
     input:
         tuple val(sample_id), path(fastq), val(fqtype)
@@ -24,7 +24,7 @@ process FASTQC {
 
 process FASTQ_SCREEN {
     tag { sample_id }
-    publishDir "$params.outdir/qc/$sample_id/fastq_screen", mode: 'copy'
+    publishDir "$params.outdir/qc/$sample_id/fastq_screen", mode: "$params.filePublishMode"
 
     input:
         tuple val(sample_id), path(fastq), path(conf)
@@ -46,7 +46,7 @@ process FASTQ_SCREEN {
 
 process ALIGN_BLACKLIST {
     tag { sample_id }
-    publishDir "$params.outdir/qc/$sample_id/align/", mode: 'copy'
+    publishDir "$params.outdir/qc/$sample_id/align/", mode: "$params.filePublishMode"
 
     input:
         tuple val(sample_id), path(fastq)
@@ -72,20 +72,20 @@ process ALIGN_BLACKLIST {
 /* // TODO -- hard to deal with on biowulf. come back to this later. have to copy entire db to lscratch on biowulf.
 process KRAKEN_SE {
     tag { sample_id }
-    publishDir "$params.outdir/$sample_id/qc/", mode: 'copy'
+    publishDir "$params.outdir/$sample_id/qc/", mode: "$params.filePublishMode"
 
 }
 */
 /*
 process BWA_SE {
     tag { sample_id }
-    publishDir "$params.outdir/$sample_id/qc/", mode: 'copy'
+    publishDir "$params.outdir/$sample_id/qc/", mode: "$params.filePublishMode"
 
 }
 
 process PRESEQ {
     tag { sample_id }
-    publishDir "$params.outdir/$sample_id/qc/", mode: 'copy'
+    publishDir "$params.outdir/$sample_id/qc/", mode: "$params.filePublishMode"
 
     input:
         path(bam)
@@ -102,13 +102,13 @@ process PRESEQ {
 
 process MACS2 {
     tag { sample_id }
-    publishDir "$params.outdir/$sample_id/qc/", mode: 'copy'
+    publishDir "$params.outdir/$sample_id/qc/", mode: "$params.filePublishMode"
 
 }
 
 process NGSQC {
     tag { sample_id }
-    publishDir "$params.outdir/$sample_id/qc/", mode: 'copy'
+    publishDir "$params.outdir/$sample_id/qc/", mode: "$params.filePublishMode"
 
     stub:
     """
@@ -119,7 +119,7 @@ process NGSQC {
 
 process MULTIQC {
     tag { sample_id }
-    publishDir "$params.outdir/$sample_id/qc/", mode: 'copy'
+    publishDir "$params.outdir/$sample_id/qc/", mode: "$params.filePublishMode"
 
 }
 */
