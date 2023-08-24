@@ -48,7 +48,7 @@ test = [
 ]
 
 [project.scripts]
-champagne = "champagne.__main__:main"
+champagne = "champagne.src.__main__:main"
 
 [project.urls]
 Homepage = "https://ccbr.github.io/CHAMPAGNE"
@@ -57,7 +57,10 @@ Repository = "https://github.com/CCBR/CHAMPAGNE"
 Changelog = "https://github.com/CCBR/CHAMPAGNE/blob/main/docs/CHANGELOG.md"
 
 [tool.setuptools.package-dir]
-champagne = "src"
+champagne = "."
+
+[tool.setuptools.package-data]
+"*" = ["CITATION", "LICENSE", "VERSION", "main.nf", "nextflow.conf", "conf/*"]
 
 [tool.setuptools.dynamic]
 version = {file = "src/VERSION"}
