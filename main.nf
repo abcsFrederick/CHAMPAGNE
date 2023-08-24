@@ -22,6 +22,8 @@ include { FASTQC as FASTQC_TRIMMED } from "./modules/local/qc.nf"
 include { FASTQ_SCREEN } from "./modules/local/qc.nf"
 include { ALIGN_BLACKLIST } from "./modules/local/qc.nf"
 include { ALIGN_GENOME } from "./modules/local/qc.nf"
+include { INDEX_BAM } from "./modules/local/qc.nf"
+include { PRESEQ } from "./modules/local/qc.nf"
 
 workflow {
   raw_fastqs = Channel
@@ -41,4 +43,6 @@ workflow {
                     .fromPath("${params.align.index_dir}${params.align.genome}*")
                     .collect()
   ALIGN_GENOME(ALIGN_BLACKLIST.out, reference_files)
+  PRESEQ(ALIGN_GENOME.out)
+  INDEX_BAM(ALIGN_GENOME.out)
 }

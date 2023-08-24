@@ -1,4 +1,5 @@
 recursive-include src
+recursive-include bin
 recursive-include conf
 recursive-include modules
 include CITATION
@@ -7,3 +8,4 @@ include VERSION
 include README.md
 include main.nf
 include nextflow.conf
+exclude *.py[ocd]

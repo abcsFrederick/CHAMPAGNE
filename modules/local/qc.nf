@@ -78,7 +78,7 @@ process ALIGN_GENOME {
         path(reference_files)
 
     output:
-        path("${sample_id}.aligned.filtered.bam")
+        tuple val(sample_id), path("${sample_id}.aligned.filtered.bam")
 
     script:
     """
@@ -94,6 +94,50 @@ process ALIGN_GENOME {
 
 }
 
+process PRESEQ {
+    """
+    Calls preseq c_curve and lc_extrap, and calls bin/parse_preseq_log.py to get statistics from the log.
+    """
+    tag { sample_id }
+    publishDir "${params.outdir}/qc/${sample_id}/preseq", mode: "${params.filePublishMode}"
+
+    input:
+        tuple val(sample_id), path(bam)
+
+    output:
+        tuple path("*.c_curve"), path("*.preseq"), path("*.preseqlog"), path("*.txt")
+
+    script:
+    """
+    preseq c_curve -B -o ${sample_id}.c_curve $bam
+    preseq lc_extrap -B -D -o ${sample_id}.preseq $bam -seed 12345 -v -l 100000000000 2> ${sample_id}.preseqlog
+    parse_preseq_log.py ${sample_id}.preseqlog > ${sample_id}.preseqlog.nrf.txt
+    """
+
+    stub:
+    """
+    touch ${sample_id}.ccurve
+    """
+}
+
+process INDEX_BAM {
+    tag { sample_id }
+    publishDir "${params.outdir}/qc/${sample_id}/align/", mode: 'copy'
+
+    input:
+        tuple val(sample_id), path(bam)
+
+    output:
+        tuple path("*.bam"), path("*.idxstats")
+
+    script:
+    """
+    samtools sort -@ ${task.cpus} -o ${sample_id}.sorted.bam $bam
+    samtools index ${sample_id}.sorted.bam
+    samtools idxstats ${sample_id}.sorted.bam > ${sample_id}.sorted.bam.idxstats
+    """
+}
+
 /* // TODO -- hard to deal with on biowulf. come back to this later. have to copy entire db to lscratch on biowulf.
 process KRAKEN_SE {
     tag { sample_id }
@@ -102,23 +146,6 @@ process KRAKEN_SE {
 }
 */
 /*
-
-process PRESEQ {
-    tag { sample_id }
-    publishDir "$params.outdir/$sample_id/qc/", mode: "$params.filePublishMode"
-
-    input:
-        path(bam)
-
-    script:
-    """
-    preseq c_curve -B -o ${sample_id}.ccurve $bam
-    """
-    stub:
-    """
-    touch ${sample_id}.ccurve
-    """
-}
 
 process MACS2 {
     tag { sample_id }
