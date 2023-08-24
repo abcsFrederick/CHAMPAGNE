@@ -21,6 +21,7 @@ include { FASTQC as FASTQC_RAW } from "./modules/local/qc.nf"
 include { FASTQC as FASTQC_TRIMMED } from "./modules/local/qc.nf"
 include { FASTQ_SCREEN } from "./modules/local/qc.nf"
 include { ALIGN_BLACKLIST } from "./modules/local/qc.nf"
+include { ALIGN_GENOME } from "./modules/local/qc.nf"
 
 workflow {
   raw_fastqs = Channel
@@ -36,4 +37,8 @@ workflow {
                     .fromPath("${params.align.index_dir}${params.align.blacklist}*")
                     .collect()
   ALIGN_BLACKLIST(trimmed_fastqs, blacklist_files)
+  reference_files = Channel
+                    .fromPath("${params.align.index_dir}${params.align.genome}*")
+                    .collect()
+  ALIGN_GENOME(ALIGN_BLACKLIST.out, reference_files)
 }

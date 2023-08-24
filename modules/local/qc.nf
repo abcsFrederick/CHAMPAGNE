@@ -53,7 +53,7 @@ process ALIGN_BLACKLIST {
         path(blacklist_files)
 
     output:
-        path("${sample_id}.no_blacklist.fastq.gz")
+        tuple val(sample_id), path("${sample_id}.no_blacklist.fastq.gz")
 
     script: // TODO use samtools -f4 for single-end and -f12 for paired to get unmapped reads https://broadinstitute.github.io/picard/explain-flags.html
     """
@@ -69,6 +69,31 @@ process ALIGN_BLACKLIST {
     """
 }
 
+process ALIGN_GENOME {
+    tag { sample_id }
+    publishDir "${params.outdir}/qc/${sample_id}/align/", mode: 'copy'
+
+    input:
+        tuple val(sample_id), path(fastq)
+        path(reference_files)
+
+    output:
+        path("${sample_id}.aligned.filtered.bam")
+
+    script:
+    """
+    bwa mem -t ${task.cpus} ${params.align.genome} $fastq |\
+    samtools sort -@ ${task.cpus} |\
+    samtools view -b -q ${params.align.min_quality} -o ${sample_id}.aligned.filtered.bam
+    """
+
+    stub:
+    """
+    touch ${sample_id}.aligned.filtered.bam
+    """
+
+}
+
 /* // TODO -- hard to deal with on biowulf. come back to this later. have to copy entire db to lscratch on biowulf.
 process KRAKEN_SE {
     tag { sample_id }
@@ -77,11 +102,6 @@ process KRAKEN_SE {
 }
 */
 /*
-process BWA_SE {
-    tag { sample_id }
-    publishDir "$params.outdir/$sample_id/qc/", mode: "$params.filePublishMode"
-
-}
 
 process PRESEQ {
     tag { sample_id }
