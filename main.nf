@@ -24,6 +24,7 @@ include { ALIGN_BLACKLIST } from "./modules/local/qc.nf"
 include { ALIGN_GENOME } from "./modules/local/qc.nf"
 include { INDEX_BAM } from "./modules/local/qc.nf"
 include { PRESEQ } from "./modules/local/qc.nf"
+include { PHANTOM_PEAKS } from "./modules/local/qc.nf"
 
 workflow {
   raw_fastqs = Channel
@@ -45,4 +46,5 @@ workflow {
   ALIGN_GENOME(ALIGN_BLACKLIST.out, reference_files)
   //PRESEQ(ALIGN_GENOME.out)
   INDEX_BAM(ALIGN_GENOME.out)
+  PHANTOM_PEAKS(ALIGN_GENOME.out)
 }

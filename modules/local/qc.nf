@@ -122,7 +122,7 @@ process PRESEQ {
 
 process INDEX_BAM {
     tag { sample_id }
-    publishDir "${params.outdir}/qc/${sample_id}/align/", mode: 'copy'
+    publishDir "${params.outdir}/qc/${sample_id}/align/", mode: "${params.filePublishMode}"
 
     input:
         tuple val(sample_id), path(bam)
@@ -138,6 +138,24 @@ process INDEX_BAM {
     """
 }
 
+process PHANTOM_PEAKS { // https://github.com/kundajelab/phantompeakqualtools
+    // TODO: how does original pipeliner use extensions to repeat this process? https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L492
+    // TODO: set tmpdir as lscratch if available https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L504
+    tag { sample_id }
+    publishDir "${params.outdir}/qc/${sample_id}/ppqt/", mode: "${params.filePublishMode}"
+
+    input:
+        tuple val(sample_id), path(bam)
+
+    output:
+        tuple path("${sample_id}.ppqt.pdf"), path("${sample_id}.ppqt")
+    script: // TODO: for PE, just use first read of each pair
+    """
+    RUN_SPP=\$(which run_spp.R)
+    Rscript \$RUN_SPP -c=${bam} -savp=${sample_id}.ppqt.pdf -out=${sample_id}.ppqt
+    """
+
+}
 /* // TODO -- hard to deal with on biowulf. come back to this later. have to copy entire db to lscratch on biowulf.
 process KRAKEN_SE {
     tag { sample_id }
