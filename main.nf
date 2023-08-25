@@ -43,6 +43,6 @@ workflow {
                     .fromPath("${params.align.index_dir}${params.align.genome}*")
                     .collect()
   ALIGN_GENOME(ALIGN_BLACKLIST.out, reference_files)
-  PRESEQ(ALIGN_GENOME.out)
+  //PRESEQ(ALIGN_GENOME.out)
   INDEX_BAM(ALIGN_GENOME.out)
 }
