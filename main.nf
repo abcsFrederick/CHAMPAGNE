@@ -25,6 +25,7 @@ include { ALIGN_GENOME } from "./modules/local/qc.nf"
 include { INDEX_BAM } from "./modules/local/qc.nf"
 include { PRESEQ } from "./modules/local/qc.nf"
 include { PHANTOM_PEAKS } from "./modules/local/qc.nf"
+include { DEDUPLICATE } from "./modules/local/qc.nf"
 
 workflow {
   raw_fastqs = Channel
@@ -47,4 +48,5 @@ workflow {
   //PRESEQ(ALIGN_GENOME.out)
   INDEX_BAM(ALIGN_GENOME.out)
   PHANTOM_PEAKS(ALIGN_GENOME.out)
+  //ALIGN_GENOME.out.combine(Channel.fromPath("${params.align.index_dir}${params.align.chrom_sizes}")) | DEDUPLICATE
 }

@@ -158,13 +158,34 @@ process PHANTOM_PEAKS { // https://github.com/kundajelab/phantompeakqualtools
 
 }
 
-/*
 process DEDUPLICATE {
     tag { sample_id }
     publishDir "$params.outdir/qc/dedup/$sample_id/", mode: "${params.filePublishMode}"
 
+    input:
+        tuple val(sample_id), path(bam), path(chrom_sizes)
+
+    output:
+        path("${sample_id}.TagAlign.gz"), emit: tag_align
+        path("${bam.baseName}.dedup.bam"), emit: bam
+        path("${bam.baseName}.dedup.bam.flagstat"), emit: flagstat
+        path("${bam.baseName}.dedup.bam.idxstat"), emit: idxstat
+
+    script:
+    """
+    macs2 filterdup -i ${bam} -g ${params.align.effective_genome_size} --keep-dup="auto" -o TmpTagAlign1
+    awk -F"\\t" -v OFS="\\t" '{{if (\$2>0 && \$3>0) {{print}}}}' TmpTagAlign1 > TmpTagAlign2
+    awk -F"\\t" -v OFS="\\t" '{{print \$1,1,\$2}}' ${chrom_sizes} | sort -k1,1 -k2,2n > GenomeFileBed
+    bedtools intersect -wa -f 1.0 -a TmpTagAlign2 -b GenomeFileBed > TmpTagAlign3
+    bedtools bedtobam -i TmpTagAlign3 -g ${chrom_sizes} | samtools sort -@ ${task.cpus} -o ${bam.baseName}.dedup.bam
+    pigz -p ${task.cpus} TmpTagAlign3 > ${sample_id}.TagAlign.gz
+    samtools index ${bam.baseName}.dedup.bam
+    samtools flagstat ${bam.baseName}.dedup.bam > ${bam.baseName}.dedup.bam.flagstat
+    samtools idxstats ${bam.baseName}.dedup.bam > ${bam.baseName}.dedup.bam.idxstat
+    """
 }
 
+/*
 process NGSQC {
     tag { sample_id }
     stub:
