@@ -1,12 +1,12 @@
 
 process FASTQC {
     tag { sample_id }
-    publishDir "$params.outdir/qc/$sample_id/fastqc_$fqtype", mode: "$params.filePublishMode"
+    publishDir "$params.outdir/qc/fastqc_${fqtype}/${sample_id}", mode: "${params.filePublishMode}"
 
     input:
         tuple val(sample_id), path(fastq), val(fqtype)
     output:
-        path("${sample_id}*.html")
+        path("${sample_id}*.html"), emit: html
 
     script:
     """
@@ -24,12 +24,12 @@ process FASTQC {
 
 process FASTQ_SCREEN {
     tag { sample_id }
-    publishDir "$params.outdir/qc/$sample_id/fastq_screen", mode: "$params.filePublishMode"
+    publishDir "${params.outdir}/qc/fastq_screen/${sample_id}", mode: "${params.filePublishMode}"
 
     input:
         tuple val(sample_id), path(fastq), path(conf)
     output:
-        path("${sample_id}*_screen.*")
+        path("${sample_id}*_screen.*"), emit: screen
 
     script:
     """
@@ -46,14 +46,14 @@ process FASTQ_SCREEN {
 
 process ALIGN_BLACKLIST {
     tag { sample_id }
-    publishDir "$params.outdir/qc/$sample_id/align/", mode: "$params.filePublishMode"
+    publishDir "${params.outdir}/qc/align/${sample_id}", mode: "$params.filePublishMode"
 
     input:
         tuple val(sample_id), path(fastq)
         path(blacklist_files)
 
     output:
-        tuple val(sample_id), path("${sample_id}.no_blacklist.fastq.gz")
+        tuple val(sample_id), path("${sample_id}.no_blacklist.fastq.gz"), emit: reads
 
     script: // TODO use samtools -f4 for single-end and -f12 for paired to get unmapped reads https://broadinstitute.github.io/picard/explain-flags.html
     """
@@ -71,14 +71,14 @@ process ALIGN_BLACKLIST {
 
 process ALIGN_GENOME {
     tag { sample_id }
-    publishDir "${params.outdir}/qc/${sample_id}/align/", mode: 'copy'
+    publishDir "${params.outdir}/qc/align/${sample_id}", mode: 'copy'
 
     input:
         tuple val(sample_id), path(fastq)
         path(reference_files)
 
     output:
-        tuple val(sample_id), path("${sample_id}.aligned.filtered.bam")
+        tuple val(sample_id), path("${sample_id}.aligned.filtered.bam"), emit: bam
 
     script:
     """
@@ -99,13 +99,13 @@ process PRESEQ {
     Calls preseq c_curve and lc_extrap, and calls bin/parse_preseq_log.py to get statistics from the log.
     """
     tag { sample_id }
-    publishDir "${params.outdir}/qc/${sample_id}/preseq", mode: "${params.filePublishMode}"
+    publishDir "${params.outdir}/qc/preseq/${sample_id}", mode: "${params.filePublishMode}"
 
     input:
         tuple val(sample_id), path(bam)
 
     output:
-        tuple path("*.c_curve"), path("*.preseq"), path("*.preseqlog"), path("*.txt")
+        tuple path("*.c_curve"), path("*.preseq"), path("*.preseqlog"), path("*.txt"), emit: preseq_files
 
     script:
     """
@@ -122,13 +122,14 @@ process PRESEQ {
 
 process INDEX_BAM {
     tag { sample_id }
-    publishDir "${params.outdir}/qc/${sample_id}/align/", mode: "${params.filePublishMode}"
+    publishDir "${params.outdir}/qc/align/${sample_id}/", mode: "${params.filePublishMode}"
 
     input:
         tuple val(sample_id), path(bam)
 
     output:
-        tuple path("*.bam"), path("*.idxstats")
+        path("*.bam"), emit: bam
+        path("*.idxstats"), emit: idxstats
 
     script:
     """
@@ -139,16 +140,16 @@ process INDEX_BAM {
 }
 
 process PHANTOM_PEAKS { // https://github.com/kundajelab/phantompeakqualtools
-    // TODO: how does original pipeliner use extensions to repeat this process? https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L492
     // TODO: set tmpdir as lscratch if available https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L504
     tag { sample_id }
-    publishDir "${params.outdir}/qc/${sample_id}/ppqt/", mode: "${params.filePublishMode}"
+    publishDir "${params.outdir}/qc/ppqt/${sample_id}/", mode: "${params.filePublishMode}"
 
     input:
         tuple val(sample_id), path(bam)
 
     output:
-        tuple path("${sample_id}.ppqt.pdf"), path("${sample_id}.ppqt")
+        tuple path("${sample_id}.ppqt.pdf"), path("${sample_id}.ppqt"), emit: ppqt
+
     script: // TODO: for PE, just use first read of each pair
     """
     RUN_SPP=\$(which run_spp.R)
@@ -156,25 +157,16 @@ process PHANTOM_PEAKS { // https://github.com/kundajelab/phantompeakqualtools
     """
 
 }
-/* // TODO -- hard to deal with on biowulf. come back to this later. have to copy entire db to lscratch on biowulf.
-process KRAKEN_SE {
-    tag { sample_id }
-    publishDir "$params.outdir/$sample_id/qc/", mode: "$params.filePublishMode"
 
-}
-*/
 /*
-
-process MACS2 {
+process DEDUPLICATE {
     tag { sample_id }
-    publishDir "$params.outdir/$sample_id/qc/", mode: "$params.filePublishMode"
+    publishDir "$params.outdir/qc/dedup/$sample_id/", mode: "${params.filePublishMode}"
 
 }
 
 process NGSQC {
     tag { sample_id }
-    publishDir "$params.outdir/$sample_id/qc/", mode: "$params.filePublishMode"
-
     stub:
     """
     touch NGSQC_report.txt
@@ -184,7 +176,10 @@ process NGSQC {
 
 process MULTIQC {
     tag { sample_id }
-    publishDir "$params.outdir/$sample_id/qc/", mode: "$params.filePublishMode"
+}
 
+ // TODO -- come back to this later. hard to deal with on biowulf and long-running. have to copy entire db to lscratch on biowulf.
+process KRAKEN_SE {
+    tag { sample_id }
 }
 */
