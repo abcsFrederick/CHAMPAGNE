@@ -4,6 +4,7 @@ import subprocess
 import yaml
 import collections.abc
 from shutil import copyfile
+import stat
 from time import localtime, strftime
 
 import click
@@ -76,6 +77,28 @@ def write_config(_config, file):
         yaml.dump(_config, stream)
 
 
+def chmod_bins_exec():
+    """Ensure that all files in bin/ are executable.
+
+    It appears that setuptools strips executable permissions from package_data files,
+    yet post-install scripts are not possible with the pyproject.toml format.
+    So this function will run when `run()` is called.
+    Without this hack, nextflow processes that call scripts in bin/ fail.
+
+    https://stackoverflow.com/questions/18409296/package-data-files-with-executable-permissions
+    https://github.com/pypa/setuptools/issues/2041
+    https://stackoverflow.com/questions/76320274/post-install-script-for-pyproject-toml-projects
+    """
+    bin_dir = nek_base("bin/")
+    for filename in os.listdir(bin_dir):
+        bin_path = os.path.join(bin_dir, filename)
+        file_stat = os.stat(bin_path)
+        # below is equivalent to `chmod +x`
+        os.chmod(
+            bin_path, file_stat.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+        )
+
+
 class OrderedCommands(click.Group):
     """Preserve the order of subcommands when printing --help"""
 
@@ -113,6 +136,9 @@ def run_nextflow(
     # add any additional Nextflow commands
     if nextflow_args:
         nextflow_command += list(nextflow_args)
+
+    # make sure bins are executable for nextflow processes
+    chmod_bins_exec()
 
     # Run Nextflow!!!
     nextflow_command = " ".join(str(nf) for nf in nextflow_command)

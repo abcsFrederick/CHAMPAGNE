@@ -4,7 +4,7 @@
 Parse the log file from preseq
 
 Usage:
-    python3 preseq_log.py <path/to/preseq.log>
+    python3 parse_preseq_log.py <path/to/preseq.log>
 
 adapted from https://github.com/CCBR/Dockers/blob/4f245f4e418dd1908b7d91d487e45470d07096df/chipseq/ccbr_preseq/ccbr_nrf.py#L1-L17
 """
