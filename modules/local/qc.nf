@@ -160,13 +160,13 @@ process PHANTOM_PEAKS { // https://github.com/kundajelab/phantompeakqualtools
 
 process DEDUPLICATE {
     tag { sample_id }
-    publishDir "$params.outdir/qc/dedup/$sample_id/", mode: "${params.filePublishMode}"
+    publishDir "${params.outdir}/qc/dedup/$sample_id/", mode: "${params.filePublishMode}"
 
     input:
         tuple val(sample_id), path(bam), path(chrom_sizes)
 
     output:
-        path("${sample_id}.TagAlign.gz"), emit: tag_align
+        tuple val(sample_id), path("${sample_id}.TagAlign.gz"), emit: tag_align
         path("${bam.baseName}.dedup.bam"), emit: bam
         path("${bam.baseName}.dedup.bam.flagstat"), emit: flagstat
         path("${bam.baseName}.dedup.bam.idxstat"), emit: idxstat
@@ -185,13 +185,30 @@ process DEDUPLICATE {
     """
 }
 
-/*
-process NGSQC {
+process NGSQC_GEN {
     tag { sample_id }
+    publishDir "${params.outdir}/qc/dedup/$sample_id/", mode: "${params.filePublishMode}"
+
+    input:
+        tuple val(sample_id), path(tag_align), path(chrom_sizes)
+
+    output:
+        path("NGSQC_report.txt"), emit: report
+
+    script:
+    """
+    ngsqc -v ${tag_align} ${chrom_sizes}
+    """
+
     stub:
     """
     touch NGSQC_report.txt
     """
+}
+
+
+/*
+process DEEPTOOLS {
 
 }
 

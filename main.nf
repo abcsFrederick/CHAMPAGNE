@@ -26,6 +26,7 @@ include { INDEX_BAM } from "./modules/local/qc.nf"
 include { PRESEQ } from "./modules/local/qc.nf"
 include { PHANTOM_PEAKS } from "./modules/local/qc.nf"
 include { DEDUPLICATE } from "./modules/local/qc.nf"
+include { NGSQC_GEN } from "./modules/local/qc.nf"
 
 workflow {
   raw_fastqs = Channel
