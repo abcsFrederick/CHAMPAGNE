@@ -187,17 +187,17 @@ process DEDUPLICATE {
 
 process NGSQC_GEN {
     tag { sample_id }
-    publishDir "${params.outdir}/qc/dedup/$sample_id/", mode: "${params.filePublishMode}"
+    publishDir "${params.outdir}/qc/ngsqc/$sample_id/", mode: "${params.filePublishMode}"
 
     input:
-        tuple val(sample_id), path(tag_align), path(chrom_sizes)
+        tuple val(sample_id), path(bed), path(chrom_sizes)
 
     output:
         path("NGSQC_report.txt"), emit: report
 
     script:
     """
-    ngsqc -v ${tag_align} ${chrom_sizes}
+    ngsqc -v ${bed} ${chrom_sizes}
     """
 
     stub:
@@ -207,7 +207,13 @@ process NGSQC_GEN {
 }
 
 
+
 /*
+process PLOT_NGSQC {
+    // TODO refactor bin/ngsqc_plot.py for simplicity
+
+}
+
 process DEEPTOOLS {
 
 }
