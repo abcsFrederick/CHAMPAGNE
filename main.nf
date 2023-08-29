@@ -55,5 +55,5 @@ workflow {
   //DEDUPLICATE.out.tag_align.combine(chrom_sizes) | NGSQC_GEN
   PHANTOM_PEAKS(INDEX_BAM.out.bam)
   DEEPTOOLS_BAMCOV(INDEX_BAM.out.bam, PHANTOM_PEAKS.out.ppqt)
-  DEEPTOOLS_BAMCOV.out.bigwig.collect() | DEEPTOOLS_BIGWIG_SUM
+  DEEPTOOLS_BIGWIG_SUM(DEEPTOOLS_BAMCOV.out.sample_id.collect(), DEEPTOOLS_BAMCOV.out.bigwig.collect())
 }

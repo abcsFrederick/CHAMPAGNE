@@ -254,10 +254,10 @@ process DEEPTOOLS_BAMCOV {
 
 }
 process DEEPTOOLS_BIGWIG_SUM {
-    tag { sample_id }
     publishDir "${params.outdir}/qc/deeptools_qc", mode: "${params.filePublishMode}"
 
     input:
+        val(sample_ids)
         path(bigwigs)
 
     output:
@@ -266,7 +266,9 @@ process DEEPTOOLS_BIGWIG_SUM {
     script:
     """
     multiBigwigSummary bins \
-      -b ${bigwigs}
+      -b ${bigwigs} \
+      --labels ${sample_ids} \
+      -o bigWigSum.npz
     """
 
     stub:
