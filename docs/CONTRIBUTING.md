@@ -22,4 +22,6 @@ Keep the changelog up to date with all changes in `docs/CHANGELOG.md`.
 
 ## VS code extensions
 
-If you use VS code, installing [nf-core extension pack](https://marketplace.visualstudio.com/items?itemName=nf-core.nf-core-extensionpack) is recommended.
+If you use VS code, installing the
+[nf-core extension pack](https://marketplace.visualstudio.com/items?itemName=nf-core.nf-core-extensionpack)
+is highly recommended.

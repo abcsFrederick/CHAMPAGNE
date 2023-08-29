@@ -13,8 +13,8 @@ TODO
 ### champagne CLI
 
 You can run champagne from the command line.
-The CLI which includes helper steps for execution on supported
-high performance computing clusters.
+The CLI includes helper steps for execution on supported
+high performance computing clusters including Biowulf and FRCE.
 
 Install the champagne CLI:
 
