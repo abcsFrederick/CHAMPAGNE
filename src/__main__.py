@@ -26,6 +26,9 @@ def common_options(func):
             help="Custom config file",
             show_default=True,
         ),
+        click.option(
+            "--paramsfile", default=None, help="Custom params file", show_default=True
+        ),
         click.option(  # when threads=None, uses max available
             "--threads",
             help="Number of threads to use",
@@ -91,10 +94,12 @@ def run(**kwargs):
 )
 def config(configfile, **kwargs):
     """Copy the system default config files"""
-    copy_config(
-        local_config=configfile,
-        system_config=nek_base("nextflow.config"),
-    )
+    for filename in ("nextflow.config", "params.yml"):
+        if os.path.exists(nek_base(filename)):
+            copy_config(
+                local_config=configfile,
+                system_config=nek_base(filename),
+            )
 
 
 @click.command()

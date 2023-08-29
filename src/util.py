@@ -117,6 +117,23 @@ def run_nextflow(
     """Run a Nextflow workfile"""
     nextflow_command = ["nextflow", "run", nextfile_path]
 
+    if paramsfile:
+        # copy sys default params if needed
+        copy_config(
+            local_config=paramsfile,
+            system_config=nek_base("params.yaml"),
+        )
+        # read the params
+        nf_config = read_config(paramsfile)
+        # merge in command line params if provided
+        if merge_config:
+            update_config(nf_config, merge_config)
+        # update params file
+        write_config(nf_config, paramsfile)
+        nextflow_command += ["-params-file", paramsfile]
+        # display the runtime params
+        msg_box("Runtime parameters", errmsg=yaml.dump(nf_config, Dumper=yaml.Dumper))
+
     if configfile:
         if not os.path.exists(configfile):
             copy_config(
