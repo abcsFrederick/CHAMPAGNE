@@ -7,18 +7,19 @@ process FASTQC {
         tuple val(sample_id), path(fastq), val(fqtype)
     output:
         path("${sample_id}*.html"), emit: html
+        path ("${sample_id}*.zip"), emit: zip
 
     script:
     """
     fastqc \
-        $fastq \
-        -t $task.cpus \
-        -o .
+      $fastq \
+      -t $task.cpus \
+      -o .
     """
 
     stub:
     """
-    touch ${sample_id}_fastqc.html
+    touch ${sample_id}_fastqc.html ${sample_id}_fastqc.zip
     """
 }
 
