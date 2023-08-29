@@ -43,8 +43,8 @@ champagne run -profile test -stub
 
 ### nextflow pipeline
 
-You can run the nextflow pipeline directly from GitHub.
-You will need nextflow and singularity or docker installed.
+You can run the nextflow pipeline directly by specifying this GitHub repo.
+You will need nextflow and either singularity or docker installed.
 
 ```sh
 nextflow run CCBR/CHAMPAGNE -profile test,singularity
