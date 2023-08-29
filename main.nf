@@ -12,10 +12,14 @@ log.info """\
          launchDir    : $workflow.launchDir
          workDir      : $workflow.workDir
          homeDir      : $workflow.homeDir
-         reads        : ${params.reads}
+         input        : ${params.input}
          """
          .stripIndent()
 
+// SUBWORKFLOWS
+include { INPUT_CHECK } from './subworkflows/local/input_check.nf'
+
+// MODULES
 include { TRIM_SE } from "./modules/local/trim.nf"
 include { FASTQC as FASTQC_RAW } from "./modules/local/qc.nf"
 include { FASTQC as FASTQC_TRIMMED } from "./modules/local/qc.nf"
@@ -30,11 +34,14 @@ include { NGSQC_GEN } from "./modules/local/qc.nf"
 include { DEEPTOOLS_BAMCOV } from "./modules/local/qc.nf"
 include { DEEPTOOLS_BIGWIG_SUM } from "./modules/local/qc.nf"
 
+// MAIN WORKFLOW
 workflow {
-  raw_fastqs = Channel
-                    .fromPath(params.reads)
-                    .map { file -> tuple(file.simpleName, file) }
-  raw_fastqs.combine(Channel.value("raw")) | FASTQC_RAW
+
+  INPUT_CHECK (
+      file(params.input),
+      params.seq_center
+  )
+  raw_fastqs = INPUT_CHECK.out.reads
   raw_fastqs | TRIM_SE
   trimmed_fastqs = TRIM_SE.out
   trimmed_fastqs.combine(Channel.value("trimmed")) | FASTQC_TRIMMED
@@ -48,12 +55,12 @@ workflow {
                     .fromPath("${params.align.index_dir}${params.align.genome}*")
                     .collect()
   ALIGN_GENOME(ALIGN_BLACKLIST.out, reference_files)
-  PRESEQ(ALIGN_GENOME.out)
+  //PRESEQ(ALIGN_GENOME.out.bam)
   chrom_sizes = Channel.fromPath("${params.align.index_dir}${params.align.chrom_sizes}")
-  ALIGN_GENOME.out.combine(chrom_sizes) | DEDUPLICATE
+  ALIGN_GENOME.out.bam.combine(chrom_sizes) | DEDUPLICATE
   INDEX_BAM(DEDUPLICATE.out.bam)
   //DEDUPLICATE.out.tag_align.combine(chrom_sizes) | NGSQC_GEN
   PHANTOM_PEAKS(INDEX_BAM.out.bam)
   DEEPTOOLS_BAMCOV(INDEX_BAM.out.bam, PHANTOM_PEAKS.out.ppqt)
-  DEEPTOOLS_BIGWIG_SUM(DEEPTOOLS_BAMCOV.out.sample_id.collect(), DEEPTOOLS_BAMCOV.out.bigwig.collect())
+  DEEPTOOLS_BIGWIG_SUM(DEEPTOOLS_BAMCOV.out.meta_id.collect(), DEEPTOOLS_BAMCOV.out.bigwig.collect())
 }

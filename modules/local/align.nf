@@ -1,74 +1,79 @@
 
 process ALIGN_BLACKLIST {
-    tag { sample_id }
+    tag { meta.id }
     label 'align'
 
     input:
-        tuple val(sample_id), path(fastq)
+        tuple val(meta), path(fastq)
         path(blacklist_files)
 
     output:
-        tuple val(sample_id), path("${sample_id}.no_blacklist.fastq.gz"), emit: reads
+        tuple val(meta), path("${meta.id}.no_blacklist.fastq.gz"), emit: reads
 
     script: // TODO use samtools -f4 for single-end and -f12 for paired to get unmapped reads https://broadinstitute.github.io/picard/explain-flags.html
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     bwa mem -t $task.cpus $params.align.blacklist $fastq |\
     samtools view -@ $task.cpus -f4 -b |\
     samtools bam2fq |\
-    pigz -p $task.cpus > ${sample_id}.no_blacklist.fastq.gz
+    pigz -p $task.cpus > ${prefix}.no_blacklist.fastq.gz
     """
 
     stub:
     """
-    touch ${sample_id}.no_blacklist.fastq.gz
+    touch ${meta.id}.no_blacklist.fastq.gz
     """
 }
 
 process ALIGN_GENOME {
-    tag { sample_id }
+    tag { meta.id }
     label 'align'
 
     input:
-        tuple val(sample_id), path(fastq)
+        tuple val(meta), path(fastq)
         path(reference_files)
 
     output:
-        tuple val(sample_id), path("${sample_id}.aligned.filtered.bam"), emit: bam
+        tuple val(meta), path("${meta.id}.aligned.filtered.bam"), emit: bam
 
     script:
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     bwa mem -t ${task.cpus} ${params.align.genome} $fastq |\
     samtools sort -@ ${task.cpus} |\
-    samtools view -b -q ${params.align.min_quality} -o ${sample_id}.aligned.filtered.bam
+    samtools view -b -q ${params.align.min_quality} -o ${prefix}.aligned.filtered.bam
     """
 
     stub:
     """
-    touch ${sample_id}.aligned.filtered.bam
+    touch ${meta.id}.aligned.filtered.bam
     """
 
 }
 
 process INDEX_BAM {
-    tag { sample_id }
+    tag { meta.id }
     label 'align'
 
     input:
-        tuple val(sample_id), path(bam)
+        tuple val(meta), path(bam)
 
     output:
-        tuple val(sample_id), path("*.bam"), path("*.bai"), emit: bam
+        tuple val(meta), path("*.bam"), path("*.bai"), emit: bam
         path("*.idxstats"), emit: idxstats
 
     script:
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    samtools sort -@ ${task.cpus} -o ${sample_id}.sorted.bam $bam
-    samtools index ${sample_id}.sorted.bam   # creates ${sample_id}.sorted.bam.bai
-    samtools idxstats ${sample_id}.sorted.bam > ${sample_id}.sorted.bam.idxstats
+    samtools sort -@ ${task.cpus} -o ${prefix}.sorted.bam $bam
+    samtools index ${prefix}.sorted.bam   # creates ${prefix}.sorted.bam.bai
+    samtools idxstats ${prefix}.sorted.bam > ${prefix}.sorted.bam.idxstats
     """
 
     stub:
     """
-    touch ${sample_id}.sorted.bam ${sample_id}.sorted.bam.bai ${sample_id}.sorted.bam.idxstats
+    for ext in sorted.bam sorted.bam.bai sorted.bam.idxstats; do
+        touch ${meta.id}.\$ext
+    done
     """
 }
