@@ -120,35 +120,17 @@ process PRESEQ {
     """
 }
 
-process INDEX_BAM {
-    tag { sample_id }
-    publishDir "${params.outdir}/qc/align/${sample_id}/", mode: "${params.filePublishMode}"
-
-    input:
-        tuple val(sample_id), path(bam)
-
-    output:
-        path("*.bam"), emit: bam
-        path("*.idxstats"), emit: idxstats
-
-    script:
-    """
-    samtools sort -@ ${task.cpus} -o ${sample_id}.sorted.bam $bam
-    samtools index ${sample_id}.sorted.bam
-    samtools idxstats ${sample_id}.sorted.bam > ${sample_id}.sorted.bam.idxstats
-    """
-}
-
 process PHANTOM_PEAKS { // https://github.com/kundajelab/phantompeakqualtools
     // TODO: set tmpdir as lscratch if available https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L504
     tag { sample_id }
-    publishDir "${params.outdir}/qc/ppqt/${sample_id}/", mode: "${params.filePublishMode}"
+    publishDir "${params.outdir}/qc/ppqt/${sample_id}", mode: "${params.filePublishMode}"
 
     input:
-        tuple val(sample_id), path(bam)
+        tuple val(sample_id), path(bam), path(bai)
 
     output:
-        tuple path("${sample_id}.ppqt.pdf"), path("${sample_id}.ppqt"), emit: ppqt
+        path("${sample_id}.ppqt.pdf"), emit: pdf
+        path("${sample_id}.ppqt"), emit: ppqt
 
     script: // TODO: for PE, just use first read of each pair
     """
@@ -160,14 +142,14 @@ process PHANTOM_PEAKS { // https://github.com/kundajelab/phantompeakqualtools
 
 process DEDUPLICATE {
     tag { sample_id }
-    publishDir "${params.outdir}/qc/dedup/$sample_id/", mode: "${params.filePublishMode}"
+    publishDir "${params.outdir}/qc/dedup/${sample_id}", mode: "${params.filePublishMode}"
 
     input:
         tuple val(sample_id), path(bam), path(chrom_sizes)
 
     output:
         tuple val(sample_id), path("${sample_id}.TagAlign.bed"), emit: tag_align
-        path("${bam.baseName}.dedup.bam"), emit: bam
+        tuple val(sample_id), path("${bam.baseName}.dedup.bam"), emit: bam
         path("${bam.baseName}.dedup.bam.flagstat"), emit: flagstat
         path("${bam.baseName}.dedup.bam.idxstat"), emit: idxstat
 
@@ -184,9 +166,28 @@ process DEDUPLICATE {
     """
 }
 
+process INDEX_BAM {
+    tag { sample_id }
+    publishDir "${params.outdir}/qc/align/${sample_id}", mode: "${params.filePublishMode}"
+
+    input:
+        tuple val(sample_id), path(bam)
+
+    output:
+        tuple val(sample_id), path("*.bam"), path("*.bai"), emit: bam
+        path("*.idxstats"), emit: idxstats
+
+    script:
+    """
+    samtools sort -@ ${task.cpus} -o ${sample_id}.sorted.bam $bam
+    samtools index ${sample_id}.sorted.bam   // creates ${sample_id}.sorted.bam.bai
+    samtools idxstats ${sample_id}.sorted.bam > ${sample_id}.sorted.bam.idxstats
+    """
+}
+
 process NGSQC_GEN {
     tag { sample_id }
-    publishDir "${params.outdir}/qc/ngsqc/$sample_id/", mode: "${params.filePublishMode}"
+    publishDir "${params.outdir}/qc/ngsqc/${sample_id}", mode: "${params.filePublishMode}"
 
     input:
         tuple val(sample_id), path(bed), path(chrom_sizes)
@@ -205,7 +206,33 @@ process NGSQC_GEN {
     """
 }
 
+process DEEPTOOLS_BAMCOV {
+    tag { sample_id }
+    publishDir "${params.outdir}/qc/ngsqc/${sample_id}", mode: "${params.filePublishMode}"
 
+    input:
+        tuple val(sample_id), path(bam), path(bai)
+        path(ppqt)
+
+    output:
+        tuple val(sample_id), path("${sample_id}.bw"), emit: bigwig
+
+    script: // https://deeptools.readthedocs.io/en/2.1.0/content/tools/bamCoverage.html
+    """
+    frag_len=\$(cut -f 2 ${ppqt})
+    bamCoverage \
+      --bam ${bam} \
+      -o ${sample_id}.bw \
+      --binSize ${params.deeptools.bin_size} \
+      --smoothLength ${params.deeptools.smooth_length} \
+      --ignoreForNormalization ${params.deeptools.excluded_chroms} \
+      --numberOfProcessors ${task.cpus} \
+      --normalizeUsing ${params.deeptools.normalize_using} \
+      --effectiveGenomeSize ${params.align.effective_genome_size} \
+      --extendReads \$frag_len
+    """
+
+}
 /*
 process DEEPTOOLS {
 

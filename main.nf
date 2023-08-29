@@ -27,6 +27,7 @@ include { PRESEQ } from "./modules/local/qc.nf"
 include { PHANTOM_PEAKS } from "./modules/local/qc.nf"
 include { DEDUPLICATE } from "./modules/local/qc.nf"
 include { NGSQC_GEN } from "./modules/local/qc.nf"
+include { DEEPTOOLS_BAMCOV } from "./modules/local/qc.nf"
 
 workflow {
   raw_fastqs = Channel
@@ -47,9 +48,10 @@ workflow {
                     .collect()
   ALIGN_GENOME(ALIGN_BLACKLIST.out, reference_files)
   PRESEQ(ALIGN_GENOME.out)
-  INDEX_BAM(ALIGN_GENOME.out)
-  PHANTOM_PEAKS(ALIGN_GENOME.out)
   chrom_sizes = Channel.fromPath("${params.align.index_dir}${params.align.chrom_sizes}")
   ALIGN_GENOME.out.combine(chrom_sizes) | DEDUPLICATE
+  INDEX_BAM(DEDUPLICATE.out.bam)
   //DEDUPLICATE.out.tag_align.combine(chrom_sizes) | NGSQC_GEN
+  PHANTOM_PEAKS(INDEX_BAM.out.bam)
+  DEEPTOOLS_BAMCOV(INDEX_BAM.out.bam, PHANTOM_PEAKS.out.ppqt)
 }
