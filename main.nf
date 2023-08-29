@@ -28,6 +28,7 @@ include { PHANTOM_PEAKS } from "./modules/local/qc.nf"
 include { DEDUPLICATE } from "./modules/local/qc.nf"
 include { NGSQC_GEN } from "./modules/local/qc.nf"
 include { DEEPTOOLS_BAMCOV } from "./modules/local/qc.nf"
+include { DEEPTOOLS_BIGWIG_SUM } from "./modules/local/qc.nf"
 
 workflow {
   raw_fastqs = Channel
@@ -54,4 +55,5 @@ workflow {
   //DEDUPLICATE.out.tag_align.combine(chrom_sizes) | NGSQC_GEN
   PHANTOM_PEAKS(INDEX_BAM.out.bam)
   DEEPTOOLS_BAMCOV(INDEX_BAM.out.bam, PHANTOM_PEAKS.out.ppqt)
+  DEEPTOOLS_BAMCOV.out.bigwig.collect() | DEEPTOOLS_BIGWIG_SUM
 }

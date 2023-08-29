@@ -116,7 +116,7 @@ process PRESEQ {
 
     stub:
     """
-    touch ${sample_id}.ccurve
+    touch ${sample_id}.c_curve ${sample_id}.preseq ${sample_id}.preseqlog ${sample_id}.preseqlog.nrf.txt
     """
 }
 
@@ -138,6 +138,10 @@ process PHANTOM_PEAKS { // https://github.com/kundajelab/phantompeakqualtools
     Rscript \$RUN_SPP -c=${bam} -savp=${sample_id}.ppqt.pdf -out=${sample_id}.ppqt
     """
 
+    stub:
+    """
+    touch ${sample_id}.ppqt.pdf ${sample_id}.ppqt
+    """
 }
 
 process DEDUPLICATE {
@@ -164,6 +168,11 @@ process DEDUPLICATE {
     samtools flagstat ${bam.baseName}.dedup.bam > ${bam.baseName}.dedup.bam.flagstat
     samtools idxstats ${bam.baseName}.dedup.bam > ${bam.baseName}.dedup.bam.idxstat
     """
+
+    stub:
+    """
+    touch ${sample_id}.TagAlign.bed ${bam.baseName}.dedup.bam ${bam.baseName}.dedup.bam.flagstat ${bam.baseName}.dedup.bam.idxstat
+    """
 }
 
 process INDEX_BAM {
@@ -180,8 +189,13 @@ process INDEX_BAM {
     script:
     """
     samtools sort -@ ${task.cpus} -o ${sample_id}.sorted.bam $bam
-    samtools index ${sample_id}.sorted.bam   // creates ${sample_id}.sorted.bam.bai
+    samtools index ${sample_id}.sorted.bam   # creates ${sample_id}.sorted.bam.bai
     samtools idxstats ${sample_id}.sorted.bam > ${sample_id}.sorted.bam.idxstats
+    """
+
+    stub:
+    """
+    touch ${sample_id}.sorted.bam ${sample_id}.sorted.bam.bai ${sample_id}.sorted.bam.idxstats
     """
 }
 
@@ -208,14 +222,15 @@ process NGSQC_GEN {
 
 process DEEPTOOLS_BAMCOV {
     tag { sample_id }
-    publishDir "${params.outdir}/qc/ngsqc/${sample_id}", mode: "${params.filePublishMode}"
+    publishDir "${params.outdir}/qc/deeptools_bigwigs/${sample_id}", mode: "${params.filePublishMode}"
 
     input:
         tuple val(sample_id), path(bam), path(bai)
         path(ppqt)
 
     output:
-        tuple val(sample_id), path("${sample_id}.bw"), emit: bigwig
+        val(sample_id), emit: sample_id
+        path("${sample_id}.bw"), emit: bigwig
 
     script: // https://deeptools.readthedocs.io/en/2.1.0/content/tools/bamCoverage.html
     """
@@ -232,12 +247,35 @@ process DEEPTOOLS_BAMCOV {
       --extendReads \$frag_len
     """
 
+    stub:
+    """
+    touch ${sample_id}.bw
+    """
+
 }
+process DEEPTOOLS_BIGWIG_SUM {
+    tag { sample_id }
+    publishDir "${params.outdir}/qc/deeptools_qc", mode: "${params.filePublishMode}"
+
+    input:
+        path(bigwigs)
+
+    output:
+        path("bigWigSum.npz")
+
+    script:
+    """
+    multiBigwigSummary bins \
+      -b ${bigwigs}
+    """
+
+    stub:
+    """
+    echo "${bigwigs}" > bigWigSum.npz
+    """
+}
+
 /*
-process DEEPTOOLS {
-
-}
-
 process PLOT_NGSQC {
     // TODO refactor bin/ngsqc_plot.py for simplicity
 
