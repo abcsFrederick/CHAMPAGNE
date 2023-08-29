@@ -2,8 +2,7 @@
 // https://github.com/nf-core/ampliseq/blob/dev/subworkflows/local/cutadapt_workflow.nf
 process TRIM_SE {
   tag { sample_id }
-  publishDir "$params.outdir/qc/$sample_id/trimmed", mode: "$params.filePublishMode"
-
+  label 'qc'
   input:
     tuple val(sample_id), path(fastq)
 

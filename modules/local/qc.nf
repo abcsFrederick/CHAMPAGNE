@@ -1,7 +1,8 @@
 
 process FASTQC {
     tag { sample_id }
-    publishDir "$params.outdir/qc/fastqc_${fqtype}/${sample_id}", mode: "${params.filePublishMode}"
+    label 'qc'
+    publishDir "${params.outdir}/qc/fastqc_${fqtype}/${sample_id}", mode: "${params.publish_dir_mode}"
 
     input:
         tuple val(sample_id), path(fastq), val(fqtype)
@@ -25,7 +26,7 @@ process FASTQC {
 
 process FASTQ_SCREEN {
     tag { sample_id }
-    publishDir "${params.outdir}/qc/fastq_screen/${sample_id}", mode: "${params.filePublishMode}"
+    label 'qc'
 
     input:
         tuple val(sample_id), path(fastq), path(conf)
@@ -47,7 +48,8 @@ process FASTQ_SCREEN {
 
 process ALIGN_BLACKLIST {
     tag { sample_id }
-    publishDir "${params.outdir}/qc/align/${sample_id}", mode: "$params.filePublishMode"
+    label 'align'
+    publishDir "${params.outdir}/align/${sample_id}", mode: "${params.publish_dir_mode}"
 
     input:
         tuple val(sample_id), path(fastq)
@@ -72,7 +74,8 @@ process ALIGN_BLACKLIST {
 
 process ALIGN_GENOME {
     tag { sample_id }
-    publishDir "${params.outdir}/qc/align/${sample_id}", mode: 'copy'
+    label 'align'
+    publishDir "${params.outdir}/align/${sample_id}", mode: 'copy'
 
     input:
         tuple val(sample_id), path(fastq)
@@ -100,7 +103,7 @@ process PRESEQ {
     Calls preseq c_curve and lc_extrap, and calls bin/parse_preseq_log.py to get statistics from the log.
     """
     tag { sample_id }
-    publishDir "${params.outdir}/qc/preseq/${sample_id}", mode: "${params.filePublishMode}"
+    label 'qc'
 
     input:
         tuple val(sample_id), path(bam)
@@ -124,7 +127,7 @@ process PRESEQ {
 process PHANTOM_PEAKS { // https://github.com/kundajelab/phantompeakqualtools
     // TODO: set tmpdir as lscratch if available https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L504
     tag { sample_id }
-    publishDir "${params.outdir}/qc/ppqt/${sample_id}", mode: "${params.filePublishMode}"
+    label 'qc'
 
     input:
         tuple val(sample_id), path(bam), path(bai)
@@ -147,7 +150,7 @@ process PHANTOM_PEAKS { // https://github.com/kundajelab/phantompeakqualtools
 
 process DEDUPLICATE {
     tag { sample_id }
-    publishDir "${params.outdir}/qc/dedup/${sample_id}", mode: "${params.filePublishMode}"
+    label 'qc'
 
     input:
         tuple val(sample_id), path(bam), path(chrom_sizes)
@@ -178,7 +181,7 @@ process DEDUPLICATE {
 
 process INDEX_BAM {
     tag { sample_id }
-    publishDir "${params.outdir}/qc/align/${sample_id}", mode: "${params.filePublishMode}"
+    label 'align'
 
     input:
         tuple val(sample_id), path(bam)
@@ -202,7 +205,7 @@ process INDEX_BAM {
 
 process NGSQC_GEN {
     tag { sample_id }
-    publishDir "${params.outdir}/qc/ngsqc/${sample_id}", mode: "${params.filePublishMode}"
+    label 'qc'
 
     input:
         tuple val(sample_id), path(bed), path(chrom_sizes)
@@ -223,7 +226,7 @@ process NGSQC_GEN {
 
 process DEEPTOOLS_BAMCOV {
     tag { sample_id }
-    publishDir "${params.outdir}/qc/deeptools_bigwigs/${sample_id}", mode: "${params.filePublishMode}"
+    label 'qc'
 
     input:
         tuple val(sample_id), path(bam), path(bai)
@@ -255,7 +258,7 @@ process DEEPTOOLS_BAMCOV {
 
 }
 process DEEPTOOLS_BIGWIG_SUM {
-    publishDir "${params.outdir}/qc/deeptools_qc", mode: "${params.filePublishMode}"
+    label 'qc'
 
     input:
         val(sample_ids)
