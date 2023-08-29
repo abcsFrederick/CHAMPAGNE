@@ -2,7 +2,7 @@
 
 **CH**rom**A**tin i**M**muno **P**recipit**A**tion sequencin**G** a**N**alysis pip**E**line
 
-🚧**This project is under active development. It is not yet ready for production use.** 🚧
+🚧 **This project is under active development. It is not yet ready for production use.** 🚧
 
 ## Getting started
 
@@ -10,10 +10,17 @@ TODO
 
 ## Usage
 
-Install the tool in edit mode:
+### champagne CLI
+
+You can run champagne from the command line.
+The CLI which includes helper steps for execution on supported
+high performance computing clusters.
+
+Install the champagne CLI:
 
 ```sh
-pip3 install -e .
+cd CHAMPAGNE
+pip3 install .
 ```
 
 Run the test dataset using the test profile:
@@ -22,16 +29,31 @@ Run the test dataset using the test profile:
 champagne run -profile test,singularity
 ```
 
-or specify the reads and outdir explicitly:
+or specify the reads and output directory explicitly:
 
 ```sh
 champagne run -profile singularity --outdir results/test --reads data/test/nf-core/*.fastq.gz
 ```
 
-Launch a stub run:
+Launch a stub run to view the steps that will run without performing the full analysis.
 
 ```sh
 champagne run -profile test -stub
+```
+
+### nextflow pipeline
+
+You can run the nextflow pipeline directly from GitHub.
+You will need nextflow and singularity or docker installed.
+
+```sh
+nextflow run CCBR/CHAMPAGNE -profile test,singularity
+```
+
+You can specify a specific version, tag, or branch with `-r`:
+
+```sh
+nextflow run CCBR/CHAMPAGNE -r v1.0.0 -profile test,singularity
 ```
 
 ## Help & Contributing
@@ -44,8 +66,11 @@ Want to **contribute** to this project? Check out the [contributing guidelines](
 
 ## References
 
-This repo was originally generated from the [CCBR Nextflow Template](https://github.com/CCBR/CCBR_NextflowTemplate).
-The template takes inspiration from nektool[^1] and the nf-core template. If you plan to contribute your pipeline to nf-core, don't use this template -- instead follow nf-core's instructions[^2].
+This repo was originally generated from the
+[CCBR Nextflow Template](https://github.com/CCBR/CCBR_NextflowTemplate).
+The template takes inspiration from nektool[^1] and the nf-core template.
+If you plan to contribute your pipeline to nf-core, don't use this template --
+instead follow nf-core's instructions[^2].
 
 [^1]: nektool https://github.com/beardymcjohnface/nektool
 [^2]: instructions for nf-core pipelines https://nf-co.re/docs/contributing/tutorials/creating_with_nf_core
