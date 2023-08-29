@@ -1,3 +1,4 @@
+// source: https://github.com/nf-core/chipseq/blob/51eba00b32885c4d0bec60db3cb0a45eb61e34c5/subworkflows/local/input_check.nf
 //
 // Check input samplesheet and get read channels
 //
