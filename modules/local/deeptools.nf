@@ -120,8 +120,17 @@ process DEEPTOOLS_FINGERPRINT { // TODO aggregate metadata and bamfiles.
       --labels ${labels} \
       -p ${task.cpus} \
       --skipZeros \
-      --outQualityMetrics quality.tsv \
-       --plotFile fingerprint.pdf \
-       -e 200
+      --outQualityMetrics quality_metrics.tsv \
+      --plotFile fingerprint.pdf \
+      --extendReads 200
+    """
+
+    stub:
+    """
+    touch quality_metrics.tsv fingerprint.pdf
     """
 }
+
+/*
+TODO: process deeptools_genes https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L704-L743
+*/
