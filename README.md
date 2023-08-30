@@ -29,10 +29,10 @@ Run the test dataset using the test profile:
 champagne run -profile test,singularity
 ```
 
-or specify the reads and output directory explicitly:
+or explicitly specify the output directory and input:
 
 ```sh
-champagne run -profile singularity --outdir results/test --reads data/test/nf-core/*.fastq.gz
+champagne run -profile singularity --outdir results/test --input assets/samplesheet_test.csv
 ```
 
 Launch a stub run to view the steps that will run without performing the full analysis.
