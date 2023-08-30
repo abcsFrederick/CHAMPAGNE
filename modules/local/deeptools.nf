@@ -109,7 +109,7 @@ process PLOT_PCA { // TODO split into separate processes
     """
 }
 
-process FINGERPRINT {
+process PLOT_FINGERPRINT {
   label 'qc'
   label 'deeptools'
 

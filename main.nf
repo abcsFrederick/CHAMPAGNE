@@ -37,9 +37,9 @@ include { INDEX_BAM                } from "./modules/local/align.nf"
 // TODO reorganize deeptools into separate subworkflow
 include { BAM_COVERAGE             } from "./modules/local/deeptools.nf"
 include { BIGWIG_SUM               } from "./modules/local/deeptools.nf"
-include { FINGERPRINT              } from "./modules/local/deeptools.nf"
 include { BED_PROTEIN_CODING       } from "./modules/local/deeptools.nf"
 include { COMPUTE_MATRIX           } from "./modules/local/deeptools.nf"
+include { PLOT_FINGERPRINT         } from "./modules/local/deeptools.nf"
 include { PLOT_CORRELATION         } from "./modules/local/deeptools.nf"
 include { PLOT_PCA                 } from "./modules/local/deeptools.nf"
 include { PLOT_HEATMAP             } from "./modules/local/deeptools.nf"
@@ -89,7 +89,7 @@ workflow {
       }
       .set { ch_ip_control_bam_bai }
 
-  //FINGERPRINT(ch_ip_control_bam_bai) // TODO https://github.com/CCBR/Dockers/issues/12
+  //PLOT_FINGERPRINT(ch_ip_control_bam_bai) // TODO https://github.com/CCBR/Dockers/issues/12
   BED_PROTEIN_CODING(Channel.fromPath(params.gene_info))
   COMPUTE_MATRIX(BAM_COVERAGE.out.bigwig.collect(),
                  BED_PROTEIN_CODING.out.bed.combine(Channel.from('metagene','TSS'))
