@@ -40,8 +40,7 @@ include { BIGWIG_SUM               } from "./modules/local/deeptools.nf"
 include { ARRAY_PLOTS              } from "./modules/local/deeptools.nf"
 include { FINGERPRINT              } from "./modules/local/deeptools.nf"
 include { BED_PROTEIN_CODING       } from "./modules/local/deeptools.nf"
-include { COMPUTE_MATRIX_METAGENE  } from "./modules/local/deeptools.nf"
-include { COMPUTE_MATRIX_TSS       } from "./modules/local/deeptools.nf"
+include { COMPUTE_MATRIX           } from "./modules/local/deeptools.nf"
 include { PLOT_HEATMAP             } from "./modules/local/deeptools.nf"
 include { PLOT_PROFILE             } from "./modules/local/deeptools.nf"
 
@@ -88,11 +87,9 @@ workflow {
 
   //FINGERPRINT(ch_ip_control_bam_bai) // TODO https://github.com/CCBR/Dockers/issues/12
   BED_PROTEIN_CODING(Channel.fromPath(params.gene_info))
-  BAM_COVERAGE.out.bigwig | first | view
-  COMPUTE_MATRIX_METAGENE(BAM_COVERAGE.out.bigwig.collect(), BED_PROTEIN_CODING.out.bed)
-  COMPUTE_MATRIX_TSS(BAM_COVERAGE.out.bigwig.collect(), BED_PROTEIN_CODING.out.bed)
-
-  COMPUTE_MATRIX_METAGENE.out.concat(COMPUTE_MATRIX_TSS.out).set{ matrices }
-  PLOT_HEATMAP(matrices)
-  PLOT_PROFILE(matrices)
+  COMPUTE_MATRIX(BAM_COVERAGE.out.bigwig.collect(),
+                 BED_PROTEIN_CODING.out.bed.combine(Channel.from('metagene','TSS'))
+  )
+  PLOT_HEATMAP(COMPUTE_MATRIX.out)
+  PLOT_PROFILE(COMPUTE_MATRIX.out)
 }

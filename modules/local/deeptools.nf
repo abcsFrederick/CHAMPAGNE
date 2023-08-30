@@ -159,66 +159,51 @@ process BED_PROTEIN_CODING {
     """
 }
 
-// TODO: best way to have one COMPUTE_MATRIX process with different arguments for metagene vs TSS?
-process COMPUTE_MATRIX_METAGENE {
+process COMPUTE_MATRIX {
   label 'qc'
   label 'deeptools'
 
   input:
     path(bigwigs)
-    path(bed)
+    tuple path(bed), val(mattype)
 
   output:
     path("*.mat.gz"), emit: matrix
 
   script:
+  if (mattype == 'TSS') {
+    def cmd = 'reference-point'
+    def args = { ['',
+                  '--referencePoint TSS',
+                  '--upstream 3000',
+                  '--downstream 3000'
+                  ].join(' ').trim()
+                }
+  } else if (mattype == 'metagene') {
+    def cmd = 'scale-regions'
+    def args = { ['-o metagene.mat.gz',
+                  '--upstream 1000',
+                  '--regionBodyLength 2000',
+                  '--downstream 1000'
+                  ].join(' ').trim()
+                }
+  } else {
+    error "Invalid matrix type: ${mattype}"
+  }
   """
-  computeMatrix scale-regions \\
+  computeMatrix ${cmd} \\
     -S ${bigwigs.join(' ')} \\
     -R ${bed} \\
     -p ${task.cpus} \\
-    -o metagene.mat.gz \\
-    --upstream 1000 \\
-    --regionBodyLength 2000 \\
-    --downstream 1000 \\
+    -o ${mattype}.mat.gz \\
     --skipZeros \\
-    --smartLabels
+    --smartLabels \\
+    ${args}
   """
 
   stub:
   """
-  touch metagene.mat.gz
-  """
-}
-
-process COMPUTE_MATRIX_TSS {
-  label 'qc'
-  label 'deeptools'
-
-  input:
-    path(bigwigs)
-    path(bed)
-
-  output:
-    path("*.mat.gz"), emit: matrix
-
-  script:
-  """
-  computeMatrix reference-point \\
-    -S ${bigwigs.join(' ')} \\
-    -R ${bed} \\
-    -p ${task.cpus} \\
-    -o TSS.mat.gz \\
-    --referencePoint TSS \\
-    --upstream 3000 \\
-    --downstream 3000 \\
-    --skipZeros \\
-    --smartLabels
-  """
-
-  stub:
-  """
-  touch TSS.mat.gz
+  touch ${mattype}.mat.gz
   """
 }
 process PLOT_HEATMAP {
