@@ -17,7 +17,7 @@ log.info """\
          .stripIndent()
 
 // SUBWORKFLOWS
-include { INPUT_CHECK } from './subworkflows/local/input_check.nf'
+include { INPUT_CHECK              } from './subworkflows/local/input_check.nf'
 
 // MODULES
 include { TRIM_SE                  } from "./modules/local/trim.nf"
@@ -39,6 +39,11 @@ include { BAM_COVERAGE             } from "./modules/local/deeptools.nf"
 include { BIGWIG_SUM               } from "./modules/local/deeptools.nf"
 include { ARRAY_PLOTS              } from "./modules/local/deeptools.nf"
 include { FINGERPRINT              } from "./modules/local/deeptools.nf"
+include { BED_PROTEIN_CODING       } from "./modules/local/deeptools.nf"
+include { COMPUTE_MATRIX_METAGENE  } from "./modules/local/deeptools.nf"
+include { COMPUTE_MATRIX_TSS       } from "./modules/local/deeptools.nf"
+include { PLOT_HEATMAP             } from "./modules/local/deeptools.nf"
+include { PLOT_PROFILE             } from "./modules/local/deeptools.nf"
 
 // MAIN WORKFLOW
 workflow {
@@ -68,8 +73,8 @@ workflow {
   //DEDUPLICATE.out.tag_align.combine(chrom_sizes) | NGSQC_GEN
   INDEX_BAM.out.bam | PHANTOM_PEAKS
   BAM_COVERAGE(INDEX_BAM.out.bam, PHANTOM_PEAKS.out.ppqt)
-  BIGWIG_SUM(BAM_COVERAGE.out.meta_id.collect(), BAM_COVERAGE.out.bigwig.collect())
-  BIGWIG_SUM.out | ARRAY_PLOTS
+  BIGWIG_SUM(BAM_COVERAGE.out.bigwig.collect())
+  BIGWIG_SUM.out.array | ARRAY_PLOTS
 
   // Create channels: [ meta, [ ip_bam, control_bam ] [ ip_bai, control_bai ] ]
   ch_genome_bam_bai = INDEX_BAM.out.bam
@@ -80,5 +85,14 @@ workflow {
               meta1.control == meta2.id ? [ meta1, [ bam1, bam2 ], [ bai1, bai2 ] ] : null
       }
       .set { ch_ip_control_bam_bai }
-  //FINGERPRINT(ch_ip_control_bam_bai)
+
+  //FINGERPRINT(ch_ip_control_bam_bai) // TODO https://github.com/CCBR/Dockers/issues/12
+  BED_PROTEIN_CODING(Channel.fromPath(params.gene_info))
+  BAM_COVERAGE.out.bigwig | first | view
+  COMPUTE_MATRIX_METAGENE(BAM_COVERAGE.out.bigwig.collect(), BED_PROTEIN_CODING.out.bed)
+  COMPUTE_MATRIX_TSS(BAM_COVERAGE.out.bigwig.collect(), BED_PROTEIN_CODING.out.bed)
+
+  COMPUTE_MATRIX_METAGENE.out.concat(COMPUTE_MATRIX_TSS.out).set{ matrices }
+  PLOT_HEATMAP(matrices)
+  PLOT_PROFILE(matrices)
 }

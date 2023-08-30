@@ -9,7 +9,6 @@ process BAM_COVERAGE {
         path(ppqt)
 
     output:
-        val(meta.id), emit: meta_id
         path("${meta.id}.bw"), emit: bigwig
 
     script: // https://deeptools.readthedocs.io/en/2.1.0/content/tools/bamCoverage.html
@@ -38,17 +37,16 @@ process BIGWIG_SUM {
     label 'deeptools'
 
     input:
-        val(meta_ids)
         path(bigwigs)
 
     output:
-        path("bigWigSum.npz")
+        path("bigWigSum.npz"), emit: array
 
     script:
     """
-    multiBigwigSummary bins \
-      -b ${bigwigs} \
-      --labels ${meta_ids} \
+    multiBigwigSummary bins \\
+      -b ${bigwigs.join(' ')} \\
+      --smartLabels \\
       -o bigWigSum.npz
     """
 
@@ -105,33 +103,179 @@ process ARRAY_PLOTS {
 }
 
 process FINGERPRINT {
+  label 'qc'
+  label 'deeptools'
+
+  input:
+    tuple val(meta), path(bams), path(bais)
+
+  output:
+    tuple val(meta), path("*.pdf")          , emit: pdf
+    tuple val(meta), path("*.mat.txt")      , emit: matrix
+    tuple val(meta), path("*.qcmetrics.txt"), emit: metrics
+
+  script:
+  // TODO handle extendReads for single vs paired https://github.com/nf-core/chipseq/blob/51eba00b32885c4d0bec60db3cb0a45eb61e34c5/modules/nf-core/modules/deeptools/plotfingerprint/main.nf
+  def prefix = task.ext.prefix ?: "${meta.id}"
+  """
+  plotFingerprint \\
+    --bamfiles ${bams.join(' ')} \\
+    --plotFile ${prefix}.plotFingerprint.plot.pdf \\
+    --outRawCounts ${prefix}.plotFingerprint.mat.txt \\
+    --outQualityMetrics ${prefix}.plotFingerprint.qcmetrics.txt \\
+    --numberOfProcessors ${task.cpus} \\
+    --skipZeros \\
+    --smartLabels \\
+    --extendReads 200
+  """
+
+  stub:
+  """
+  for ext in plot.pdf mat.txt qcmetrics.txt; do
+    touch ${meta.id}.plotFingerprint.\$ext
+  done
+  """
+
+}
+
+process BED_PROTEIN_CODING {
     label 'qc'
     label 'deeptools'
 
     input:
-      tuple val(meta), path(bams), path(bais)
+      path(bed)
 
     output:
-      tuple val(meta), path("*.pdf")          , emit: pdf
-      tuple val(meta), path("*.matrix.txt")      , emit: matrix
-      tuple val(meta), path("*.qcmetrics.txt"), emit: metrics
+      path("*.bed"), emit: bed
 
     script:
-    // TODO handle extendReads for single vs paired https://github.com/nf-core/chipseq/blob/51eba00b32885c4d0bec60db3cb0a45eb61e34c5/modules/nf-core/modules/deeptools/plotfingerprint/main.nf
-    def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    plotFingerprint \\
-      --bamfiles ${bams.join(' ')} \\
-      --plotFile ${prefix}.plotFingerprint.plot.pdf \\
-      --outRawCounts ${prefix}.plotFingerprint.matrix.txt \\
-      --outQualityMetrics ${prefix}.plotFingerprint.qcmetrics.txt \\
-      --numberOfProcessors ${task.cpus} \\
-      --skipZeros \\
-      --extendReads 200
+    grep --line-buffered 'protein_coding' ${bed} | awk -v OFS='\t' -F'\t' '{{print \$1, \$2, \$3, \$5, \".\", \$4}}' > ${params.align.genome}.protein_coding.bed
     """
 
+    stub:
+    """
+    touch ${params.align.genome}.protein_coding.bed
+    """
 }
 
-/*
-TODO: process deeptools_genes only on protein coding for now https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L704-L743
-*/
+// TODO: best way to have one COMPUTE_MATRIX process with different arguments for metagene vs TSS?
+process COMPUTE_MATRIX_METAGENE {
+  label 'qc'
+  label 'deeptools'
+
+  input:
+    path(bigwigs)
+    path(bed)
+
+  output:
+    path("*.mat.gz"), emit: matrix
+
+  script:
+  """
+  computeMatrix scale-regions \\
+    -S ${bigwigs.join(' ')} \\
+    -R ${bed} \\
+    -p ${task.cpus} \\
+    -o metagene.mat.gz \\
+    --upstream 1000 \\
+    --regionBodyLength 2000 \\
+    --downstream 1000 \\
+    --skipZeros \\
+    --smartLabels
+  """
+
+  stub:
+  """
+  touch metagene.mat.gz
+  """
+}
+
+process COMPUTE_MATRIX_TSS {
+  label 'qc'
+  label 'deeptools'
+
+  input:
+    path(bigwigs)
+    path(bed)
+
+  output:
+    path("*.mat.gz"), emit: matrix
+
+  script:
+  """
+  computeMatrix reference-point \\
+    -S ${bigwigs.join(' ')} \\
+    -R ${bed} \\
+    -p ${task.cpus} \\
+    -o TSS.mat.gz \\
+    --referencePoint TSS \\
+    --upstream 3000 \\
+    --downstream 3000 \\
+    --skipZeros \\
+    --smartLabels
+  """
+
+  stub:
+  """
+  touch TSS.mat.gz
+  """
+}
+process PLOT_HEATMAP {
+  label 'qc'
+  label 'deeptools'
+
+  input:
+    path(mat)
+
+  output:
+    path("*.pdf")
+
+  script:
+  // set colorMap to "BuGn" if "metagene" in matrix filename, otherwise use "BuPu"
+  def color_map = mat.baseName.contains('metagene') ? 'BuGn' : 'BuPu'
+  """
+  plotHeatmap \\
+    -m ${mat} \\
+    -out ${mat.baseName}.heatmap.pdf \\
+    --colorMap ${color_map} \\
+    --yAxisLabel 'average RPGC' \\
+    --regionsLabel 'genes' \\
+    --legendLocation 'none'"
+  """
+
+  stub:
+  """
+  touch ${mat.baseName}.heatmap.pdf
+  """
+}
+
+process PLOT_PROFILE {
+  label 'qc'
+  label 'deeptools'
+
+  input:
+    path(mat)
+
+  output:
+    path("*.pdf")
+
+  script: // TODO set plotType for SE vs paired
+  def legend_loc = mat.baseName.contains('metagene') ? 'upper-right' : 'upper-left'
+  """
+  plotProfile \\
+    -m ${mat} \\
+    -out ${mat.baseName}.lineplot.pdf \\
+    --plotHeight 15 \\
+    --plotWidth 15 \\
+    --perGroup \\
+    --yAxisLabel 'average RPGC' \\
+    --plotType 'se' \\
+    --legendLocation ${legend_loc}"
+  """
+
+  stub:
+  """
+  touch ${mat.baseName}.lineplot.pdf
+  """
+}
