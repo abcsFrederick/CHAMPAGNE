@@ -2,6 +2,7 @@ recursive-include src
 recursive-include bin
 recursive-include conf
 recursive-include modules
+recursive-include submodules
 include CITATION
 include LICENSE
 include VERSION
