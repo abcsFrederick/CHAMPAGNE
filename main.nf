@@ -59,10 +59,24 @@ workflow {
   //PRESEQ(ALIGN_GENOME.out.bam)
   chrom_sizes = Channel.fromPath("${params.align.index_dir}${params.align.chrom_sizes}")
   ALIGN_GENOME.out.bam.combine(chrom_sizes) | DEDUPLICATE
-  INDEX_BAM(DEDUPLICATE.out.bam)
+  DEDUPLICATE.out.bam | INDEX_BAM
   //DEDUPLICATE.out.tag_align.combine(chrom_sizes) | NGSQC_GEN
-  PHANTOM_PEAKS(INDEX_BAM.out.bam)
+  INDEX_BAM.out.bam | PHANTOM_PEAKS
   DEEPTOOLS_BAMCOV(INDEX_BAM.out.bam, PHANTOM_PEAKS.out.ppqt)
   DEEPTOOLS_BIGWIG_SUM(DEEPTOOLS_BAMCOV.out.meta_id.collect(), DEEPTOOLS_BAMCOV.out.bigwig.collect())
   DEEPTOOLS_BIGWIG_SUM.out | DEEPTOOLS_PLOTS
+
+  // Create channels: [ meta, [ ip_bam, control_bam ] [ ip_bai, control_bai ] ]
+  ch_genome_bam_bai = INDEX_BAM.out.bam
+  ch_genome_bam_bai
+      .combine(ch_genome_bam_bai)
+      .map {
+          meta1, bam1, bai1, meta2, bam2, bai2 ->
+              meta1.control == meta2.id ? [ meta1, [ bam1, bam2 ], [ bai1, bai2 ] ] : null
+      }
+      .set { ch_ip_control_bam_bai }
+  ch_ip_control_bam_bai.collect().view() // TODO this is currently null
+  //ch_genome_bam_bai.combine(ch_genome_bam_bai).collect().view()
+  //ch_genome_bam_bai.combine(ch_genome_bam_bai) | view
+  //ch_genome_bam_bai.view()
 }

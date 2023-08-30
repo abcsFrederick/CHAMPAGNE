@@ -4,4 +4,3 @@ modules/nf-core/** linguist-generated
 subworkflows/nf-core/** linguist-generated
 *.config linguist-language=nextflow
 assets/** linguist-generated
-bin/check_samplesheet.py linguist-vendored

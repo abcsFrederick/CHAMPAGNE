@@ -188,8 +188,10 @@ def check_samplesheet(file_in, file_out):
                             "Control",
                             control,
                         )
-
-                    fout.write(",".join([f"{sample}_T{idx+1}"] + val) + "\n")
+                    plus_T = (
+                        f"_T{idx+1}" if len(sample_mapping_dict[sample]) > 1 else ""
+                    )  # do not append _T{idx} if not needed
+                    fout.write(",".join([f"{sample}{plus_T}"] + val) + "\n")
     else:
         print_error(f"No entries to process!", "Samplesheet: {file_in}")
 
