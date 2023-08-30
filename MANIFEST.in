@@ -3,7 +3,7 @@ recursive-include bin
 recursive-include conf
 recursive-include modules
 recursive-include submodules
-include CITATION
+include CITATION.cff
 include LICENSE
 include VERSION
 include README.md

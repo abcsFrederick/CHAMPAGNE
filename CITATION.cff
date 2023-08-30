@@ -1,0 +1,10 @@
+cff-version: 1.1.0
+message: "Please cite CHAMPAGNE as below." # TODO set up Zenodo to archive the tool and assign a DOI. Or if it gets published in a journal, include the citation here.
+authors: # TODO: author names should match those in pyproject.toml. can we populate this automatically?
+  - family-names: Sovacool
+    given-names: Kelly
+  - family-names: Koparde
+    given-names: Vishal
+title: "CHAMPAGNE: CHromAtin iMmuno PrecipitAtion sequencinG aNalysis pipEline" # TODO: citation title should match pyproject.toml
+version: 0.1.0 # TODO: this should be the same as in the VERSION file
+date-released: 2023-08-28 # TODO update release date

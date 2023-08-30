@@ -104,13 +104,13 @@ def config(configfile, **kwargs):
 
 @click.command()
 def citation(**kwargs):
-    """Print the citation(s) for this tool"""
+    """Print the citation"""
     print_citation()
 
 
 cli.add_command(run)
 cli.add_command(config)
-# cli.add_command(citation) # uncomment if champagne is published in a journal or Zenodo
+# cli.add_command(citation) # TODO uncomment if champagne is published in a journal or Zenodo
 
 
 def main():
