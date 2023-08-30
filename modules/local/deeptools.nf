@@ -101,24 +101,24 @@ process DEEPTOOLS_PLOTS {
     """
 }
 
-process DEEPTOOLS_FINGERPRINT { // TODO aggregate metadata and bamfiles.
-    label: 'qc'
+process DEEPTOOLS_FINGERPRINT {
+    label 'qc'
 
     input:
-        tuple val(meta), path(bams)
+        tuple val(meta), path(bams), path(bais)
 
     output:
         path("quality_metrics.tsv"), emit: metrics
         path("fingerprint.pdf"), emit: plot
 
     script:
+    // TODO handle extendReads for single vs paired https://github.com/nf-core/chipseq/blob/51eba00b32885c4d0bec60db3cb0a45eb61e34c5/modules/nf-core/modules/deeptools/plotfingerprint/main.nf
     // TODO bams should be space-delimited list of bam files. labels should be antibodies + inputs
-    // TODO -e only for single end. should it be hardcoded here? above it's taken from ppqt.
     """
     plotFingerprint \
       -b ${bams} \
       --labels ${labels} \
-      -p ${task.cpus} \
+      --numberOfProcessors ${task.cpus} \
       --skipZeros \
       --outQualityMetrics quality_metrics.tsv \
       --plotFile fingerprint.pdf \
