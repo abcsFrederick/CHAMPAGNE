@@ -31,8 +31,9 @@ include { PRESEQ } from "./modules/local/qc.nf"
 include { PHANTOM_PEAKS } from "./modules/local/qc.nf"
 include { DEDUPLICATE } from "./modules/local/qc.nf"
 include { NGSQC_GEN } from "./modules/local/qc.nf"
-include { DEEPTOOLS_BAMCOV } from "./modules/local/qc.nf"
-include { DEEPTOOLS_BIGWIG_SUM } from "./modules/local/qc.nf"
+include { DEEPTOOLS_BAMCOV } from "./modules/local/deeptools.nf"
+include { DEEPTOOLS_BIGWIG_SUM } from "./modules/local/deeptools.nf"
+include { DEEPTOOLS_PLOTS } from "./modules/local/deeptools.nf"
 
 // MAIN WORKFLOW
 workflow {
@@ -63,4 +64,5 @@ workflow {
   PHANTOM_PEAKS(INDEX_BAM.out.bam)
   DEEPTOOLS_BAMCOV(INDEX_BAM.out.bam, PHANTOM_PEAKS.out.ppqt)
   DEEPTOOLS_BIGWIG_SUM(DEEPTOOLS_BAMCOV.out.meta_id.collect(), DEEPTOOLS_BAMCOV.out.bigwig.collect())
+  DEEPTOOLS_BIGWIG_SUM.out | DEEPTOOLS_PLOTS
 }

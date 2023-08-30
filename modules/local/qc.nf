@@ -150,63 +150,6 @@ process NGSQC_GEN {
     """
 }
 
-process DEEPTOOLS_BAMCOV {
-    tag { meta.id }
-    label 'qc'
-
-    input:
-        tuple val(meta), path(bam), path(bai)
-        path(ppqt)
-
-    output:
-        val(meta.id), emit: meta_id
-        path("${meta.id}.bw"), emit: bigwig
-
-    script: // https://deeptools.readthedocs.io/en/2.1.0/content/tools/bamCoverage.html
-    """
-    frag_len=\$(cut -f 2 ${ppqt})
-    bamCoverage \
-      --bam ${bam} \
-      -o ${meta.id}.bw \
-      --binSize ${params.deeptools.bin_size} \
-      --smoothLength ${params.deeptools.smooth_length} \
-      --ignoreForNormalization ${params.deeptools.excluded_chroms} \
-      --numberOfProcessors ${task.cpus} \
-      --normalizeUsing ${params.deeptools.normalize_using} \
-      --effectiveGenomeSize ${params.align.effective_genome_size} \
-      --extendReads \$frag_len
-    """
-
-    stub:
-    """
-    touch ${meta.id}.bw
-    """
-
-}
-process DEEPTOOLS_BIGWIG_SUM {
-    label 'qc'
-
-    input:
-        val(meta_ids)
-        path(bigwigs)
-
-    output:
-        path("bigWigSum.npz")
-
-    script:
-    """
-    multiBigwigSummary bins \
-      -b ${bigwigs} \
-      --labels ${meta_ids} \
-      -o bigWigSum.npz
-    """
-
-    stub:
-    """
-    echo "${bigwigs}" > bigWigSum.npz
-    """
-}
-
 /*
 process PLOT_NGSQC {
     // TODO refactor bin/ngsqc_plot.py for simplicity
