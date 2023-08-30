@@ -37,12 +37,14 @@ include { INDEX_BAM                } from "./modules/local/align.nf"
 // TODO reorganize deeptools into separate subworkflow
 include { BAM_COVERAGE             } from "./modules/local/deeptools.nf"
 include { BIGWIG_SUM               } from "./modules/local/deeptools.nf"
-include { ARRAY_PLOTS              } from "./modules/local/deeptools.nf"
 include { FINGERPRINT              } from "./modules/local/deeptools.nf"
 include { BED_PROTEIN_CODING       } from "./modules/local/deeptools.nf"
 include { COMPUTE_MATRIX           } from "./modules/local/deeptools.nf"
+include { PLOT_CORRELATION         } from "./modules/local/deeptools.nf"
+include { PLOT_PCA                 } from "./modules/local/deeptools.nf"
 include { PLOT_HEATMAP             } from "./modules/local/deeptools.nf"
 include { PLOT_PROFILE             } from "./modules/local/deeptools.nf"
+include { NORMALIZE_INPUT          } from "./modules/local/deeptools.nf"
 
 // MAIN WORKFLOW
 workflow {
@@ -72,8 +74,10 @@ workflow {
   //DEDUPLICATE.out.tag_align.combine(chrom_sizes) | NGSQC_GEN
   INDEX_BAM.out.bam | PHANTOM_PEAKS
   BAM_COVERAGE(INDEX_BAM.out.bam, PHANTOM_PEAKS.out.ppqt)
+
   BIGWIG_SUM(BAM_COVERAGE.out.bigwig.collect())
-  BIGWIG_SUM.out.array | ARRAY_PLOTS
+  BIGWIG_SUM.out.array.combine(Channel.from('heatmap', 'scatterplot')) | PLOT_CORRELATION
+  BIGWIG_SUM.out.array | PLOT_PCA
 
   // Create channels: [ meta, [ ip_bam, control_bam ] [ ip_bai, control_bai ] ]
   ch_genome_bam_bai = INDEX_BAM.out.bam
@@ -90,6 +94,19 @@ workflow {
   COMPUTE_MATRIX(BAM_COVERAGE.out.bigwig.collect(),
                  BED_PROTEIN_CODING.out.bed.combine(Channel.from('metagene','TSS'))
   )
-  PLOT_HEATMAP(COMPUTE_MATRIX.out)
-  PLOT_PROFILE(COMPUTE_MATRIX.out)
+  PLOT_HEATMAP(COMPUTE_MATRIX.out.mat)
+  PLOT_PROFILE(COMPUTE_MATRIX.out.mat)
+
+  // Create channel: [ meta, ip_bw, control_bw ]
+  BAM_COVERAGE.out.meta
+      .merge(BAM_COVERAGE.out.bigwig)
+      .set { bigwigs }
+  bigwigs
+      .combine(bigwigs)
+      .map {
+        meta1, bw1, meta2, bw2 ->
+            meta1.control == meta2.id ? [ meta1, bw1, bw2 ] : null
+      }
+      .set { ch_ip_control_bigwig }
+  NORMALIZE_INPUT(ch_ip_control_bigwig)
 }

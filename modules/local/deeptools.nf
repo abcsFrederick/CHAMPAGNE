@@ -9,6 +9,7 @@ process BAM_COVERAGE {
         path(ppqt)
 
     output:
+        val(meta), emit: meta
         path("${meta.id}.bw"), emit: bigwig
 
     script: // https://deeptools.readthedocs.io/en/2.1.0/content/tools/bamCoverage.html
@@ -56,7 +57,36 @@ process BIGWIG_SUM {
     """
 }
 
-process ARRAY_PLOTS {
+process PLOT_CORRELATION { // TODO use args to repeeat for heatmap and scatterplot
+    label 'qc'
+    label 'deeptools'
+
+    input:
+        tuple path(array), val(plottype)
+
+    output:
+        path("*.pdf"), emit: plot
+
+    script:
+    def args = (plottype == 'heatmap')? '--plotNumbers': ''
+    // TODO throw error if plottype != either'heatmap' or 'scatterplot'
+    """
+    plotCorrelation \
+      -in ${array} \
+      -o ${array.baseName}.spearman_${plottype}.pdf \
+      -c 'spearman' \
+      -p '${plottype}' \
+      --skipZeros \
+      --removeOutliers ${args}
+    """
+
+    stub:
+    """
+    touch ${array.baseName}.spearman_${plottype}.pdf
+    """
+}
+
+process PLOT_PCA { // TODO split into separate processes
     label 'qc'
     label 'deeptools'
 
@@ -64,41 +94,18 @@ process ARRAY_PLOTS {
         path(array)
 
     output:
-        tuple path("*.pdf"), path("*.png"), emit: plots
+        path("*.pdf"), emit: plot
 
     script:
     """
-    plotCorrelation \
-      -in ${array} \
-      -o spearman_heatmap.pdf \
-      -c 'spearman' \
-      -p 'heatmap' \
-      --skipZeros \
-      --removeOutliers \
-      --plotNumbers
-    plotCorrelation \
-      -in ${array} \
-      -o spearman_scatterplot.pdf \
-      -c 'spearman' \
-      -p 'scatterplot' \
-      --skipZeros \
-      --removeOutliers
     plotPCA \
       -in ${array} \
-      -o pca.pdf
-    plotCorrelation \
-      -in ${array} \
-      -o spearman_heatmap_mqc.png \
-      -c 'spearman' \
-      -p 'heatmap' \
-      --skipZeros \
-      --removeOutliers \
-      --plotNumbers
+      -o ${array.baseName}.pca.pdf
     """
 
     stub:
     """
-    touch spearman_heatmap.pdf spearman_scatterplot.pdf pca.pdf spearman_heatmap_mqc.png
+    touch ${array.baseName}.pca.pdf
     """
 }
 
@@ -168,29 +175,30 @@ process COMPUTE_MATRIX {
     tuple path(bed), val(mattype)
 
   output:
-    path("*.mat.gz"), emit: matrix
+    path("*.mat.gz"), emit: mat
 
   script:
+  def cmd = null
+  def args = null
   if (mattype == 'TSS') {
-    def cmd = 'reference-point'
-    def args = { ['',
-                  '--referencePoint TSS',
-                  '--upstream 3000',
-                  '--downstream 3000'
-                  ].join(' ').trim()
-                }
+    cmd = 'reference-point'
+    args = { ['--referencePoint TSS',
+              '--upstream 3000',
+              '--downstream 3000'
+              ].join(' ').trim()
+            }
   } else if (mattype == 'metagene') {
-    def cmd = 'scale-regions'
-    def args = { ['-o metagene.mat.gz',
-                  '--upstream 1000',
-                  '--regionBodyLength 2000',
-                  '--downstream 1000'
-                  ].join(' ').trim()
-                }
+    cmd = 'scale-regions'
+    args = { ['--upstream 1000',
+              '--regionBodyLength 2000',
+              '--downstream 1000'
+              ].join(' ').trim()
+            }
   } else {
     error "Invalid matrix type: ${mattype}"
   }
   """
+  echo "$mattype" > file.txt
   computeMatrix ${cmd} \\
     -S ${bigwigs.join(' ')} \\
     -R ${bed} \\
@@ -226,7 +234,7 @@ process PLOT_HEATMAP {
     --colorMap ${color_map} \\
     --yAxisLabel 'average RPGC' \\
     --regionsLabel 'genes' \\
-    --legendLocation 'none'"
+    --legendLocation 'none'
   """
 
   stub:
@@ -256,11 +264,40 @@ process PLOT_PROFILE {
     --perGroup \\
     --yAxisLabel 'average RPGC' \\
     --plotType 'se' \\
-    --legendLocation ${legend_loc}"
+    --legendLocation ${legend_loc}
   """
 
   stub:
   """
   touch ${mat.baseName}.lineplot.pdf
+  """
+}
+
+process NORMALIZE_INPUT {
+  label 'qc'
+  label 'deeptools'
+
+  input:
+    tuple val(meta), path(chip), path(input)
+
+  output:
+    tuple val(meta), path("*.norm.bw"), emit: bigwig
+
+  script:
+  """
+  bigwigCompare \\
+  --binSize ${params.deeptools.bin_size} \\
+  --outFileName ${meta.id}.norm.bw \\
+  --outFileFormat 'bigwig' \\
+  --bigwig1 ${chip} \\
+  --bigwig2 ${input} \\
+  --operation 'subtract' \\
+  --skipNonCoveredRegions \\
+  --numberOfProcessors ${task.cpus}
+  """
+
+  stub:
+  """
+  touch ${meta.id}.norm.bw
   """
 }
