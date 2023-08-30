@@ -1,7 +1,8 @@
 
-process DEEPTOOLS_BAMCOV {
+process BAM_COVERAGE {
     tag { meta.id }
     label 'qc'
+    label 'deeptools'
 
     input:
         tuple val(meta), path(bam), path(bai)
@@ -32,8 +33,9 @@ process DEEPTOOLS_BAMCOV {
     """
 
 }
-process DEEPTOOLS_BIGWIG_SUM {
+process BIGWIG_SUM {
     label 'qc'
+    label 'deeptools'
 
     input:
         val(meta_ids)
@@ -56,8 +58,9 @@ process DEEPTOOLS_BIGWIG_SUM {
     """
 }
 
-process DEEPTOOLS_PLOTS {
+process ARRAY_PLOTS {
     label 'qc'
+    label 'deeptools'
 
     input:
         path(array)
@@ -101,36 +104,34 @@ process DEEPTOOLS_PLOTS {
     """
 }
 
-process DEEPTOOLS_FINGERPRINT {
+process FINGERPRINT {
     label 'qc'
+    label 'deeptools'
 
     input:
-        tuple val(meta), path(bams), path(bais)
+      tuple val(meta), path(bams), path(bais)
 
     output:
-        path("quality_metrics.tsv"), emit: metrics
-        path("fingerprint.pdf"), emit: plot
+      tuple val(meta), path("*.pdf")          , emit: pdf
+      tuple val(meta), path("*.matrix.txt")      , emit: matrix
+      tuple val(meta), path("*.qcmetrics.txt"), emit: metrics
 
     script:
     // TODO handle extendReads for single vs paired https://github.com/nf-core/chipseq/blob/51eba00b32885c4d0bec60db3cb0a45eb61e34c5/modules/nf-core/modules/deeptools/plotfingerprint/main.nf
-    // TODO bams should be space-delimited list of bam files. labels should be antibodies + inputs
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    plotFingerprint \
-      -b ${bams} \
-      --labels ${labels} \
-      --numberOfProcessors ${task.cpus} \
-      --skipZeros \
-      --outQualityMetrics quality_metrics.tsv \
-      --plotFile fingerprint.pdf \
+    plotFingerprint \\
+      --bamfiles ${bams.join(' ')} \\
+      --plotFile ${prefix}.plotFingerprint.plot.pdf \\
+      --outRawCounts ${prefix}.plotFingerprint.matrix.txt \\
+      --outQualityMetrics ${prefix}.plotFingerprint.qcmetrics.txt \\
+      --numberOfProcessors ${task.cpus} \\
+      --skipZeros \\
       --extendReads 200
     """
 
-    stub:
-    """
-    touch quality_metrics.tsv fingerprint.pdf
-    """
 }
 
 /*
-TODO: process deeptools_genes https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L704-L743
+TODO: process deeptools_genes only on protein coding for now https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L704-L743
 */
