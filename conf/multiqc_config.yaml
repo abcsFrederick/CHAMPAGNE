@@ -105,6 +105,6 @@ custom_data:
 
 sp:
   QC_Table:
-    fn: "QCTable.txt"
+    fn: "qc_table.txt"
   NGSQC_data:
     fn: "*NGSQC.txt"

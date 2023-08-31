@@ -28,7 +28,10 @@ include { FASTQ_SCREEN             } from "./modules/local/qc.nf"
 include { DEDUPLICATE              } from "./modules/local/qc.nf"
 include { PRESEQ                   } from "./modules/local/qc.nf"
 include { PHANTOM_PEAKS            } from "./modules/local/qc.nf"
+include { PPQT_PROCESS             } from "./modules/local/qc.nf"
 include { NGSQC_GEN                } from "./modules/local/qc.nf"
+include { QC_STATS                 } from "./modules/local/qc.nf"
+include { QC_TABLE                 } from "./modules/local/qc.nf"
 include { MULTIQC                  } from "./modules/local/qc.nf"
 
 include { ALIGN_BLACKLIST          } from "./modules/local/align.nf"
@@ -68,14 +71,25 @@ workflow {
                     .fromPath("${params.align.index_dir}${params.align.genome}*")
                     .collect()
   ALIGN_GENOME(ALIGN_BLACKLIST.out, reference_files)
-  //PRESEQ(ALIGN_GENOME.out.bam)
+  PRESEQ(ALIGN_GENOME.out.bam)
   chrom_sizes = Channel.fromPath("${params.align.index_dir}${params.align.chrom_sizes}")
   ALIGN_GENOME.out.bam.combine(chrom_sizes) | DEDUPLICATE
   DEDUPLICATE.out.bam | INDEX_BAM
   //DEDUPLICATE.out.tag_align.combine(chrom_sizes) | NGSQC_GEN
   INDEX_BAM.out.bam | PHANTOM_PEAKS
-  BAM_COVERAGE(INDEX_BAM.out.bam, PHANTOM_PEAKS.out.spp)
+  PPQT_PROCESS(PHANTOM_PEAKS.out.fraglen)
+  QC_STATS(
+    raw_fastqs,
+    ALIGN_GENOME.out.flagstat,
+    DEDUPLICATE.out.flagstat,
+    PRESEQ.out.nrf,
+    PHANTOM_PEAKS.out.spp,
+    PPQT_PROCESS.out.fraglen
+  )
+  QC_TABLE(QC_STATS.out.collect())
 
+  // Deeptools
+  BAM_COVERAGE(INDEX_BAM.out.bam, PPQT_PROCESS.out.fraglen)
   BIGWIG_SUM(BAM_COVERAGE.out.bigwig.collect())
   BIGWIG_SUM.out.array.combine(Channel.from('heatmap', 'scatterplot')) | PLOT_CORRELATION
   BIGWIG_SUM.out.array | PLOT_PCA
@@ -90,7 +104,7 @@ workflow {
       }
       .set { ch_ip_control_bam_bai }
 
-  PLOT_FINGERPRINT(ch_ip_control_bam_bai) // TODO https://github.com/CCBR/Dockers/issues/12
+  PLOT_FINGERPRINT(ch_ip_control_bam_bai)
   BED_PROTEIN_CODING(Channel.fromPath(params.gene_info))
   COMPUTE_MATRIX(BAM_COVERAGE.out.bigwig.collect(),
                  BED_PROTEIN_CODING.out.bed.combine(Channel.from('metagene','TSS'))
@@ -117,8 +131,10 @@ workflow {
     FASTQC_TRIMMED.out.zip.collect(),
     FASTQ_SCREEN.out.screen.collect(),
     //PRESEQ.out.files.collect(),
+    //NGSQC_GEN
     DEDUPLICATE.out.flagstat.collect(),
     PHANTOM_PEAKS.out.spp.collect(),
+    QC_TABLE.out.txt,
     PLOT_FINGERPRINT.out.matrix.collect(),
     PLOT_FINGERPRINT.out.metrics.collect(),
     PLOT_CORRELATION.out.tab.collect(),

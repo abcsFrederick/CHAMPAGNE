@@ -53,18 +53,25 @@ process PRESEQ {
     tag { meta.id }
     label 'qc'
 
+    // https://github.com/nf-core/methylseq/issues/161
+    errorStrategy 'ignore'
+
     input:
         tuple val(meta), path(bam)
 
     output:
-        tuple path("*.c_curve"), path("*.preseq"), path("*.preseqlog"), path("*.txt"), emit: files
+        path("*.c_curve"), emit: c_curve
+        path("*.lc_extrap.txt"), emit: preseq
+        path("*.preseq.log"), emit: log
+        path("*nrf.txt"), emit: nrf
 
     script:
+    // TODO handle paired: https://github.com/nf-core/rnaseq/blob/3bec2331cac2b5ff88a1dc71a21fab6529b57a0f/modules/nf-core/preseq/lcextrap/main.nf#L25
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    preseq c_curve -B -o ${prefix}.c_curve $bam
-    preseq lc_extrap -B -D -o ${prefix}.preseq $bam -seed 12345 -v -l 100000000000 2> ${prefix}.preseqlog
-    parse_preseq_log.py ${prefix}.preseqlog > ${prefix}.preseqlog.nrf.txt
+    preseq c_curve -B -o ${prefix}.c_curve ${bam}
+    preseq lc_extrap -B -D -o ${prefix}.lc_extrap.txt ${bam} -seed 12345 -v -l 100000000000 2> ${prefix}.preseq.log
+    parse_preseq_log.py ${prefix}.preseq.log > ${prefix}.preseq.nrf.txt
     """
 
     stub:
@@ -73,7 +80,7 @@ process PRESEQ {
     """
 }
 
-process PHANTOM_PEAKS { // https://github.com/kundajelab/phantompeakqualtools
+process PHANTOM_PEAKS {
     // TODO: set tmpdir as lscratch if available https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L504
     tag { meta.id }
     label 'qc'
@@ -84,17 +91,45 @@ process PHANTOM_PEAKS { // https://github.com/kundajelab/phantompeakqualtools
     output:
         path("${meta.id}.ppqt.pdf"), emit: pdf
         path("${meta.id}.spp.out"), emit: spp
+        path("${meta.id}.fraglen.txt"), emit: fraglen
 
     script: // TODO: for PE, just use first read of each pair
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     RUN_SPP=\$(which run_spp.R)
     Rscript \$RUN_SPP -c=${bam} -savp=${prefix}.ppqt.pdf -out=${prefix}.spp.out
+    frag_len=`cut -f 3 ${prefix}.spp.out | sed 's/,.*//g'`
+    echo \$frag_len > "${meta.id}.fraglen.txt"
     """
 
     stub:
     """
     touch ${meta.id}.ppqt.pdf ${meta.id}.spp.out
+    """
+}
+
+process PPQT_PROCESS {
+    /*
+    refactor of https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L513-L541
+    */
+    input:
+        path(fraglen)
+    output:
+        path("${fraglen.baseName}.fraglen.process.txt"), emit: fraglen
+
+    script:
+    """
+    #!/usr/bin/env python
+
+    import warnings
+    with open("${fraglen}", 'r') as infile:
+        fragment_length = int(infile.read().strip())
+    min_frag_len = ${params.min_fragment_length}
+    if fragment_length < min_frag_len:
+        warnings.warn(f"The estimated fragment length was {fragment_length}. Using default of {min_frag_len} instead.")
+        fragment_length = min_frag_len
+    with open("${fraglen.baseName}.fraglen.process.txt", 'w') as outfile:
+        outfile.write(str(fragment_length))
     """
 }
 
@@ -149,6 +184,59 @@ process NGSQC_GEN { // TODO segfault
     """
 }
 
+process QC_STATS {
+    tag { meta.id }
+    label 'qc'
+
+    input:
+        tuple val(meta), path(raw_fastq)
+        path(align_flagstat)
+        tuple path(dedup_flagstat), path(idxstat)
+        path(preseq_nrf)
+        path(ppqt_spp)
+        path(ppqt_fraglen)
+
+
+    output:
+        path("${meta.id}.qc_stats.txt")
+
+    script:
+    // TODO: handle paired reads
+    def outfile = "${meta.id}.qc_stats.txt"
+    """
+    touch ${outfile}
+    # Number of reads
+    zcat ${raw_fastq} | wc -l | filterMetrics.py ${meta.id} tnreads >> ${outfile}
+    # Number of mapped reads
+    grep 'mapped (' ${align_flagstat} | awk '{{print \$1,\$3}}' | filterMetrics.py ${meta.id} mnreads >> ${outfile}
+    # Number of uniquely mapped reads
+    grep 'mapped (' ${dedup_flagstat} | awk '{{print \$1,\$3}}' | filterMetrics.py ${meta.id} unreads >> ${outfile}
+    # NRF, PCB1, PCB2
+    cat ${preseq_nrf} | filterMetrics.py ${meta.id} nrf >> ${outfile}
+    # NSC, RSC, Qtag
+    awk '{{print \$(NF-2),\$(NF-1),\$NF}}' ${ppqt_spp} | filterMetrics.py ${meta.id} ppqt >> ${outfile}
+    # Fragment Length
+    fragLen=\$(cat ${ppqt_fraglen})
+    echo "${meta.id}\tFragmentLength\t\$fragLen" >> ${outfile}
+    """
+
+}
+
+process QC_TABLE {
+    label 'qc'
+    input:
+        path(qc_stats)
+
+    output:
+        path("qc_table.txt"), emit: txt
+
+    script:
+    """
+    cat ${qc_stats.join(' ')} | createtable.py > qc_table.txt
+    """
+
+}
+
 process MULTIQC {
     label 'qc'
 
@@ -160,6 +248,7 @@ process MULTIQC {
         path(fastq_screen)
         path(dedup)
         path(phantom_peaks)
+        path(qc_table)
         path(plot_fingerprint_matrix)
         path(plot_fingerprint_metrics)
         path(plot_corr)

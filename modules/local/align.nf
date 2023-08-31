@@ -34,7 +34,8 @@ process ALIGN_GENOME {
         path(reference_files)
 
     output:
-        tuple val(meta), path("${meta.id}.aligned.filtered.bam"), emit: bam
+        tuple val(meta), path("*.aligned.filtered.bam"), emit: bam
+        path("*.aligned.filtered.bam.flagstat"), emit: flagstat
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
@@ -42,6 +43,7 @@ process ALIGN_GENOME {
     bwa mem -t ${task.cpus} ${params.align.genome} $fastq |\
     samtools sort -@ ${task.cpus} |\
     samtools view -b -q ${params.align.min_quality} -o ${prefix}.aligned.filtered.bam
+    samtools flagstat ${prefix}.aligned.filtered.bam > ${prefix}.aligned.filtered.bam.flagstat
     """
 
     stub:

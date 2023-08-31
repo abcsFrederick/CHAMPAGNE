@@ -6,7 +6,7 @@ process BAM_COVERAGE {
 
     input:
         tuple val(meta), path(bam), path(bai)
-        path(ppqt)
+        path(ppqt_fraglen)
 
     output:
         val(meta), emit: meta
@@ -14,7 +14,7 @@ process BAM_COVERAGE {
 
     script: // https://deeptools.readthedocs.io/en/2.1.0/content/tools/bamCoverage.html
     """
-    frag_len=\$(cut -f 2 ${ppqt})
+    frag_len=\$(cat ${ppqt_fraglen})
     bamCoverage \
       --bam ${bam} \
       -o ${meta.id}.bw \
