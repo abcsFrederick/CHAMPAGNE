@@ -1,15 +1,15 @@
 # Project Information
-site_name: CHAMPAGNE
+site_name: TOOL_NAME
 site_author: CCR Collaborative Bioinformatics Resource
 site_description: >-
-  CHromAtin iMmuno PrecipitAtion sequencinG aNalysis pipEline
+  insert a one-line description of TOOL_NAME here
 # Repository
-repo_name: CCBR/CHAMPAGNE
-repo_url: https://github.com/CCBR/CHAMPAGNE
-edit_uri: https://github.com/CCBR/CHAMPAGNE/edit/main/docs/
+repo_name: CCBR/TOOL_NAME
+repo_url: https://github.com/CCBR/TOOL_NAME
+edit_uri: https://github.com/CCBR/TOOL_NAME/edit/main/docs/
 
 # Copyright
-copyright: Copyright &copy; 2023 CCBR
+copyright: Copyright &copy; 2023 CCR Collaborative Bioinformatics Resource
 
 # Configuration
 theme:
@@ -98,7 +98,8 @@ nav:
       - 3. Running the Pipeline: user-guide/run.md
       - 4. Expected Output: user-guide/output.md
       - 5. Running Test Data: user-guide/test-info.md
-  - FAQ:
       - Troubleshooting: user-guide/troubleshooting.md
-      - Contributions: user-guide/contributions.md
-  - Changelog: CHANGELOG.md
+  - FAQ:
+      - How to contribute: contributing.md
+      - Contributors: contributors.md
+  - Changelog: changelog.md
