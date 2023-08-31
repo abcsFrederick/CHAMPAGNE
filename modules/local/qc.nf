@@ -115,7 +115,7 @@ process PPQT_PROCESS {
     input:
         path(fraglen)
     output:
-        path("${fraglen.baseName}.fraglen.process.txt"), emit: fraglen
+        path("${fraglen.baseName}.process.txt"), emit: fraglen
 
     script:
     """
