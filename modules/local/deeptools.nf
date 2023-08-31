@@ -65,7 +65,7 @@ process PLOT_CORRELATION { // TODO use args to repeeat for heatmap and scatterpl
         tuple path(array), val(plottype)
 
     output:
-        path("*.pdf"), emit: plot
+        path("*.pdf"), emit: pdf
 
     script:
     def args = (plottype == 'heatmap')? '--plotNumbers': ''
@@ -94,7 +94,7 @@ process PLOT_PCA { // TODO split into separate processes
         path(array)
 
     output:
-        path("*.pdf"), emit: plot
+        path("*.pdf"), emit: pdf
 
     script:
     """
@@ -117,7 +117,7 @@ process PLOT_FINGERPRINT {
     tuple val(meta), path(bams), path(bais)
 
   output:
-    tuple val(meta), path("*.pdf")          , emit: pdf
+    path("*.pdf")          , emit: pdf
     tuple val(meta), path("*.mat.txt")      , emit: matrix
     tuple val(meta), path("*.qcmetrics.txt"), emit: metrics
 
@@ -222,7 +222,7 @@ process PLOT_HEATMAP {
     path(mat)
 
   output:
-    path("*.pdf")
+    path("*.pdf"), emit: pdf
 
   script:
   // set colorMap to "BuGn" if "metagene" in matrix filename, otherwise use "BuPu"
@@ -251,7 +251,7 @@ process PLOT_PROFILE {
     path(mat)
 
   output:
-    path("*.pdf")
+    path("*.pdf"), emit: pdf
 
   script: // TODO set plotType for SE vs paired
   def legend_loc = mat.baseName.contains('metagene') ? 'upper-right' : 'upper-left'
