@@ -1,10 +1,10 @@
 ---
-
-name: Pull Request report
+name: Pull Request
 about: Create a Pull Request
-title: ''
-labels: ''
-assignees: ''
+title: ""
+labels: ""
+assignees: ""
+---
 
 ## Changes
 

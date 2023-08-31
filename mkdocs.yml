@@ -1,12 +1,12 @@
 # Project Information
-site_name: TOOL_NAME
+site_name: CHAMPAGNE
 site_author: CCR Collaborative Bioinformatics Resource
 site_description: >-
-  insert a one-line description of TOOL_NAME here
+  insert a one-line description of CHAMPAGNE here
 # Repository
-repo_name: CCBR/TOOL_NAME
-repo_url: https://github.com/CCBR/TOOL_NAME
-edit_uri: https://github.com/CCBR/TOOL_NAME/edit/main/docs/
+repo_name: CCBR/CHAMPAGNE
+repo_url: https://github.com/CCBR/CHAMPAGNE
+edit_uri: https://github.com/CCBR/CHAMPAGNE/edit/main/
 
 # Copyright
 copyright: Copyright &copy; 2023 CCR Collaborative Bioinformatics Resource
