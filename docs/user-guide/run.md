@@ -1,12 +1,10 @@
-TODO This should include all information about the various run commands provided within the pipeline.
+This should include all information about the various run commands provided within the pipeline.
 
 # 3. Running the Pipeline
 
 ## 3.1 Pipeline Overview
 
 The Snakemake workflow has a multiple options:
-
-TODO using quarto would allow us to generate this dynamically.
 
 ```
 Usage: bash ./data/CCBR_Pipeliner/Pipelines/CARLISLE/carlisle -m/--runmode=<RUNMODE> -w/--workdir=<WORKDIR>

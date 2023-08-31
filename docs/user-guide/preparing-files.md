@@ -1,4 +1,4 @@
-TODO his should describe any input files needed, including config files, manifest files, and sample files. An example is provided below.
+This should describe any input files needed, including config files, manifest files, and sample files. An example is provided below.
 
 # 2. Preparing Files
 
