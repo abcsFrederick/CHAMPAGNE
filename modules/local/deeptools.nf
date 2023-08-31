@@ -117,7 +117,7 @@ process PLOT_FINGERPRINT {
     tuple val(meta), path(bams), path(bais)
 
   output:
-    tuple val(meta), path("*.pdf")          , emit: pdf
+    path("*.pdf")          , emit: pdf
     tuple val(meta), path("*.mat.txt")      , emit: matrix
     tuple val(meta), path("*.qcmetrics.txt"), emit: metrics
 

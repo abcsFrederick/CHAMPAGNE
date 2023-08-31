@@ -29,6 +29,7 @@ include { DEDUPLICATE              } from "./modules/local/qc.nf"
 include { PRESEQ                   } from "./modules/local/qc.nf"
 include { PHANTOM_PEAKS            } from "./modules/local/qc.nf"
 include { NGSQC_GEN                } from "./modules/local/qc.nf"
+include { MULTIQC                  } from "./modules/local/qc.nf"
 
 include { ALIGN_BLACKLIST          } from "./modules/local/align.nf"
 include { ALIGN_GENOME             } from "./modules/local/align.nf"
@@ -54,10 +55,10 @@ workflow {
       params.seq_center
   )
   raw_fastqs = INPUT_CHECK.out.reads
+  raw_fastqs.combine(Channel.value("raw")) | FASTQC_RAW
   raw_fastqs | TRIM_SE
   trimmed_fastqs = TRIM_SE.out
   trimmed_fastqs.combine(Channel.value("trimmed")) | FASTQC_TRIMMED
-  //trimmed_fastqs = TRIM_SE.out | map { it -> it[1] } | collect // obtain list of just fastqs without sample_ids
   trimmed_fastqs.combine(Channel.fromPath(params.fastq_screen.conf)) | FASTQ_SCREEN
   blacklist_files = Channel
                     .fromPath("${params.align.index_dir}${params.align.blacklist}*")
@@ -109,4 +110,19 @@ workflow {
       }
       .set { ch_ip_control_bigwig }
   NORMALIZE_INPUT(ch_ip_control_bigwig)
+
+  MULTIQC(
+    Channel.fromPath(params.multiqc_config),
+    FASTQC_RAW.out.zip.collect(),
+    FASTQC_TRIMMED.out.zip.collect(),
+    FASTQ_SCREEN.out.screen.collect(),
+    //PRESEQ.out.files.collect(),
+    DEDUPLICATE.out.flagstat.collect(),
+    PHANTOM_PEAKS.out.pdf.collect(),
+    PLOT_FINGERPRINT.out.pdf.collect(),
+    PLOT_CORRELATION.out.pdf.collect(),
+    PLOT_PCA.out.pdf.collect(),
+    PLOT_HEATMAP.out.pdf.collect(),
+    PLOT_PROFILE.out.pdf.collect()
+  )
 }

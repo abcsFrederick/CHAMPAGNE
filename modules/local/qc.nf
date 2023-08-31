@@ -7,8 +7,8 @@ process FASTQC {
     input:
         tuple val(meta), path(fastq), val(fqtype)
     output:
-        path("${meta.id}*.html"), emit: html
-        path ("${meta.id}*.zip"), emit: zip
+        path("${fastq.getBaseName(2)}*.html"), emit: html
+        path ("${fastq.getBaseName(2)}*.zip"), emit: zip
 
     script:
     """
@@ -20,7 +20,7 @@ process FASTQC {
 
     stub:
     """
-    touch ${meta.id}_fastqc.html ${meta.id}_fastqc.zip
+    touch ${fastq..getBaseName(2)}_fastqc.html ${fastq..getBaseName(2)}_fastqc.zip
     """
 }
 
@@ -57,7 +57,7 @@ process PRESEQ {
         tuple val(meta), path(bam)
 
     output:
-        tuple path("*.c_curve"), path("*.preseq"), path("*.preseqlog"), path("*.txt"), emit: preseq_files
+        tuple path("*.c_curve"), path("*.preseq"), path("*.preseqlog"), path("*.txt"), emit: files
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
@@ -108,8 +108,7 @@ process DEDUPLICATE {
     output:
         tuple val(meta), path("${meta.id}.TagAlign.bed"), emit: tag_align
         tuple val(meta), path("${bam.baseName}.dedup.bam"), emit: bam
-        path("${bam.baseName}.dedup.bam.flagstat"), emit: flagstat
-        path("${bam.baseName}.dedup.bam.idxstat"), emit: idxstat
+        tuple path("${bam.baseName}.dedup.bam.flagstat"), path("${bam.baseName}.dedup.bam.idxstat"), emit: flagstat
 
     script:
     """
@@ -129,7 +128,7 @@ process DEDUPLICATE {
     """
 }
 
-process NGSQC_GEN {
+process NGSQC_GEN { // TODO segfault
     tag { meta.id }
     label 'qc'
 
@@ -150,15 +149,43 @@ process NGSQC_GEN {
     """
 }
 
+process MULTIQC {
+    label 'qc'
+
+    input:
+        path(multiqc_conf)
+
+        path(fastqc_raw)
+        path(fastqc_trimmed)
+        path(fastq_screen)
+        path(dedup)
+        path(phantom_peaks)
+        path(plot_fingerprint)
+        path(plot_corr)
+        path(plot_pca)
+        path(plot_heatmap)
+        path(plot_profile)
+
+    output:
+        path('multiqc_report.html'), emit: html
+
+    script:
+    """
+    multiqc \\
+        -c ${multiqc_conf} \\
+        .
+    """
+
+    stub:
+    """
+    touch multiqc_report.html
+    """
+}
+
 /*
 process PLOT_NGSQC {
     // TODO refactor bin/ngsqc_plot.py for simplicity
 
-}
-
-
-process MULTIQC {
-    tag { meta.id }
 }
 
  // TODO -- come back to this later. hard to deal with on biowulf and long-running. have to copy entire db to lscratch on biowulf.
