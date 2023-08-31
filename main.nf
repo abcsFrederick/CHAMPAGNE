@@ -89,7 +89,7 @@ workflow {
       }
       .set { ch_ip_control_bam_bai }
 
-  //PLOT_FINGERPRINT(ch_ip_control_bam_bai) // TODO https://github.com/CCBR/Dockers/issues/12
+  PLOT_FINGERPRINT(ch_ip_control_bam_bai) // TODO https://github.com/CCBR/Dockers/issues/12
   BED_PROTEIN_CODING(Channel.fromPath(params.gene_info))
   COMPUTE_MATRIX(BAM_COVERAGE.out.bigwig.collect(),
                  BED_PROTEIN_CODING.out.bed.combine(Channel.from('metagene','TSS'))
