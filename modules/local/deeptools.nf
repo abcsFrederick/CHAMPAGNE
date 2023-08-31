@@ -66,17 +66,19 @@ process PLOT_CORRELATION { // TODO use args to repeeat for heatmap and scatterpl
 
     output:
         path("*.pdf"), emit: pdf
+        path("*.tab"), emit: tab
 
     script:
     def args = (plottype == 'heatmap')? '--plotNumbers': ''
     // TODO throw error if plottype != either'heatmap' or 'scatterplot'
     """
-    plotCorrelation \
-      -in ${array} \
-      -o ${array.baseName}.spearman_${plottype}.pdf \
-      -c 'spearman' \
-      -p '${plottype}' \
-      --skipZeros \
+    plotCorrelation \\
+      -in ${array} \\
+      -o ${array.baseName}.spearman_${plottype}.pdf \\
+      --outFileCorMatrix ${array.baseName}.spearman_${plottype}.tab \\
+      -c 'spearman' \\
+      -p '${plottype}' \\
+      --skipZeros \\
       --removeOutliers ${args}
     """
 
@@ -95,12 +97,14 @@ process PLOT_PCA { // TODO split into separate processes
 
     output:
         path("*.pdf"), emit: pdf
+        path("*.tab"), emit: tab
 
     script:
     """
-    plotPCA \
-      -in ${array} \
-      -o ${array.baseName}.pca.pdf
+    plotPCA \\
+      -in ${array} \\
+      -o ${array.baseName}.pca.pdf \\
+      --outFileNameData ${array.baseName}.plotPCA.tab
     """
 
     stub:
@@ -118,8 +122,8 @@ process PLOT_FINGERPRINT {
 
   output:
     path("*.pdf")          , emit: pdf
-    tuple val(meta), path("*.mat.txt")      , emit: matrix
-    tuple val(meta), path("*.qcmetrics.txt"), emit: metrics
+    path("*.mat.txt")      , emit: matrix
+    path("*.qcmetrics.txt"), emit: metrics
 
   script:
   // TODO handle extendReads for single vs paired https://github.com/nf-core/chipseq/blob/51eba00b32885c4d0bec60db3cb0a45eb61e34c5/modules/nf-core/modules/deeptools/plotfingerprint/main.nf
@@ -252,13 +256,15 @@ process PLOT_PROFILE {
 
   output:
     path("*.pdf"), emit: pdf
+    path("*.tab"), emit: tab
 
   script: // TODO set plotType for SE vs paired
   def legend_loc = mat.baseName.contains('metagene') ? 'upper-right' : 'upper-left'
   """
   plotProfile \\
     -m ${mat} \\
-    -out ${mat.baseName}.lineplot.pdf \\
+    --outFileName ${mat.baseName}.lineplot.pdf \\
+    --outFileNameData ${mat.baseName}.plotProfile.tab \\
     --plotHeight 15 \\
     --plotWidth 15 \\
     --perGroup \\

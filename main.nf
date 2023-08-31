@@ -74,7 +74,7 @@ workflow {
   DEDUPLICATE.out.bam | INDEX_BAM
   //DEDUPLICATE.out.tag_align.combine(chrom_sizes) | NGSQC_GEN
   INDEX_BAM.out.bam | PHANTOM_PEAKS
-  BAM_COVERAGE(INDEX_BAM.out.bam, PHANTOM_PEAKS.out.ppqt)
+  BAM_COVERAGE(INDEX_BAM.out.bam, PHANTOM_PEAKS.out.spp)
 
   BIGWIG_SUM(BAM_COVERAGE.out.bigwig.collect())
   BIGWIG_SUM.out.array.combine(Channel.from('heatmap', 'scatterplot')) | PLOT_CORRELATION
@@ -118,11 +118,11 @@ workflow {
     FASTQ_SCREEN.out.screen.collect(),
     //PRESEQ.out.files.collect(),
     DEDUPLICATE.out.flagstat.collect(),
-    PHANTOM_PEAKS.out.pdf.collect(),
-    PLOT_FINGERPRINT.out.pdf.collect(),
-    PLOT_CORRELATION.out.pdf.collect(),
-    PLOT_PCA.out.pdf.collect(),
-    PLOT_HEATMAP.out.pdf.collect(),
-    PLOT_PROFILE.out.pdf.collect()
+    PHANTOM_PEAKS.out.spp.collect(),
+    PLOT_FINGERPRINT.out.matrix.collect(),
+    PLOT_FINGERPRINT.out.metrics.collect(),
+    PLOT_CORRELATION.out.tab.collect(),
+    PLOT_PCA.out.tab.collect(),
+    PLOT_PROFILE.out.tab.collect()
   )
 }

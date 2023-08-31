@@ -83,18 +83,18 @@ process PHANTOM_PEAKS { // https://github.com/kundajelab/phantompeakqualtools
 
     output:
         path("${meta.id}.ppqt.pdf"), emit: pdf
-        path("${meta.id}.ppqt"), emit: ppqt
+        path("${meta.id}.spp.out"), emit: spp
 
     script: // TODO: for PE, just use first read of each pair
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     RUN_SPP=\$(which run_spp.R)
-    Rscript \$RUN_SPP -c=${bam} -savp=${prefix}.ppqt.pdf -out=${prefix}.ppqt
+    Rscript \$RUN_SPP -c=${bam} -savp=${prefix}.ppqt.pdf -out=${prefix}.spp.out
     """
 
     stub:
     """
-    touch ${meta.id}.ppqt.pdf ${meta.id}.ppqt
+    touch ${meta.id}.ppqt.pdf ${meta.id}.spp.out
     """
 }
 
@@ -160,10 +160,10 @@ process MULTIQC {
         path(fastq_screen)
         path(dedup)
         path(phantom_peaks)
-        path(plot_fingerprint)
+        path(plot_fingerprint_matrix)
+        path(plot_fingerprint_metrics)
         path(plot_corr)
         path(plot_pca)
-        path(plot_heatmap)
         path(plot_profile)
 
     output:
