@@ -159,7 +159,10 @@ def run_nextflow(
 
     # Run Nextflow!!!
     nextflow_command = " ".join(str(nf) for nf in nextflow_command)
-    if os.environ["HOSTNAME"] == "biowulf.nih.gov":
+    if (
+        os.environ["HOSTNAME"] == "biowulf.nih.gov"
+        or os.environ["SLURM_SUBMIT_HOST"] == "biowulf.nih.gov"
+    ):
         nextflow_command = f'bash -c "module load nextflow && {nextflow_command}"'
     msg_box("Nextflow command", errmsg=nextflow_command)
     subprocess.run(nextflow_command, shell=True, check=True)
