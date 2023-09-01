@@ -20,7 +20,7 @@ process FASTQC {
 
     stub:
     """
-    touch ${fastq..getBaseName(2)}_fastqc.html ${fastq..getBaseName(2)}_fastqc.zip
+    touch ${fastq.getBaseName(2)}_fastqc.html ${fastq.getBaseName(2)}_fastqc.zip
     """
 }
 
