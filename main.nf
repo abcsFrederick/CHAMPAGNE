@@ -68,7 +68,7 @@ workflow {
                     .collect()
   ALIGN_BLACKLIST(trimmed_fastqs, blacklist_files)
   reference_files = Channel
-                    .fromPath("${params.align.index_dir}${params.align.genome}*")
+                    .fromPath("${params.align.index_dir}${params.genome}*")
                     .collect()
   ALIGN_GENOME(ALIGN_BLACKLIST.out, reference_files)
   PRESEQ(ALIGN_GENOME.out.bam)

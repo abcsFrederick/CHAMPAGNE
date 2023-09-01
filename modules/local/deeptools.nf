@@ -161,12 +161,12 @@ process BED_PROTEIN_CODING {
 
     script:
     """
-    grep --line-buffered 'protein_coding' ${bed} | awk -v OFS='\t' -F'\t' '{{print \$1, \$2, \$3, \$5, \".\", \$4}}' > ${params.align.genome}.protein_coding.bed
+    grep --line-buffered 'protein_coding' ${bed} | awk -v OFS='\t' -F'\t' '{{print \$1, \$2, \$3, \$5, \".\", \$4}}' > ${params.genome}.protein_coding.bed
     """
 
     stub:
     """
-    touch ${params.align.genome}.protein_coding.bed
+    touch ${params.genome}.protein_coding.bed
     """
 }
 

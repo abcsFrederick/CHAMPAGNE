@@ -40,7 +40,7 @@ process ALIGN_GENOME {
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    bwa mem -t ${task.cpus} ${params.align.genome} $fastq |\
+    bwa mem -t ${task.cpus} ${params.genome} $fastq |\
     samtools sort -@ ${task.cpus} |\
     samtools view -b -q ${params.align.min_quality} -o ${prefix}.aligned.filtered.bam
     samtools flagstat ${prefix}.aligned.filtered.bam > ${prefix}.aligned.filtered.bam.flagstat

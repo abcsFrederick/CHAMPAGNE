@@ -92,7 +92,7 @@ process PHANTOM_PEAKS {
     output:
         path("${meta.id}.ppqt.pdf"), emit: pdf
         path("${meta.id}.spp.out"), emit: spp
-        path("${meta.id}.fraglen.txt"), emit: fraglen
+        tuple val(meta), path("${meta.id}.fraglen.txt"), emit: fraglen
 
     script: // TODO: for PE, just use first read of each pair
     def prefix = task.ext.prefix ?: "${meta.id}"
@@ -115,7 +115,7 @@ process PPQT_PROCESS { // refactor of https://github.com/CCBR/Pipeliner/blob/86c
     label 'qc'
 
     input:
-        path(fraglen)
+        tuple val(meta), path(fraglen)
     output:
         path("${fraglen.baseName}.process.txt"), emit: fraglen
 
