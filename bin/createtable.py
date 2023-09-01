@@ -2,7 +2,8 @@
 """
 Author:		Skyler Kuhn
 Date created:	08/18/2018
-Last modified:	04/26/2019 by Tovah Markowitz: markowitzte@nih.gov
+modified:	04/26/2019 by Tovah Markowitz: markowitzte@nih.gov
+modified:   08/31/2023 by Kelly Sovacool: kelly.sovacool@nih.gov
 Email:		kuhnsa@nih.gov
 
 About: This program takes standard input from the concatenation of each *qc.metric file.The results
@@ -11,10 +12,8 @@ About: This program takes standard input from the concatenation of each *qc.metr
        Example Usage:
        --------------
 	   cat sample1.qcmetrics sample2.qcmetrics sampleNth.qcmetrics | ./createQCTable > ChIPseq_QC_Table.txt
-Python version(s):	2.7 or 3.X
+Python version: 3+
 """
-from collections import Ord
-from __future__ import print_function
 import pandas as pd
 import sys
 
@@ -39,8 +38,8 @@ def file2table():
     # orderedcols = ordercolumns(cols)
     # print(df.to_string())
 
-    # sometimes preseq fails, results in some columns not being present.
-    # so this only keeps columns that exit in the dict.
+    # sometimes preseq fails, resulting in some columns not being present.
+    # so this only keeps columns that exist in the dict.
     df_columns = frozenset(df.columns)
     column_order = [
         col

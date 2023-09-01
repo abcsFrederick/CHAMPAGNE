@@ -21,10 +21,10 @@ def main(log_filename):
                 one_pair = float(line.strip().split()[1])
             elif line.startswith("2\t"):
                 two_pair = float(line.strip().split()[1])
-    nrf = distinct_reads / tot_reads
-    pbc1 = one_pair / distinct_reads
-    pbc2 = one_pair / two_pair
-    print(f"NRF: {nrf}\nPBC1: {pbc1}\nPBC2: {pbc2}")
+    nrf = round(distinct_reads / tot_reads, 3)
+    pbc1 = round(one_pair / distinct_reads, 3)
+    pbc2 = round(one_pair / two_pair, 3)
+    print(f"{nrf}\t{pbc1}\t{pbc2}")
 
 
 if __name__ == "__main__":

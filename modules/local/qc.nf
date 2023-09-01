@@ -48,11 +48,12 @@ process FASTQ_SCREEN {
 
 process PRESEQ {
     """
-    Calls preseq c_curve and lc_extrap, and calls bin/parse_preseq_log.py to get statistics from the log.
+    Calls preseq c_curve and lc_extrap, and calls bin/parse_preseq_log.py to get NRF statistics from the log.
     """
     tag { meta.id }
     label 'qc'
 
+    // preseq is known to fail inexplicably, especially on small datasets.
     // https://github.com/nf-core/methylseq/issues/161
     errorStrategy 'ignore'
 
@@ -108,10 +109,11 @@ process PHANTOM_PEAKS {
     """
 }
 
-process PPQT_PROCESS {
-    /*
-    refactor of https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L513-L541
-    */
+process PPQT_PROCESS { // refactor of https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L513-L541
+
+    tag { meta.id }
+    label 'qc'
+
     input:
         path(fraglen)
     output:
@@ -128,7 +130,7 @@ process PPQT_PROCESS {
     if fragment_length < min_frag_len:
         warnings.warn(f"The estimated fragment length was {fragment_length}. Using default of {min_frag_len} instead.")
         fragment_length = min_frag_len
-    with open("${fraglen.baseName}.fraglen.process.txt", 'w') as outfile:
+    with open("${fraglen.baseName}.process.txt", 'w') as outfile:
         outfile.write(str(fragment_length))
     """
 }
