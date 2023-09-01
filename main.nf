@@ -50,6 +50,9 @@ include { PLOT_HEATMAP             } from "./modules/local/deeptools.nf"
 include { PLOT_PROFILE             } from "./modules/local/deeptools.nf"
 include { NORMALIZE_INPUT          } from "./modules/local/deeptools.nf"
 
+// TODO reorganize peak calling into separate subworkflow
+include { SICER } from "./modules/local/peaks.nf"
+
 // MAIN WORKFLOW
 workflow {
 
@@ -123,7 +126,6 @@ workflow {
             meta1.control == meta2.id ? [ meta1, bw1, bw2 ] : null
       }
       .set { ch_ip_control_bigwig }
-  NORMALIZE_INPUT(ch_ip_control_bigwig)
 
   MULTIQC(
     Channel.fromPath(params.multiqc_config),
@@ -141,4 +143,6 @@ workflow {
     PLOT_PCA.out.tab.collect(),
     PLOT_PROFILE.out.tab.collect()
   )
+
+  NORMALIZE_INPUT(ch_ip_control_bigwig)
 }
