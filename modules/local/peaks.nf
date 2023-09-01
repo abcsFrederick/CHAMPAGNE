@@ -1,0 +1,6 @@
+
+process SICER {
+    label 'peaks'
+
+
+}

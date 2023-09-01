@@ -57,7 +57,7 @@ process BIGWIG_SUM {
     """
 }
 
-process PLOT_CORRELATION { // TODO use args to repeeat for heatmap and scatterplot
+process PLOT_CORRELATION {
     label 'qc'
     label 'deeptools'
 
@@ -88,7 +88,7 @@ process PLOT_CORRELATION { // TODO use args to repeeat for heatmap and scatterpl
     """
 }
 
-process PLOT_PCA { // TODO split into separate processes
+process PLOT_PCA {
     label 'qc'
     label 'deeptools'
 
@@ -229,7 +229,7 @@ process PLOT_HEATMAP {
     path("*.pdf"), emit: pdf
 
   script:
-  // set colorMap to "BuGn" if "metagene" in matrix filename, otherwise use "BuPu"
+  // sets colorMap to "BuGn" if "metagene" in matrix filename, otherwise use "BuPu"
   def color_map = mat.baseName.contains('metagene') ? 'BuGn' : 'BuPu'
   """
   plotHeatmap \\
