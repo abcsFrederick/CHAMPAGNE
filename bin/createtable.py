@@ -13,6 +13,7 @@ About: This program takes standard input from the concatenation of each *qc.metr
 	   cat sample1.qcmetrics sample2.qcmetrics sampleNth.qcmetrics | ./createQCTable > ChIPseq_QC_Table.txt
 Python version(s):	2.7 or 3.X
 """
+from collections import Ord
 from __future__ import print_function
 import pandas as pd
 import sys
@@ -37,23 +38,29 @@ def file2table():
     # cols = df.columns.tolist() # view df columns names
     # orderedcols = ordercolumns(cols)
     # print(df.to_string())
-    print(
-        df[
-            [
-                "SampleName",
-                "NReads",
-                "NMappedReads",
-                "NUniqMappedReads",
-                "NRF",
-                "PBC1",
-                "PBC2",
-                "FragmentLength",
-                "NSC",
-                "RSC",
-                "Qtag",
-            ]
-        ].to_string(index=False, justify="left")
-    )
+
+    # sometimes preseq fails, results in some columns not being present.
+    # so this only keeps columns that exit in the dict.
+    df_columns = frozenset(df.columns)
+    column_order = [
+        col
+        for col in [
+            "SampleName",
+            "NReads",
+            "NMappedReads",
+            "NUniqMappedReads",
+            "NRF",
+            "PBC1",
+            "PBC2",
+            "FragmentLength",
+            "NSC",
+            "RSC",
+            "Qtag",
+        ]
+        if col in df_columns
+    ]
+
+    print(df[column_order].to_string(index=False, justify="left"))
 
 
 if __name__ == "__main__":
