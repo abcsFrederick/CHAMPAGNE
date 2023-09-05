@@ -64,18 +64,19 @@ workflow {
   trimmed_fastqs.combine(Channel.value("trimmed")) | FASTQC_TRIMMED
   trimmed_fastqs.combine(Channel.fromPath(params.fastq_screen.conf)) | FASTQ_SCREEN
   blacklist_files = Channel
-                    .fromPath("${params.align.index_dir}${params.align.blacklist}*")
+                    .fromPath(params.align.blacklist_files)
                     .collect()
   ALIGN_BLACKLIST(trimmed_fastqs, blacklist_files)
   reference_files = Channel
-                    .fromPath("${params.align.index_dir}${params.genome}*")
+                    .fromPath(params.align.reference_files)
                     .collect()
-  ALIGN_GENOME(ALIGN_BLACKLIST.out, reference_files)
+  ALIGN_GENOME(ALIGN_BLACKLIST.out.reads, reference_files)
   PRESEQ(ALIGN_GENOME.out.bam)
-  chrom_sizes = Channel.fromPath("${params.align.index_dir}${params.align.chrom_sizes}")
+  chrom_sizes = Channel.fromPath(params.align.chrom_sizes)
+  print params.align.chrom_sizes
   ALIGN_GENOME.out.bam.combine(chrom_sizes) | DEDUPLICATE
   DEDUPLICATE.out.bam | INDEX_BAM
-  //DEDUPLICATE.out.tag_align.combine(chrom_sizes) | NGSQC_GEN
+  DEDUPLICATE.out.tag_align.combine(chrom_sizes) | NGSQC_GEN
   INDEX_BAM.out.bam | PHANTOM_PEAKS
   PPQT_PROCESS(PHANTOM_PEAKS.out.fraglen)
   QC_STATS(
