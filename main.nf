@@ -76,7 +76,7 @@ workflow {
   print params.align.chrom_sizes
   ALIGN_GENOME.out.bam.combine(chrom_sizes) | DEDUPLICATE
   DEDUPLICATE.out.bam | INDEX_BAM
-  DEDUPLICATE.out.tag_align.combine(chrom_sizes) | NGSQC_GEN
+  //DEDUPLICATE.out.tag_align.combine(chrom_sizes) | NGSQC_GEN
   INDEX_BAM.out.bam | PHANTOM_PEAKS
   PPQT_PROCESS(PHANTOM_PEAKS.out.fraglen)
   QC_STATS(
