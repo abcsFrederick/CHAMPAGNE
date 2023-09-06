@@ -75,7 +75,7 @@ workflow {
   ALIGN_GENOME(ALIGN_BLACKLIST.out.reads, reference_files)
 
   PRESEQ(ALIGN_GENOME.out.bam)
-
+  // when preseq fails, write NAs for the stats that are calculated from its log
   PRESEQ.out.log
     .join(ALIGN_GENOME.out.bam, remainder: true)
     .branch { meta, preseq_log, bam_tuple ->
@@ -86,7 +86,6 @@ workflow {
     }.set{ preseq_logs }
   preseq_logs.failed | HANDLE_PRESEQ_ERROR
   preseq_logs.succeeded | PARSE_PRESEQ_LOG
-
   PARSE_PRESEQ_LOG.out.nrf
     .concat(HANDLE_PRESEQ_ERROR.out.nrf)
     .set{ preseq_nrf }
@@ -96,7 +95,10 @@ workflow {
   print params.align.chrom_sizes
   ALIGN_GENOME.out.bam.combine(chrom_sizes) | DEDUPLICATE
   DEDUPLICATE.out.bam | INDEX_BAM
+
+  // NGSQC is seg faulting, see https://github.com/CCBR/CHAMPAGNE/issues/13
   //DEDUPLICATE.out.tag_align.combine(chrom_sizes) | NGSQC_GEN
+
   INDEX_BAM.out.bam | PHANTOM_PEAKS
   PPQT_PROCESS(PHANTOM_PEAKS.out.fraglen)
   QC_STATS(
@@ -115,7 +117,7 @@ workflow {
   BIGWIG_SUM.out.array.combine(Channel.from('heatmap', 'scatterplot')) | PLOT_CORRELATION
   BIGWIG_SUM.out.array | PLOT_PCA
 
-  // Create channels: [ meta, [ ip_bam, control_bam ] [ ip_bai, control_bai ] ]
+  // Create channel: [ meta, [ ip_bam, control_bam ] [ ip_bai, control_bai ] ]
   ch_genome_bam_bai = INDEX_BAM.out.bam
   ch_genome_bam_bai
       .combine(ch_genome_bam_bai)
@@ -151,7 +153,6 @@ workflow {
     FASTQC_RAW.out.zip.collect(),
     FASTQC_TRIMMED.out.zip.collect(),
     FASTQ_SCREEN.out.screen.collect(),
-    //PRESEQ.out.files.collect(),
     //NGSQC_GEN
     DEDUPLICATE.out.flagstat.collect(),
     PHANTOM_PEAKS.out.spp.collect(),
