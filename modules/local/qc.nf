@@ -75,7 +75,13 @@ process PRESEQ {
 
     stub:
     """
-    touch ${meta.id}.c_curve ${meta.id}.preseq ${meta.id}.preseqlog ${meta.id}.preseqlog.nrf.txt
+    touch ${meta.id}.c_curve ${meta.id}.lc_extrap.txt ${meta.id}.preseq.log
+    """
+}
+
+process HANDLE_PRESEQ_ERROR {
+    script:
+    """
     """
 }
 
@@ -85,13 +91,19 @@ process PARSE_PRESEQ_LOG {
     """
     input:
         tuple val(meta), path(log)
+
     output:
         path("*nrf.txt"), emit: nrf
+
     script:
     """
     parse_preseq_log.py ${prefix}.preseq.log > ${prefix}.preseq.nrf.txt
     """
 
+    stub:
+    """
+    touch ${meta.id}.preseqlog.nrf.txt
+    """
 }
 
 process PHANTOM_PEAKS {
