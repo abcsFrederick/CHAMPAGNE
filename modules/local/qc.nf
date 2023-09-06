@@ -80,8 +80,16 @@ process PRESEQ {
 }
 
 process HANDLE_PRESEQ_ERROR {
+    input:
+        tuple val(meta), val(log)
+
+    output:
+        path("*nrf.txt"), emit: nrf
+
     script:
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
+    echo "NA\tNA\tNA\n" > ${prefix}.preseq.nrf.txt
     """
 }
 
@@ -96,6 +104,7 @@ process PARSE_PRESEQ_LOG {
         path("*nrf.txt"), emit: nrf
 
     script:
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     parse_preseq_log.py ${prefix}.preseq.log > ${prefix}.preseq.nrf.txt
     """
