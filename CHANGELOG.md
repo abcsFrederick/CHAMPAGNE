@@ -8,7 +8,7 @@ _This project is under active development_
 
 - Trim raw reads, FastQC on raw and trimmed reads, and FastQ Screen on trimmed reads.
 - Exclude reads that align to blacklist regions, align remaining reads to the reference genome, and deduplicate.
-- Optional: Preseq on aligned reads.
+- Preseq on aligned reads.
 - Phantompeakqualtools on aligned and deduplicated reads.
 - Process reads with deepTools: bam coverage to generate bigwigs for each sample, summarize all bigwigs, and compute matrices relative to TSSs and scaled to metagene regions.
 - Generate plots with deepTools: PCA, profile, heatmap, spearman correlation, and fingerprint plots.
