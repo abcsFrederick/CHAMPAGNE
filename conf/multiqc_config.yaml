@@ -43,7 +43,31 @@ custom_data:
     id: "QC_Table"
     section_name: "ChIP-specific QC metrics"
     section_href: https://www.encodeproject.org/chip-seq/
-    description: "Encode3 standards: <br>  Usable fragments (A fragment corresponds to a read mapping to one location in the genome.) If single-end, one read is considered a fragment. If paired-end, one pair is considered a fragment. <br>  Usable fragments for TF/narrow histones: concerning <10M, acceptable 10-20M, ideal >20M. <br>  Usable fragments for broad histones: concerning <20M, acceptable 20-40M, ideal >40M. <br>  NRF: Number of distinct mapping reads after removing duplicates/total number of reads. <br> PBC1: Number of genomic locations where exactly one read maps uniquely/number of distinct genomic locations to which one read maps uniquely. <br> PBC2: Number of genomic locations where only one read maps uniquely/number of genomic locations where two reads map uniquely <br>  Concerning(severe bottlenecking): NRF < 0.5, Acceptable: 0.5 < NRF < 0.8, Ideal (no bottlenecking): NRF > 0.9 <br><br> PPQT standards: https://github.com/crazyhottommy/phantompeakqualtools <br> NSC: cross-correlation value/minimum cross-correlation <br> RSC: (cross-correlation value - minimum cross-correlation) / (correlation at phantom peak - minimum cross-correlation) <br> Optimal NSC: > 1.1, Okay NSC: 1.05 - 1.1. Low NSC means low signal to noise or very few peaks (biological or technical). <br> Optimal RSC: > 1, Okay RSC: 0.8-1. Low RSC means low signal to noise caused by: poor quality ChIP, low read sequence quality, shallow sequencing depth, or few peaks. <br> QualityTag: -2: very low, 2: very high"
+    description: |
+      <h3>Encode3 standards</h3>
+      <ul>
+        <li><a href='https://www.encodeproject.org/chip-seq/histone-encode4/#standards' target='_blank'>Histone standards</a></li>
+        <li><a href='https://www.encodeproject.org/chip-seq/transcription-factor-encode4/#standards' target='_blank'>Transcription Factor standards</a></li>
+      </ul>
+      Usable fragments (A fragment corresponds to a read mapping to one location in the genome.)
+      If single-end, one read is considered a fragment. If paired-end, one pair is considered a fragment. <br>
+      Usable fragments for TF/narrow histones: concerning <10M, acceptable 10-20M, ideal >20M. <br>
+      Usable fragments for broad histones: concerning <20M, acceptable 20-40M, ideal >40M. <br>
+      <ul>
+        <li> NRF: Number of distinct mapping reads after removing duplicates/total number of reads.</li>
+        <li> PBC1: Number of genomic locations where exactly one read maps uniquely/number of distinct genomic locations to which one read maps uniquely.</li>
+        <li> PBC2: Number of genomic locations where only one read maps uniquely/number of genomic locations where two reads map uniquely</li>
+        <li> Concerning(severe bottlenecking): NRF < 0.5, Acceptable: 0.5 < NRF < 0.8, Ideal (no bottlenecking): NRF > 0.9</li>
+      </ul>
+      <br>
+      <h3><a href='https://github.com/kundajelab/phantompeakqualtools' target='_blank'>phantompeakqualtools</a> standards</h3>
+      <ul>
+      <li> NSC: cross-correlation value/minimum cross-correlation <br>
+           Optimal NSC: > 1.1, Okay NSC: 1.05 - 1.1. Low NSC means low signal to noise or very few peaks (biological or technical).</li>
+      <li> RSC: (cross-correlation value - minimum cross-correlation) / (correlation at phantom peak - minimum cross-correlation) <br>
+           Optimal RSC: > 1, Okay RSC: 0.8-1. Low RSC means low signal to noise caused by: poor quality ChIP,
+           low read sequence quality, shallow sequencing depth, or few peaks. <br> QualityTag: -2: very low, 2: very high </li>
+      </ul>
     plot_type: "table"
     pconfig:
       id: "QC_Table"

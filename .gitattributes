@@ -4,3 +4,4 @@ modules/nf-core/** linguist-generated
 subworkflows/nf-core/** linguist-generated
 *.config linguist-language=nextflow
 assets/** linguist-generated
+docs/**.html linguist-generated

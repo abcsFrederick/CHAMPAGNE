@@ -27,6 +27,8 @@ include { FASTQC as FASTQC_TRIMMED } from "./modules/local/qc.nf"
 include { FASTQ_SCREEN             } from "./modules/local/qc.nf"
 include { DEDUPLICATE              } from "./modules/local/qc.nf"
 include { PRESEQ                   } from "./modules/local/qc.nf"
+include { HANDLE_PRESEQ_ERROR      } from "./modules/local/qc.nf"
+include { PARSE_PRESEQ_LOG         } from "./modules/local/qc.nf"
 include { PHANTOM_PEAKS            } from "./modules/local/qc.nf"
 include { PPQT_PROCESS             } from "./modules/local/qc.nf"
 include { NGSQC_GEN                } from "./modules/local/qc.nf"
@@ -64,25 +66,46 @@ workflow {
   trimmed_fastqs.combine(Channel.value("trimmed")) | FASTQC_TRIMMED
   trimmed_fastqs.combine(Channel.fromPath(params.fastq_screen.conf)) | FASTQ_SCREEN
   blacklist_files = Channel
-                    .fromPath("${params.align.index_dir}${params.align.blacklist}*")
+                    .fromPath(params.align.blacklist_files)
                     .collect()
   ALIGN_BLACKLIST(trimmed_fastqs, blacklist_files)
   reference_files = Channel
-                    .fromPath("${params.align.index_dir}${params.align.genome}*")
+                    .fromPath(params.align.reference_files)
                     .collect()
-  ALIGN_GENOME(ALIGN_BLACKLIST.out, reference_files)
+  ALIGN_GENOME(ALIGN_BLACKLIST.out.reads, reference_files)
+
   PRESEQ(ALIGN_GENOME.out.bam)
-  chrom_sizes = Channel.fromPath("${params.align.index_dir}${params.align.chrom_sizes}")
+  // when preseq fails, write NAs for the stats that are calculated from its log
+  PRESEQ.out.log
+    .join(ALIGN_GENOME.out.bam, remainder: true)
+    .branch { meta, preseq_log, bam_tuple ->
+      failed: preseq_log == null
+        return (tuple(meta, "nopresqlog"))
+      succeeded: true
+        return (tuple(meta, preseq_log))
+    }.set{ preseq_logs }
+  preseq_logs.failed | HANDLE_PRESEQ_ERROR
+  preseq_logs.succeeded | PARSE_PRESEQ_LOG
+  PARSE_PRESEQ_LOG.out.nrf
+    .concat(HANDLE_PRESEQ_ERROR.out.nrf)
+    .set{ preseq_nrf }
+
+
+  chrom_sizes = Channel.fromPath(params.align.chrom_sizes)
+  print params.align.chrom_sizes
   ALIGN_GENOME.out.bam.combine(chrom_sizes) | DEDUPLICATE
   DEDUPLICATE.out.bam | INDEX_BAM
+
+  // NGSQC is seg faulting, see https://github.com/CCBR/CHAMPAGNE/issues/13
   //DEDUPLICATE.out.tag_align.combine(chrom_sizes) | NGSQC_GEN
+
   INDEX_BAM.out.bam | PHANTOM_PEAKS
   PPQT_PROCESS(PHANTOM_PEAKS.out.fraglen)
   QC_STATS(
     raw_fastqs,
     ALIGN_GENOME.out.flagstat,
     DEDUPLICATE.out.flagstat,
-    PRESEQ.out.nrf,
+    preseq_nrf,
     PHANTOM_PEAKS.out.spp,
     PPQT_PROCESS.out.fraglen
   )
@@ -94,7 +117,7 @@ workflow {
   BIGWIG_SUM.out.array.combine(Channel.from('heatmap', 'scatterplot')) | PLOT_CORRELATION
   BIGWIG_SUM.out.array | PLOT_PCA
 
-  // Create channels: [ meta, [ ip_bam, control_bam ] [ ip_bai, control_bai ] ]
+  // Create channel: [ meta, [ ip_bam, control_bam ] [ ip_bai, control_bai ] ]
   ch_genome_bam_bai = INDEX_BAM.out.bam
   ch_genome_bam_bai
       .combine(ch_genome_bam_bai)
@@ -130,7 +153,6 @@ workflow {
     FASTQC_RAW.out.zip.collect(),
     FASTQC_TRIMMED.out.zip.collect(),
     FASTQ_SCREEN.out.screen.collect(),
-    //PRESEQ.out.files.collect(),
     //NGSQC_GEN
     DEDUPLICATE.out.flagstat.collect(),
     PHANTOM_PEAKS.out.spp.collect(),
@@ -141,4 +163,5 @@ workflow {
     PLOT_PCA.out.tab.collect(),
     PLOT_PROFILE.out.tab.collect()
   )
+
 }

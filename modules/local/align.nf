@@ -13,8 +13,12 @@ process ALIGN_BLACKLIST {
     script: // TODO use samtools -f4 for single-end and -f12 for paired to get unmapped reads https://broadinstitute.github.io/picard/explain-flags.html
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    bwa mem -t $task.cpus $params.align.blacklist $fastq |\
-    samtools view -@ $task.cpus -f4 -b |\
+    bwa mem -t $task.cpus $params.align.blacklist $fastq > ${prefix}.sam
+    samtools view \\
+        -@ ${task.cpus} \\
+        -f4 \\
+        -b \\
+        ${prefix}.sam |\
     samtools bam2fq |\
     pigz -p $task.cpus > ${prefix}.no_blacklist.fastq.gz
     """
@@ -40,15 +44,27 @@ process ALIGN_GENOME {
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    bwa mem -t ${task.cpus} ${params.align.genome} $fastq |\
-    samtools sort -@ ${task.cpus} |\
-    samtools view -b -q ${params.align.min_quality} -o ${prefix}.aligned.filtered.bam
+    # current working directory is a tmpdir when 'scratch' is set
+    tmp=tmp/
+    trap 'rm -rf "\$tmp"' EXIT
+
+    bwa mem -t ${task.cpus} ${params.genome} ${fastq} > ${prefix}.bam
+    samtools sort \\
+      -@ ${task.cpus} \\
+      -m 2G \\
+      -T \$tmp \\
+      ${prefix}.bam > ${prefix}.sorted.bam
+    samtools view \\
+      -@ ${task.cpus} \\
+      -q ${params.align.min_quality} \\
+      -b \\
+      ${prefix}.sorted.bam > ${prefix}.aligned.filtered.bam
     samtools flagstat ${prefix}.aligned.filtered.bam > ${prefix}.aligned.filtered.bam.flagstat
     """
 
     stub:
     """
-    touch ${meta.id}.aligned.filtered.bam
+    touch ${meta.id}.aligned.filtered.bam ${meta.id}.aligned.filtered.bam.flagstat
     """
 
 }

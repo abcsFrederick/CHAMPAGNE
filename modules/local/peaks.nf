@@ -1,6 +1,0 @@
-
-process SICER {
-    label 'peaks'
-
-
-}
