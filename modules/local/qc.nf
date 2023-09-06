@@ -48,7 +48,7 @@ process FASTQ_SCREEN {
 
 process PRESEQ {
     """
-    Calls preseq c_curve and lc_extrap, and calls bin/parse_preseq_log.py to get NRF statistics from the log.
+    Calls preseq c_curve and lc_extrap
     """
     tag { meta.id }
     label 'qc'
@@ -63,8 +63,7 @@ process PRESEQ {
     output:
         path("*.c_curve"), emit: c_curve
         path("*.lc_extrap.txt"), emit: preseq
-        path("*.preseq.log"), emit: log
-        path("*nrf.txt"), emit: nrf
+        tuple val(meta), path("*.preseq.log"), emit: log
 
     script:
     // TODO handle paired: https://github.com/nf-core/rnaseq/blob/3bec2331cac2b5ff88a1dc71a21fab6529b57a0f/modules/nf-core/preseq/lcextrap/main.nf#L25
@@ -72,13 +71,27 @@ process PRESEQ {
     """
     preseq c_curve -B -o ${prefix}.c_curve ${bam}
     preseq lc_extrap -B -D -o ${prefix}.lc_extrap.txt ${bam} -seed 12345 -v -l 100000000000 2> ${prefix}.preseq.log
-    parse_preseq_log.py ${prefix}.preseq.log > ${prefix}.preseq.nrf.txt
     """
 
     stub:
     """
     touch ${meta.id}.c_curve ${meta.id}.preseq ${meta.id}.preseqlog ${meta.id}.preseqlog.nrf.txt
     """
+}
+
+process PARSE_PRESEQ_LOG {
+    """
+    Calls bin/parse_preseq_log.py to get NRF statistics from the preseq log.
+    """
+    input:
+        tuple val(meta), path(log)
+    output:
+        path("*nrf.txt"), emit: nrf
+    script:
+    """
+    parse_preseq_log.py ${prefix}.preseq.log > ${prefix}.preseq.nrf.txt
+    """
+
 }
 
 process PHANTOM_PEAKS {

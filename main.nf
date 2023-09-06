@@ -27,6 +27,7 @@ include { FASTQC as FASTQC_TRIMMED } from "./modules/local/qc.nf"
 include { FASTQ_SCREEN             } from "./modules/local/qc.nf"
 include { DEDUPLICATE              } from "./modules/local/qc.nf"
 include { PRESEQ                   } from "./modules/local/qc.nf"
+include { PARSE_PRESEQ_LOG         } from "./modules/local/qc.nf"
 include { PHANTOM_PEAKS            } from "./modules/local/qc.nf"
 include { PPQT_PROCESS             } from "./modules/local/qc.nf"
 include { NGSQC_GEN                } from "./modules/local/qc.nf"
@@ -72,6 +73,8 @@ workflow {
                     .collect()
   ALIGN_GENOME(ALIGN_BLACKLIST.out.reads, reference_files)
   PRESEQ(ALIGN_GENOME.out.bam)
+  // TODO control flow to write NAs for preseq stats if it failed
+  PARSE_PRESEQ_LOG(PRESEQ.out.log)
   chrom_sizes = Channel.fromPath(params.align.chrom_sizes)
   print params.align.chrom_sizes
   ALIGN_GENOME.out.bam.combine(chrom_sizes) | DEDUPLICATE
@@ -83,7 +86,7 @@ workflow {
     raw_fastqs,
     ALIGN_GENOME.out.flagstat,
     DEDUPLICATE.out.flagstat,
-    PRESEQ.out.nrf,
+    PARSE_PRESEQ_LOG.out.nrf,
     PHANTOM_PEAKS.out.spp,
     PPQT_PROCESS.out.fraglen
   )
