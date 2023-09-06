@@ -64,7 +64,7 @@ process ALIGN_GENOME {
 
     stub:
     """
-    touch ${meta.id}.aligned.filtered.bam
+    touch ${meta.id}.aligned.filtered.bam ${meta.id}.aligned.filtered.bam.flagstat
     """
 
 }
