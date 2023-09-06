@@ -143,15 +143,18 @@ process PHANTOM_PEAKS {
     """
 }
 
-process PPQT_PROCESS { // refactor of https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L513-L541
-
+process PPQT_PROCESS {
+    """
+    Process fragment length output from PPQT.
+    Refactor of https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L513-L541
+    """
     tag { meta.id }
     label 'qc'
 
     input:
         tuple val(meta), path(fraglen)
     output:
-        path("${fraglen.baseName}.process.txt"), emit: fraglen
+        tuple val(meta), stdout, emit: fraglen
 
     script:
     """
@@ -164,8 +167,7 @@ process PPQT_PROCESS { // refactor of https://github.com/CCBR/Pipeliner/blob/86c
     if fragment_length < min_frag_len:
         warnings.warn(f"The estimated fragment length was {fragment_length}. Using default of {min_frag_len} instead.")
         fragment_length = min_frag_len
-    with open("${fraglen.baseName}.process.txt", 'w') as outfile:
-        outfile.write(str(fragment_length))
+    print(fragment_length)
     """
 }
 
@@ -230,7 +232,7 @@ process QC_STATS {
         tuple path(dedup_flagstat), path(idxstat)
         path(preseq_nrf)
         path(ppqt_spp)
-        path(ppqt_fraglen)
+        tuple val(meta), val(fraglen)
 
 
     output:
@@ -252,8 +254,7 @@ process QC_STATS {
     # NSC, RSC, Qtag
     awk '{{print \$(NF-2),\$(NF-1),\$NF}}' ${ppqt_spp} | filterMetrics.py ${meta.id} ppqt >> ${outfile}
     # Fragment Length
-    fragLen=\$(cat ${ppqt_fraglen})
-    echo "${meta.id}\tFragmentLength\t\$fragLen" >> ${outfile}
+    echo "${meta.id}\tFragmentLength\t${fraglen}" >> ${outfile}
     """
 
 }

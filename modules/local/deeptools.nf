@@ -6,7 +6,7 @@ process BAM_COVERAGE {
 
     input:
         tuple val(meta), path(bam), path(bai)
-        path(ppqt_fraglen)
+        tuple val(meta), val(fraglen)
 
     output:
         val(meta), emit: meta
@@ -14,7 +14,6 @@ process BAM_COVERAGE {
 
     script: // https://deeptools.readthedocs.io/en/2.1.0/content/tools/bamCoverage.html
     """
-    frag_len=\$(cat ${ppqt_fraglen})
     bamCoverage \
       --bam ${bam} \
       -o ${meta.id}.bw \
@@ -24,7 +23,7 @@ process BAM_COVERAGE {
       --numberOfProcessors ${task.cpus} \
       --normalizeUsing ${params.deeptools.normalize_using} \
       --effectiveGenomeSize ${params.align.effective_genome_size} \
-      --extendReads \$frag_len
+      --extendReads ${fraglen}
     """
 
     stub:
