@@ -10,7 +10,7 @@ process CALC_GENOME_FRAC {
 
     script:
     """
-    genome_frac=`calc_effective_genome_fraction.py ${chrom_sizes} ${params.align.effective_genome_size} ${params.deeptools.excluded_chroms}`
+    genome_frac=`calc_effective_genome_fraction.py ${params.align.effective_genome_size} ${chrom_sizes} ${params.deeptools.excluded_chroms}`
     echo \$genome_frac
     """
 
@@ -27,6 +27,8 @@ process SICER {
     input:
         tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
 
+    //output:
+
     script:
     """
     sicer \\
@@ -40,6 +42,11 @@ process SICER {
       -g 600 \\
       -fdr 1E-2 \\
       -cpu ${task.cpus}
+    """
+
+    stub:
+    """
+    # TODO
     """
 }
 /*
