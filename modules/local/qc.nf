@@ -27,6 +27,7 @@ process FASTQC {
 process FASTQ_SCREEN {
     tag { meta.id }
     label 'qc'
+    label 'process_low'
 
     input:
         tuple val(meta), path(fastq), path(conf)
