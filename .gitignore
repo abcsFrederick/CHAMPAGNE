@@ -25,9 +25,9 @@ replay_pid*
 
 # nextflow
 .nextflow*
-work/
-data/
-results/
+/work/
+/data/
+/results/
 /params.yaml
 
 # python packaging
