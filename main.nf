@@ -102,18 +102,19 @@ workflow {
 
   INDEX_BAM.out.bam | PHANTOM_PEAKS
   PPQT_PROCESS(PHANTOM_PEAKS.out.fraglen)
+  frag_lengths = PPQT_PROCESS.out.fraglen
   QC_STATS(
     raw_fastqs,
     ALIGN_GENOME.out.flagstat,
     DEDUPLICATE.out.flagstat,
     preseq_nrf,
     PHANTOM_PEAKS.out.spp,
-    PPQT_PROCESS.out.fraglen
+    frag_lengths
   )
   QC_TABLE(QC_STATS.out.collect())
 
   // Deeptools
-  BAM_COVERAGE(INDEX_BAM.out.bam, PPQT_PROCESS.out.fraglen)
+  BAM_COVERAGE(INDEX_BAM.out.bam, frag_lengths)
   BIGWIG_SUM(BAM_COVERAGE.out.bigwig.collect())
   BIGWIG_SUM.out.array.combine(Channel.from('heatmap', 'scatterplot')) | PLOT_CORRELATION
   BIGWIG_SUM.out.array | PLOT_PCA
@@ -126,9 +127,9 @@ workflow {
           meta1, bam1, bai1, meta2, bam2, bai2 ->
               meta1.control == meta2.id ? [ meta1, [ bam1, bam2 ], [ bai1, bai2 ] ] : null
       }
-      .set { ch_ip_control_bam_bai }
+      .set { ch_ip_ctrl_bam_bai }
 
-  PLOT_FINGERPRINT(ch_ip_control_bam_bai)
+  PLOT_FINGERPRINT(ch_ip_ctrl_bam_bai)
   BED_PROTEIN_CODING(Channel.fromPath(params.gene_info))
   COMPUTE_MATRIX(BAM_COVERAGE.out.bigwig.collect(),
                  BED_PROTEIN_CODING.out.bed.combine(Channel.from('metagene','TSS'))
@@ -146,7 +147,7 @@ workflow {
         meta1, bw1, meta2, bw2 ->
             meta1.control == meta2.id ? [ meta1, bw1, bw2 ] : null
       }
-      .set { ch_ip_control_bigwig }
+      .set { ch_ip_ctrl_bigwig }
 
   MULTIQC(
     Channel.fromPath(params.multiqc_config),
@@ -164,7 +165,22 @@ workflow {
     PLOT_PROFILE.out.tab.collect()
   )
 
-  NORMALIZE_INPUT(ch_ip_control_bigwig)
+  NORMALIZE_INPUT(ch_ip_ctrl_bigwig)
 
-  CALC_GENOME_FRAC(chrom_sizes)
+  // peak calling
+
+  genome_frac = CALC_GENOME_FRAC(chrom_sizes)
+  // create channel with [ meta, chip_tag, input_tag, fraglen, genome_frac]
+  DEDUPLICATE.out.tag_align
+    .combine(DEDUPLICATE.out.tag_align)
+    .map {
+        meta1, tag1, meta2, tag2 ->
+            meta1.control == meta2.id ? [ meta1, tag1, tag2 ]: null
+    }
+    .join(frag_lengths)
+    .combine(genome_frac)
+    .set { ch_ip_ctrl_tagalign }
+
+  ch_ip_ctrl_tagalign | SICER
+
 }
