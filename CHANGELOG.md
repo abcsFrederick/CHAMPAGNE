@@ -1,6 +1,12 @@
 ## CHAMPAGNE development version
 
-_This project is under active development_
+### New features
+
+- New GitHub Actions workflow to launch a stub run from the champagne CLI.
+
+### Bug fixes
+
+- CLI error when biowulf-specific environment variables are not defined. (#54)
 
 ## CHAMPAGNE 0.1.0
 
