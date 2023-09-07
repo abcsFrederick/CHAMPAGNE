@@ -1,6 +1,24 @@
 
-process calc_effective_genome_fraction {
+process CALC_GENOME_FRAC {
+    label 'peaks'
 
+    input:
+        path(chrom_sizes)
+
+    output:
+        env(genome_frac), emit: genome_frac
+
+    script:
+    """
+    genome_frac=`calc_effective_genome_fraction.py ${chrom_sizes} ${params.align.effective_genome_size} ${params.deeptools.excluded_chroms}`
+    echo \$genome_frac
+    """
+
+    stub:
+    """
+    genome_frac=0.75
+    echo \$genome_frac
+    """
 }
 
 process SICER {

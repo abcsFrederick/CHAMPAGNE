@@ -53,11 +53,11 @@ include { PLOT_PROFILE             } from "./modules/local/deeptools.nf"
 include { NORMALIZE_INPUT          } from "./modules/local/deeptools.nf"
 
 // TODO reorganize peak calling into separate subworkflow
-include { SICER } from "./modules/local/peaks.nf"
+include { CALC_GENOME_FRAC } from "./modules/local/peaks.nf"
+include { SICER            } from "./modules/local/peaks.nf"
 
 // MAIN WORKFLOW
 workflow {
-
   INPUT_CHECK (
       file(params.input),
       params.seq_center
@@ -93,9 +93,7 @@ workflow {
     .concat(HANDLE_PRESEQ_ERROR.out.nrf)
     .set{ preseq_nrf }
 
-
   chrom_sizes = Channel.fromPath(params.align.chrom_sizes)
-  print params.align.chrom_sizes
   ALIGN_GENOME.out.bam.combine(chrom_sizes) | DEDUPLICATE
   DEDUPLICATE.out.bam | INDEX_BAM
 
@@ -167,4 +165,6 @@ workflow {
   )
 
   NORMALIZE_INPUT(ch_ip_control_bigwig)
+
+  CALC_GENOME_FRAC(chrom_sizes)
 }
