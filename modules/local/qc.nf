@@ -2,6 +2,7 @@
 process FASTQC {
     tag { meta.id }
     label 'qc'
+    label 'process_higher'
     publishDir "${params.outdir}/qc/fastqc_${fqtype}/${meta.id}", mode: "${params.publish_dir_mode}"
 
     input:
