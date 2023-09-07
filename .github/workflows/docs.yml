@@ -1,4 +1,5 @@
-name: mkdocs_build
+name: mkdocs
+
 on:
   workflow_dispatch:
   push:
