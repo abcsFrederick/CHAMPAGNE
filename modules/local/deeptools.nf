@@ -150,7 +150,6 @@ process PLOT_FINGERPRINT {
 
 process BED_PROTEIN_CODING {
     label 'qc'
-    label 'deeptools'
 
     input:
       path(bed)
