@@ -156,10 +156,6 @@ process PHANTOM_PEAKS {
 }
 
 process PPQT_PROCESS {
-    """
-    Process fragment length output from PPQT.
-    Refactor of https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L513-L541
-    """
     tag { meta.id }
     label 'qc'
     label 'ppqt'
@@ -171,18 +167,8 @@ process PPQT_PROCESS {
 
     script:
     """
-    #!/usr/bin/env python
-
-    import os
-    import warnings
-    with open("${fraglen}", 'r') as infile:
-        fragment_length = int(infile.read().strip())
-    min_frag_len = ${params.min_fragment_length}
-    if fragment_length < min_frag_len:
-        warnings.warn(f"The estimated fragment length was {fragment_length}. Using default of {min_frag_len} instead.")
-        fragment_length = min_frag_len
-    print(fragment_length)
-    os.environ['fraglen'] = str(fragment_length)
+    fraglen=\$(process_ppqt.py ${fraglen} ${params.min_fragment_length})
+    echo \$fraglen
     """
 
     stub:
