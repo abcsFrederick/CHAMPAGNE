@@ -23,4 +23,7 @@ when referring to the issue.
 - [ ] This comment contains a description of changes with justifications, with any relevant issues linked.
 - ~[ ] Write unit tests for any new features, bug fixes, or other code changes.~ _testing framework not yet implemented_
 - [ ] Update docs if there are any API changes.
+- [ ] If a new nextflow process is implemented:
+  - [ ] docker container is set in `conf/modules.config`.
+  - [ ] stub is defined.
 - [ ] Update `CHANGELOG.md` with a one-line description of these changes and reference the PR number. Guidelines: https://keepachangelog.com/en/1.1.0/
