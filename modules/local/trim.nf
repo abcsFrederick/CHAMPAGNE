@@ -4,6 +4,7 @@
 process TRIM_SE {
   tag { meta.id }
   label 'qc'
+  label 'process_high'
 
   input:
     tuple val(meta), path(fastq)

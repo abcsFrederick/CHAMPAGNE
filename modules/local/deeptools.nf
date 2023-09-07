@@ -3,6 +3,7 @@ process BAM_COVERAGE {
     tag { meta.id }
     label 'qc'
     label 'deeptools'
+    label 'process_higher'
 
     input:
         tuple val(meta), path(bam), path(bai)
@@ -35,6 +36,7 @@ process BAM_COVERAGE {
 process BIGWIG_SUM {
     label 'qc'
     label 'deeptools'
+    label 'process_high'
 
     input:
         path(bigwigs)
@@ -115,6 +117,7 @@ process PLOT_PCA {
 process PLOT_FINGERPRINT {
   label 'qc'
   label 'deeptools'
+    label 'process_higher'
 
   input:
     tuple val(meta), path(bams), path(bais)
@@ -171,6 +174,7 @@ process BED_PROTEIN_CODING {
 process COMPUTE_MATRIX {
   label 'qc'
   label 'deeptools'
+  label 'process_higher'
 
   input:
     path(bigwigs)
@@ -280,6 +284,7 @@ process PLOT_PROFILE {
 process NORMALIZE_INPUT {
   label 'qc'
   label 'deeptools'
+  label 'process_higher'
 
   input:
     tuple val(meta), path(chip), path(input)

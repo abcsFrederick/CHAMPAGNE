@@ -2,6 +2,7 @@
 process FASTQC {
     tag { meta.id }
     label 'qc'
+    label 'process_higher'
     publishDir "${params.outdir}/qc/fastqc_${fqtype}/${meta.id}", mode: "${params.publish_dir_mode}"
 
     input:
@@ -27,6 +28,7 @@ process FASTQC {
 process FASTQ_SCREEN {
     tag { meta.id }
     label 'qc'
+    label 'process_high'
 
     input:
         tuple val(meta), path(fastq), path(conf)
@@ -52,6 +54,7 @@ process PRESEQ {
     """
     tag { meta.id }
     label 'qc'
+    label 'preseq'
 
     // preseq is known to fail inexplicably, especially on small datasets.
     // https://github.com/nf-core/methylseq/issues/161
@@ -80,6 +83,10 @@ process PRESEQ {
 }
 
 process HANDLE_PRESEQ_ERROR {
+    tag { meta.id }
+    label 'qc'
+    label 'preseq'
+
     input:
         tuple val(meta), val(log)
 
@@ -97,6 +104,10 @@ process PARSE_PRESEQ_LOG {
     """
     Calls bin/parse_preseq_log.py to get NRF statistics from the preseq log.
     """
+    tag { meta.id }
+    label 'qc'
+    label 'preseq'
+
     input:
         tuple val(meta), path(log)
 
@@ -119,6 +130,7 @@ process PHANTOM_PEAKS {
     // TODO: set tmpdir as lscratch if available https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L504
     tag { meta.id }
     label 'qc'
+    label 'ppqt'
 
     input:
         tuple val(meta), path(bam), path(bai)
@@ -150,6 +162,7 @@ process PPQT_PROCESS {
     """
     tag { meta.id }
     label 'qc'
+    label 'ppqt'
 
     input:
         tuple val(meta), path(fraglen)
@@ -182,6 +195,7 @@ process PPQT_PROCESS {
 process DEDUPLICATE {
     tag { meta.id }
     label 'qc'
+    label 'process_medium'
 
     input:
         tuple val(meta), path(bam), path(chrom_sizes)
@@ -209,7 +223,7 @@ process DEDUPLICATE {
     """
 }
 
-process NGSQC_GEN { // TODO segfault
+process NGSQC_GEN { // TODO segfault - https://github.com/CCBR/CHAMPAGNE/issues/13
     tag { meta.id }
     label 'qc'
 
@@ -229,6 +243,13 @@ process NGSQC_GEN { // TODO segfault
     touch NGSQC_report.txt
     """
 }
+
+/*
+process PLOT_NGSQC {
+    // TODO refactor bin/ngsqc_plot.py for simplicity
+
+}
+*/
 
 process QC_STATS {
     tag { meta.id }
@@ -325,15 +346,3 @@ process MULTIQC {
     touch multiqc_report.html
     """
 }
-
-/*
-process PLOT_NGSQC {
-    // TODO refactor bin/ngsqc_plot.py for simplicity
-
-}
-
- // TODO -- come back to this later. hard to deal with on biowulf and long-running. have to copy entire db to lscratch on biowulf.
-process KRAKEN_SE {
-    tag { meta.id }
-}
-*/
