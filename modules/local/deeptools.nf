@@ -83,7 +83,7 @@ process PLOT_CORRELATION {
 
     stub:
     """
-    touch ${array.baseName}.spearman_${plottype}.pdf
+    touch ${array.baseName}.spearman_${plottype}.pdf ${array.baseName}.spearman_${plottype}.tab
     """
 }
 
@@ -108,7 +108,7 @@ process PLOT_PCA {
 
     stub:
     """
-    touch ${array.baseName}.pca.pdf
+    touch ${array.baseName}.pca.pdf ${array.baseName}.plotPCA.tab
     """
 }
 
@@ -274,7 +274,7 @@ process PLOT_PROFILE {
 
   stub:
   """
-  touch ${mat.baseName}.lineplot.pdf
+  touch ${mat.baseName}.lineplot.pdf ${mat.baseName}.plotProfile.tab
   """
 }
 
