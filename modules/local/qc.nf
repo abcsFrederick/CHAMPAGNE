@@ -139,7 +139,7 @@ process PHANTOM_PEAKS {
 
     stub:
     """
-    touch ${meta.id}.ppqt.pdf ${meta.id}.spp.out
+    touch ${meta.id}.ppqt.pdf ${meta.id}.spp.out "${meta.id}.fraglen.txt"
     """
 }
 
@@ -154,12 +154,13 @@ process PPQT_PROCESS {
     input:
         tuple val(meta), path(fraglen)
     output:
-        tuple val(meta), stdout, emit: fraglen
+        tuple val(meta), env(fraglen), emit: fraglen
 
     script:
     """
     #!/usr/bin/env python
 
+    import os
     import warnings
     with open("${fraglen}", 'r') as infile:
         fragment_length = int(infile.read().strip())
@@ -168,6 +169,13 @@ process PPQT_PROCESS {
         warnings.warn(f"The estimated fragment length was {fragment_length}. Using default of {min_frag_len} instead.")
         fragment_length = min_frag_len
     print(fragment_length)
+    os.environ['fraglen'] = str(fragment_length)
+    """
+
+    stub:
+    """
+    fraglen=0.5
+    echo \$fraglen
     """
 }
 
@@ -257,6 +265,11 @@ process QC_STATS {
     echo "${meta.id}\tFragmentLength\t${fraglen}" >> ${outfile}
     """
 
+    stub:
+    """
+    touch ${meta.id}.qc_stats.txt
+    """
+
 }
 
 process QC_TABLE {
@@ -270,6 +283,11 @@ process QC_TABLE {
     script:
     """
     cat ${qc_stats.join(' ')} | createtable.py > qc_table.txt
+    """
+
+    stub:
+    """
+    touch qc_table.txt
     """
 
 }
