@@ -32,4 +32,4 @@ jobs:
           pip install .[dev,test]
       - name: Test stub run
         run: |
-          champagne run -profile ci_stub,docker -stub
+          champagne run -profile ci_stub -stub
