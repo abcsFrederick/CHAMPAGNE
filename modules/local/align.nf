@@ -2,6 +2,7 @@
 process ALIGN_BLACKLIST {
     tag { meta.id }
     label 'align'
+    label 'process_higher'
 
     input:
         tuple val(meta), path(fastq)
@@ -32,6 +33,7 @@ process ALIGN_BLACKLIST {
 process ALIGN_GENOME {
     tag { meta.id }
     label 'align'
+    label 'process_higher'
 
     input:
         tuple val(meta), path(fastq)
@@ -72,6 +74,7 @@ process ALIGN_GENOME {
 process INDEX_BAM {
     tag { meta.id }
     label 'align'
+    label 'process_higher'
 
     input:
         tuple val(meta), path(bam)

@@ -29,13 +29,13 @@ pip3 install .
 Run the test dataset using the test profile:
 
 ```sh
-champagne run -profile test,prod,singularity
+champagne run -profile test,singularity
 ```
 
 or explicitly specify the output directory and input:
 
 ```sh
-champagne run -profile prod,singularity --outdir results/test --input assets/samplesheet_test.csv
+champagne run -profile singularity --outdir results/test --input assets/samplesheet_test.csv
 ```
 
 Launch a stub run to view the steps that will run without performing the full analysis.
@@ -50,13 +50,13 @@ You can run the nextflow pipeline directly by specifying this GitHub repo.
 You will need nextflow and either singularity or docker installed.
 
 ```sh
-nextflow run CCBR/CHAMPAGNE -profile test,prod,singularity
+nextflow run CCBR/CHAMPAGNE -profile test,singularity
 ```
 
 You can specify a specific version, tag, or branch with `-r`:
 
 ```sh
-nextflow run CCBR/CHAMPAGNE -r v1.0.0 -profile test,prod,singularity
+nextflow run CCBR/CHAMPAGNE -r v1.0.0 -profile test,singularity
 ```
 
 ## Help & Contributing
