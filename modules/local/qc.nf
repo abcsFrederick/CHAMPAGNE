@@ -187,7 +187,7 @@ process PPQT_PROCESS {
 
     stub:
     """
-    fraglen=0.5
+    fraglen=${params.min_fragment_length}
     echo \$fraglen
     """
 }

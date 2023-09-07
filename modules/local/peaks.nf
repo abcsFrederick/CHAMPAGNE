@@ -36,7 +36,7 @@ process SICER {
       -rt 100 \\
       -w 300 \\
       -f ${fraglen} \\
-      -egf ${genome_frac} \\ // TODO
+      -egf ${genome_frac} \\
       -g 600 \\
       -fdr 1E-2 \\
       -cpu ${task.cpus}
