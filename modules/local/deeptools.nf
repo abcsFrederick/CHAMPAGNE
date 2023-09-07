@@ -117,7 +117,7 @@ process PLOT_PCA {
 process PLOT_FINGERPRINT {
   label 'qc'
   label 'deeptools'
-    label 'process_higher'
+  label 'process_higher'
 
   input:
     tuple val(meta), path(bams), path(bais)
