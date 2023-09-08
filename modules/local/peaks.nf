@@ -22,6 +22,7 @@ process CALC_GENOME_FRAC {
 }
 
 process SICER {
+    tag { meta.id }
     label 'peaks'
 
     input:
@@ -50,7 +51,7 @@ process SICER {
     """
 }
 /*
-process SICER_NO_CTRL { // TODO just use one process with optional ctrl input
+process SICER_NO_CTRL { // TODO just use one process for each peak caller with optional ctrl input
     script:
     """
     sicer \\
@@ -66,3 +67,94 @@ process SICER_NO_CTRL { // TODO just use one process with optional ctrl input
     """
 }
 */
+
+process MACS_BROAD {
+    tag { meta.id }
+    label 'peaks'
+    label 'process_high'
+
+    input:
+        tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
+
+    //output:
+
+    script:
+    """
+    macs2 callpeak \\
+      -t ${chip} \\
+      -c ${input} \\
+      -g ${params.align.effective_genome_size} \\
+      -n ${meta.id} \\
+      --extsize ${fraglen} \\
+      --nomodel \\
+      -q 0.01 \\
+      --keep-dup='all' \\
+      --broad \\
+      --broad-cutoff 0.01
+    """
+
+    stub:
+    """
+    # TODO
+    """
+
+}
+
+process MACS_NARROW {
+    tag { meta.id }
+    label 'peaks'
+
+    input:
+        tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
+
+    //output:
+
+    script:
+    """
+    macs2 callpeak \\
+      -t ${chip} \\
+      -c ${input} \\
+      -g ${params.align.effective_genome_size} \\
+      -n ${meta.id} \\
+      --extsize ${fraglen} \\
+      --nomodel \\
+      -q 0.01 \\
+      --keep-dup='all'
+    """
+
+    stub:
+    """
+    # TODO
+    """
+}
+
+process GEM {
+    tag { meta.id }
+    label 'peaks'
+
+    input:
+        tuple val(meta), path(chip), path(input), path(read_dists)
+
+    //output:
+
+    script:
+    // $GEMJAR is defined in the docker container
+    """
+    java -Xmx30g -jar \$GEMJAR \\
+      --t ${task.cpus} \\
+      --d ${read_dists} \\
+      --g ${params.genome} \\
+      --genome ${params.genome_fastas} \\
+      --expt ${chip} \\
+      --ctrl ${input} \\
+      --k_min 6 \\
+      --k_max 13 \\
+      --outNP \\
+      --nrf
+    """
+
+    stub:
+    """
+    # TODO
+    """
+}

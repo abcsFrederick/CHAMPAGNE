@@ -55,13 +55,13 @@ include { NORMALIZE_INPUT          } from "./modules/local/deeptools.nf"
 // TODO reorganize peak calling into separate subworkflow
 include { CALC_GENOME_FRAC } from "./modules/local/peaks.nf"
 include { SICER            } from "./modules/local/peaks.nf"
+include { MACS_BROAD       } from "./modules/local/peaks.nf"
+include { MACS_NARROW      } from "./modules/local/peaks.nf"
+include { GEM              } from "./modules/local/peaks.nf"
 
 // MAIN WORKFLOW
 workflow {
-  INPUT_CHECK (
-      file(params.input),
-      params.seq_center
-  )
+  INPUT_CHECK(file(params.input), params.seq_center)
   raw_fastqs = INPUT_CHECK.out.reads
   raw_fastqs.combine(Channel.value("raw")) | FASTQC_RAW
   raw_fastqs | TRIM_SE
@@ -169,18 +169,24 @@ workflow {
 
   // peak calling
 
-  genome_frac = CALC_GENOME_FRAC(chrom_sizes)
-  // create channel with [ meta, chip_tag, input_tag, fraglen, genome_frac]
   DEDUPLICATE.out.tag_align
     .combine(DEDUPLICATE.out.tag_align)
     .map {
         meta1, tag1, meta2, tag2 ->
             meta1.control == meta2.id ? [ meta1, tag1, tag2 ]: null
     }
+    .set { ch_ip_ctrl_tagalign }
+  // create channel with [ meta, chip_tag, input_tag, fraglen, genome_frac]
+  genome_frac = CALC_GENOME_FRAC(chrom_sizes)
+  ch_ip_ctrl_tagalign
     .join(frag_lengths)
     .combine(genome_frac)
-    .set { ch_ip_ctrl_tagalign }
+    .set { ch_tagalign_macs_sicer }
 
-  ch_ip_ctrl_tagalign | SICER
+  //ch_tagalign_macs_sicer | SICER
+  ch_tagalign_macs_sicer | MACS_BROAD
+  ch_tagalign_macs_sicer| MACS_NARROW
 
+  ch_ip_ctrl_tagalign
+    .join(Channel.fromPath(params.gem_read_dists)) | GEM
 }
