@@ -185,8 +185,9 @@ workflow {
 
   //ch_tagalign_macs_sicer | SICER
   ch_tagalign_macs_sicer | MACS_BROAD
-  ch_tagalign_macs_sicer| MACS_NARROW
+  ch_tagalign_macs_sicer | MACS_NARROW
 
   ch_ip_ctrl_tagalign
-    .join(Channel.fromPath(params.gem_read_dists)) | GEM
+    .combine(Channel.fromPath(params.gem_read_dists))
+    .combine(chrom_sizes) | GEM
 }

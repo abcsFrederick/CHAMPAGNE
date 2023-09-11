@@ -76,7 +76,10 @@ process MACS_BROAD {
     input:
         tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
 
-    //output:
+    output:
+        path("${meta.id}_peaks.xls")
+        path("${meta.id}_peaks.broadPeak")
+        path("${meta.id}_peaks.gappedPeak")
 
     script:
     """
@@ -107,7 +110,10 @@ process MACS_NARROW {
     input:
         tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
 
-    //output:
+    output:
+        path("${meta.id}_peaks.xls")
+        path("${meta.id}_peaks.narrowPeak")
+        path("${meta.id}_summits.bed")
 
     script:
     """
@@ -133,7 +139,7 @@ process GEM {
     label 'peaks'
 
     input:
-        tuple val(meta), path(chip), path(input), path(read_dists)
+        tuple val(meta), path(chip), path(input), path(read_dists), path(chrom_sizes)
 
     //output:
 
@@ -143,8 +149,8 @@ process GEM {
     java -Xmx30g -jar \$GEMJAR \\
       --t ${task.cpus} \\
       --d ${read_dists} \\
-      --g ${params.genome} \\
-      --genome ${params.genome_fastas} \\
+      --g ${chrom_sizes} \\
+      --genome ${params.chromosomes_dir} \\
       --expt ${chip} \\
       --ctrl ${input} \\
       --k_min 6 \\
