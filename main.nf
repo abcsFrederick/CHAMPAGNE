@@ -95,12 +95,11 @@ workflow {
 
   chrom_sizes = Channel.fromPath(params.align.chrom_sizes)
   ALIGN_GENOME.out.bam.combine(chrom_sizes) | DEDUPLICATE
-  DEDUPLICATE.out.bam | INDEX_BAM
 
   // NGSQC is seg faulting, see https://github.com/CCBR/CHAMPAGNE/issues/13
   //DEDUPLICATE.out.tag_align.combine(chrom_sizes) | NGSQC_GEN
 
-  INDEX_BAM.out.bam | PHANTOM_PEAKS
+  DEDUPLICATE.out.bam | PHANTOM_PEAKS
   PPQT_PROCESS(PHANTOM_PEAKS.out.fraglen)
   frag_lengths = PPQT_PROCESS.out.fraglen
   QC_STATS(
@@ -114,13 +113,13 @@ workflow {
   QC_TABLE(QC_STATS.out.collect())
 
   // Deeptools
-  BAM_COVERAGE(INDEX_BAM.out.bam, frag_lengths)
+  BAM_COVERAGE(DEDUPLICATE.out.bam, frag_lengths)
   BIGWIG_SUM(BAM_COVERAGE.out.bigwig.collect())
   BIGWIG_SUM.out.array.combine(Channel.from('heatmap', 'scatterplot')) | PLOT_CORRELATION
   BIGWIG_SUM.out.array | PLOT_PCA
 
   // Create channel: [ meta, [ ip_bam, control_bam ] [ ip_bai, control_bai ] ]
-  ch_genome_bam_bai = INDEX_BAM.out.bam
+  ch_genome_bam_bai = DEDUPLICATE.out.bam
   ch_genome_bam_bai
       .combine(ch_genome_bam_bai)
       .map {
@@ -169,25 +168,25 @@ workflow {
 
   // peak calling
 
-  DEDUPLICATE.out.tag_align
-    .combine(DEDUPLICATE.out.tag_align)
+  DEDUPLICATE.out.bam
+    .combine(DEDUPLICATE.out.bam)
     .map {
-        meta1, tag1, meta2, tag2 ->
-            meta1.control == meta2.id ? [ meta1, tag1, tag2 ]: null
+        meta1, bam1, bai1, meta2, bam2, bai2 ->
+            meta1.control == meta2.id ? [ meta1, bam1, bam2, [bai1, bai2] ]: null
     }
-    .set { ch_ip_ctrl_tagalign }
+    .set { ch_ip_ctrl_bam }
   // create channel with [ meta, chip_tag, input_tag, fraglen, genome_frac]
   genome_frac = CALC_GENOME_FRAC(chrom_sizes)
-  ch_ip_ctrl_tagalign
+  ch_ip_ctrl_bam
     .join(frag_lengths)
     .combine(genome_frac)
-    .set { ch_tagalign_macs_sicer }
+    .set { ch_bam_macs }
 
-  //ch_tagalign_macs_sicer | SICER
-  ch_tagalign_macs_sicer | MACS_BROAD
-  ch_tagalign_macs_sicer | MACS_NARROW
+  ch_bam_macs | SICER
+  ch_bam_macs | MACS_BROAD
+  ch_bam_macs | MACS_NARROW
 
-  ch_ip_ctrl_tagalign
+  ch_ip_ctrl_bam
     .combine(Channel.fromPath(params.gem_read_dists))
     .combine(chrom_sizes) | GEM
 }

@@ -27,7 +27,7 @@ process SICER {
     label 'process_high'
 
     input:
-        tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
+        tuple val(meta), path(chip), path(input), path(bais), val(fraglen), val(genome_frac)
 
     //output:
 
@@ -74,7 +74,7 @@ process MACS_BROAD {
     label 'peaks'
 
     input:
-        tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
+        tuple val(meta), path(chip), path(input), path(bais), val(fraglen), val(genome_frac)
 
     output:
         path("${meta.id}_peaks.xls")
@@ -108,7 +108,7 @@ process MACS_NARROW {
     label 'peaks'
 
     input:
-        tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
+        tuple val(meta), path(chip), path(input), path(bais), val(fraglen), val(genome_frac)
 
     output:
         path("${meta.id}_peaks.xls")
@@ -140,7 +140,7 @@ process GEM {
     label 'process_high'
 
     input:
-        tuple val(meta), path(chip), path(input), path(read_dists), path(chrom_sizes)
+        tuple val(meta), path(chip), path(input), path(bais), path(read_dists), path(chrom_sizes)
 
     //output:
 
@@ -157,7 +157,8 @@ process GEM {
       --k_min 6 \\
       --k_max 13 \\
       --outNP \\
-      --nrf
+      --nrf \\
+      -f SAM
     """
 
     stub:

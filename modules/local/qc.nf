@@ -188,7 +188,7 @@ process DEDUPLICATE {
 
     output:
         tuple val(meta), path("${meta.id}.TagAlign"), emit: tag_align
-        tuple val(meta), path("${bam.baseName}.dedup.bam"), emit: bam
+        tuple val(meta), path("${bam.baseName}.dedup.bam"), path("${bam.baseName}.dedup.bam.bai"), emit: bam
         tuple path("${bam.baseName}.dedup.bam.flagstat"), path("${bam.baseName}.dedup.bam.idxstat"), emit: flagstat
 
     script:
