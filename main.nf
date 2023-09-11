@@ -168,6 +168,18 @@ workflow {
 
   // peak calling
 
+  genome_frac = CALC_GENOME_FRAC(chrom_sizes)
+  // create channel with [ meta, chip_tag, input_tag, fraglen, genome_frac]
+  DEDUPLICATE.out.tag_align
+    .combine(DEDUPLICATE.out.tag_align)
+    .map {
+        meta1, tag1, meta2, tag2 ->
+            meta1.control == meta2.id ? [ meta1, tag1, tag2 ]: null
+    }
+    .join(frag_lengths)
+    .combine(genome_frac)
+    .set { ch_sicer }
+
   DEDUPLICATE.out.bam
     .combine(DEDUPLICATE.out.bam)
     .map {
@@ -175,18 +187,18 @@ workflow {
             meta1.control == meta2.id ? [ meta1, bam1, bam2, [bai1, bai2] ]: null
     }
     .set { ch_ip_ctrl_bam }
-  // create channel with [ meta, chip_tag, input_tag, fraglen, genome_frac]
-  genome_frac = CALC_GENOME_FRAC(chrom_sizes)
   ch_ip_ctrl_bam
     .join(frag_lengths)
     .combine(genome_frac)
-    .set { ch_bam_macs }
-
-  ch_bam_macs | SICER
-  ch_bam_macs | MACS_BROAD
-  ch_bam_macs | MACS_NARROW
+    .set { ch_macs }
 
   ch_ip_ctrl_bam
     .combine(Channel.fromPath(params.gem_read_dists))
-    .combine(chrom_sizes) | GEM
+    .combine(chrom_sizes)
+    .set {ch_gem}
+
+  ch_sicer | SICER
+  ch_macs  | MACS_BROAD
+  ch_macs  | MACS_NARROW
+  ch_gem   | GEM
 }

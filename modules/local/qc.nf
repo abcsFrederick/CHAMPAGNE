@@ -187,7 +187,7 @@ process DEDUPLICATE {
         tuple val(meta), path(bam), path(chrom_sizes)
 
     output:
-        tuple val(meta), path("${meta.id}.TagAlign"), emit: tag_align
+        tuple val(meta), path("${meta.id}.TagAlign.bed"), emit: tag_align
         tuple val(meta), path("${bam.baseName}.dedup.bam"), path("${bam.baseName}.dedup.bam.bai"), emit: bam
         tuple path("${bam.baseName}.dedup.bam.flagstat"), path("${bam.baseName}.dedup.bam.idxstat"), emit: flagstat
 
@@ -196,8 +196,8 @@ process DEDUPLICATE {
     macs2 filterdup -i ${bam} -g ${params.align.effective_genome_size} --keep-dup="auto" -o TmpTagAlign1
     awk -F"\\t" -v OFS="\\t" '{{if (\$2>0 && \$3>0) {{print}}}}' TmpTagAlign1 > TmpTagAlign2
     awk -F"\\t" -v OFS="\\t" '{{print \$1,1,\$2}}' ${chrom_sizes} | sort -k1,1 -k2,2n > GenomeFile.bed
-    bedtools intersect -wa -f 1.0 -a TmpTagAlign2 -b GenomeFile.bed > ${meta.id}.TagAlign
-    bedtools bedtobam -i ${meta.id}.TagAlign -g ${chrom_sizes} | samtools sort -@ ${task.cpus} -o ${bam.baseName}.dedup.bam
+    bedtools intersect -wa -f 1.0 -a TmpTagAlign2 -b GenomeFile.bed > ${meta.id}.TagAlign.bed
+    bedtools bedtobam -i ${meta.id}.TagAlign.bed -g ${chrom_sizes} | samtools sort -@ ${task.cpus} -o ${bam.baseName}.dedup.bam
     samtools index ${bam.baseName}.dedup.bam
     samtools flagstat ${bam.baseName}.dedup.bam > ${bam.baseName}.dedup.bam.flagstat
     samtools idxstats ${bam.baseName}.dedup.bam > ${bam.baseName}.dedup.bam.idxstat

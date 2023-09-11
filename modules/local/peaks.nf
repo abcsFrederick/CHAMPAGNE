@@ -27,9 +27,10 @@ process SICER {
     label 'process_high'
 
     input:
-        tuple val(meta), path(chip), path(input), path(bais), val(fraglen), val(genome_frac)
+        tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
 
-    //output:
+    output:
+        tuple path("*.scoreisland"), path("*normalized.wig"), path("*islands-summary"), path("*island.bed")
 
     script:
     """
@@ -83,6 +84,7 @@ process MACS_BROAD {
 
     script:
     """
+    ls $chip > debug.txt
     macs2 callpeak \\
       -t ${chip} \\
       -c ${input} \\
@@ -142,7 +144,8 @@ process GEM {
     input:
         tuple val(meta), path(chip), path(input), path(bais), path(read_dists), path(chrom_sizes)
 
-    //output:
+    output:
+        path("*.GEM_events.narrowPeak")
 
     script:
     // $GEMJAR is defined in the docker container
@@ -158,7 +161,7 @@ process GEM {
       --k_max 13 \\
       --outNP \\
       --nrf \\
-      -f SAM
+      --f SAM
     """
 
     stub:
