@@ -24,6 +24,7 @@ process CALC_GENOME_FRAC {
 process SICER {
     tag { meta.id }
     label 'peaks'
+    label 'process_high'
 
     input:
         tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
@@ -71,7 +72,6 @@ process SICER_NO_CTRL { // TODO just use one process for each peak caller with o
 process MACS_BROAD {
     tag { meta.id }
     label 'peaks'
-    label 'process_high'
 
     input:
         tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
@@ -137,6 +137,7 @@ process MACS_NARROW {
 process GEM {
     tag { meta.id }
     label 'peaks'
+    label 'process_high'
 
     input:
         tuple val(meta), path(chip), path(input), path(read_dists), path(chrom_sizes)
