@@ -54,10 +54,10 @@ custom_data:
       Usable fragments for TF/narrow histones: concerning <10M, acceptable 10-20M, ideal >20M. <br>
       Usable fragments for broad histones: concerning <20M, acceptable 20-40M, ideal >40M. <br>
       <ul>
-        <li> NRF: Number of distinct mapping reads after removing duplicates/total number of reads.</li>
-        <li> PBC1: Number of genomic locations where exactly one read maps uniquely/number of distinct genomic locations to which one read maps uniquely.</li>
-        <li> PBC2: Number of genomic locations where only one read maps uniquely/number of genomic locations where two reads map uniquely</li>
-        <li> Concerning(severe bottlenecking): NRF < 0.5, Acceptable: 0.5 < NRF < 0.8, Ideal (no bottlenecking): NRF > 0.9</li>
+        <li> NRF: Number of distinct mapping reads after removing duplicates/total number of reads. Preferred value: NRF > 0.9, Acceptable: NRF > 0.5, Concerning (severe bottle-necking): NRF < 0.5.</li>
+        <li> PBC1: Number of genomic locations where exactly one read maps uniquely/number of distinct genomic locations to which one read maps uniquely. Preferred value: PBC1 > 0.9. </li>
+        <li> PBC2: Number of genomic locations where only one read maps uniquely/number of genomic locations where two reads map uniquely. Preferred value: PBC2 > 10.</li>
+
       </ul>
       <br>
       <h3><a href='https://github.com/kundajelab/phantompeakqualtools' target='_blank'>phantompeakqualtools</a> standards</h3>
