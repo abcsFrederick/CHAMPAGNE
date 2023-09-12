@@ -147,7 +147,7 @@ process GEM {
     label 'process_high'
 
     input:
-        tuple val(meta), path(chip), path(input), path(bais), path(read_dists), path(chrom_sizes)
+        tuple val(meta), path(chip), path(input), path(read_dists), path(chrom_sizes)
 
     output:
         path("*.GEM_events.narrowPeak")
@@ -165,8 +165,7 @@ process GEM {
       --k_min 6 \\
       --k_max 13 \\
       --outNP \\
-      --nrf \\
-      --f SAM
+      --nrf
     """
 
     stub:

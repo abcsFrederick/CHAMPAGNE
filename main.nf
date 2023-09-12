@@ -103,6 +103,7 @@ workflow {
   PPQT_PROCESS(PHANTOM_PEAKS.out.fraglen)
   frag_lengths = PPQT_PROCESS.out.fraglen
 
+  ///* optional qc
   QC_STATS(
     raw_fastqs,
     ALIGN_GENOME.out.flagstat,
@@ -166,7 +167,7 @@ workflow {
   )
 
   NORMALIZE_INPUT(ch_ip_ctrl_bigwig)
-
+  //*/
   // peak calling
 
   genome_frac = CALC_GENOME_FRAC(chrom_sizes)
@@ -181,21 +182,18 @@ workflow {
     .combine(genome_frac)
     .set { ch_tagalign }
 
-  DEDUPLICATE.out.bam
-    .combine(DEDUPLICATE.out.bam)
+  DEDUPLICATE.out.tag_align
+    .combine(DEDUPLICATE.out.tag_align)
     .map {
-        meta1, bam1, bai1, meta2, bam2, bai2 ->
-            meta1.control == meta2.id ? [ meta1, bam1, bam2, [bai1, bai2] ]: null
+        meta1, tag1, meta2, tag2 ->
+            meta1.control == meta2.id ? [ meta1, tag1, tag2 ]: null
     }
-    .set { ch_ip_ctrl_bam }
-
-  ch_ip_ctrl_bam
     .combine(Channel.fromPath(params.gem_read_dists))
     .combine(chrom_sizes)
-    .set {ch_gem}
+    .set { ch_gem }
 
-  //ch_tagalign | SICER
+  ch_tagalign  | SICER
   ch_tagalign  | MACS_BROAD
   ch_tagalign  | MACS_NARROW
-  //ch_gem   | GEM
+  ch_gem       | GEM
 }
