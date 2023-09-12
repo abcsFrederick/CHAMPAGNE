@@ -205,7 +205,10 @@ process DEDUPLICATE {
 
     stub:
     """
-    touch ${meta.id}.TagAlign ${bam.baseName}.dedup.bam ${bam.baseName}.dedup.bam.flagstat ${bam.baseName}.dedup.bam.idxstat
+    touch ${meta.id}.TagAlign.bed
+    for ext in dedup.bam dedup.bam.bai dedup.bam.flagstat dedup.bam.idxstat; do
+        touch ${bam.baseName}.\${ext}
+    done
     """
 }
 

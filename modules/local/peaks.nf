@@ -49,7 +49,9 @@ process SICER {
 
     stub:
     """
-    # TODO
+    for ext in scoreisland normalized.wig islands-summary island.bed; do
+        touch ${meta.id}.\${ext}
+    done
     """
 }
 /*
@@ -100,7 +102,9 @@ process MACS_BROAD {
 
     stub:
     """
-    # TODO
+    for ext in xls broadPeak gappedPeak; do
+        touch ${meta.id}_peaks.\${ext}
+    done
     """
 
 }
@@ -132,7 +136,9 @@ process MACS_NARROW {
 
     stub:
     """
-    # TODO
+    for ext in peaks.xls peaks.narrowPeak summits.bed; do
+        touch ${meta.id}_\${ext}
+    done
     """
 }
 
@@ -166,6 +172,6 @@ process GEM {
 
     stub:
     """
-    # TODO
+    touch ${meta.id}.GEM_events.narrowPeak
     """
 }
