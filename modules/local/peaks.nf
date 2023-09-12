@@ -77,7 +77,7 @@ process MACS_BROAD {
     label 'peaks'
 
     input:
-        tuple val(meta), path(chip), path(input), path(bais), val(fraglen), val(genome_frac)
+        tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
 
     output:
         path("${meta.id}_peaks.xls")
@@ -86,7 +86,6 @@ process MACS_BROAD {
 
     script:
     """
-    ls $chip > debug.txt
     macs2 callpeak \\
       -t ${chip} \\
       -c ${input} \\
@@ -114,7 +113,7 @@ process MACS_NARROW {
     label 'peaks'
 
     input:
-        tuple val(meta), path(chip), path(input), path(bais), val(fraglen), val(genome_frac)
+        tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
 
     output:
         path("${meta.id}_peaks.xls")

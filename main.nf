@@ -102,6 +102,7 @@ workflow {
   DEDUPLICATE.out.bam | PHANTOM_PEAKS
   PPQT_PROCESS(PHANTOM_PEAKS.out.fraglen)
   frag_lengths = PPQT_PROCESS.out.fraglen
+
   QC_STATS(
     raw_fastqs,
     ALIGN_GENOME.out.flagstat,
@@ -178,7 +179,7 @@ workflow {
     }
     .join(frag_lengths)
     .combine(genome_frac)
-    .set { ch_sicer }
+    .set { ch_tagalign }
 
   DEDUPLICATE.out.bam
     .combine(DEDUPLICATE.out.bam)
@@ -187,18 +188,14 @@ workflow {
             meta1.control == meta2.id ? [ meta1, bam1, bam2, [bai1, bai2] ]: null
     }
     .set { ch_ip_ctrl_bam }
-  ch_ip_ctrl_bam
-    .join(frag_lengths)
-    .combine(genome_frac)
-    .set { ch_macs }
 
   ch_ip_ctrl_bam
     .combine(Channel.fromPath(params.gem_read_dists))
     .combine(chrom_sizes)
     .set {ch_gem}
 
-  ch_sicer | SICER
-  ch_macs  | MACS_BROAD
-  ch_macs  | MACS_NARROW
-  ch_gem   | GEM
+  //ch_tagalign | SICER
+  ch_tagalign  | MACS_BROAD
+  ch_tagalign  | MACS_NARROW
+  //ch_gem   | GEM
 }
