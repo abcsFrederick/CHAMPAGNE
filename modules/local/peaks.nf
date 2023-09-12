@@ -150,7 +150,7 @@ process GEM {
         tuple val(meta), path(chip), path(input), path(read_dists), path(chrom_sizes)
 
     output:
-        path("*.GEM_events.narrowPeak")
+        path("${meta.id}/*.GEM_events.txt")
 
     script:
     // $GEMJAR is defined in the docker container
@@ -162,6 +162,7 @@ process GEM {
       --genome ${params.chromosomes_dir} \\
       --expt ${chip} \\
       --ctrl ${input} \\
+      --out ${meta.id} \\
       --k_min 6 \\
       --k_max 13 \\
       --outNP \\
@@ -170,6 +171,6 @@ process GEM {
 
     stub:
     """
-    touch ${meta.id}.GEM_events.narrowPeak
+    touch ${meta.id}.GEM_events.txt
     """
 }
