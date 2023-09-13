@@ -25,7 +25,7 @@ replay_pid*
 
 # nextflow
 .nextflow*
-/work/
+/work*/
 /data/
 /results/
 /params.yaml

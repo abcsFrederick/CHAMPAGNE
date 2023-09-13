@@ -2,6 +2,7 @@
 
 ### New features
 
+- Implemented peak calling with sicer2, macs2, and gem. (#52)
 - New GitHub Actions workflow to launch a stub run from the champagne CLI.
 
 ### Bug fixes

@@ -151,12 +151,11 @@ process PHANTOM_PEAKS {
 
     stub:
     """
-    touch ${meta.id}.ppqt.pdf ${meta.id}.spp.out
+    touch ${meta.id}.ppqt.pdf ${meta.id}.spp.out "${meta.id}.fraglen.txt"
     """
 }
 
-process PPQT_PROCESS { // refactor of https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L513-L541
-
+process PPQT_PROCESS {
     tag { meta.id }
     label 'qc'
     label 'ppqt'
@@ -164,21 +163,18 @@ process PPQT_PROCESS { // refactor of https://github.com/CCBR/Pipeliner/blob/86c
     input:
         tuple val(meta), path(fraglen)
     output:
-        path("${fraglen.baseName}.process.txt"), emit: fraglen
+        tuple val(meta), env(fraglen), emit: fraglen
 
     script:
     """
-    #!/usr/bin/env python
+    fraglen=\$(process_ppqt.py ${fraglen} ${params.min_fragment_length})
+    echo \$fraglen
+    """
 
-    import warnings
-    with open("${fraglen}", 'r') as infile:
-        fragment_length = int(infile.read().strip())
-    min_frag_len = ${params.min_fragment_length}
-    if fragment_length < min_frag_len:
-        warnings.warn(f"The estimated fragment length was {fragment_length}. Using default of {min_frag_len} instead.")
-        fragment_length = min_frag_len
-    with open("${fraglen.baseName}.process.txt", 'w') as outfile:
-        outfile.write(str(fragment_length))
+    stub:
+    """
+    fraglen=${params.min_fragment_length}
+    echo \$fraglen
     """
 }
 
@@ -192,15 +188,15 @@ process DEDUPLICATE {
 
     output:
         tuple val(meta), path("${meta.id}.TagAlign.bed"), emit: tag_align
-        tuple val(meta), path("${bam.baseName}.dedup.bam"), emit: bam
+        tuple val(meta), path("${bam.baseName}.dedup.bam"), path("${bam.baseName}.dedup.bam.bai"), emit: bam
         tuple path("${bam.baseName}.dedup.bam.flagstat"), path("${bam.baseName}.dedup.bam.idxstat"), emit: flagstat
 
     script:
     """
-    macs2 filterdup -i ${bam} -g ${params.align.effective_genome_size} --keep-dup="auto" -o TmpTagAlign1.bed
-    awk -F"\\t" -v OFS="\\t" '{{if (\$2>0 && \$3>0) {{print}}}}' TmpTagAlign1.bed > TmpTagAlign2.bed
+    macs2 filterdup -i ${bam} -g ${params.align.effective_genome_size} --keep-dup="auto" -o TmpTagAlign1
+    awk -F"\\t" -v OFS="\\t" '{{if (\$2>0 && \$3>0) {{print}}}}' TmpTagAlign1 > TmpTagAlign2
     awk -F"\\t" -v OFS="\\t" '{{print \$1,1,\$2}}' ${chrom_sizes} | sort -k1,1 -k2,2n > GenomeFile.bed
-    bedtools intersect -wa -f 1.0 -a TmpTagAlign2.bed -b GenomeFile.bed > ${meta.id}.TagAlign.bed
+    bedtools intersect -wa -f 1.0 -a TmpTagAlign2 -b GenomeFile.bed | awk -F"\\t" -v OFS="\\t" '{\$5="0"; print}' > ${meta.id}.TagAlign.bed
     bedtools bedtobam -i ${meta.id}.TagAlign.bed -g ${chrom_sizes} | samtools sort -@ ${task.cpus} -o ${bam.baseName}.dedup.bam
     samtools index ${bam.baseName}.dedup.bam
     samtools flagstat ${bam.baseName}.dedup.bam > ${bam.baseName}.dedup.bam.flagstat
@@ -209,11 +205,14 @@ process DEDUPLICATE {
 
     stub:
     """
-    touch ${meta.id}.TagAlign.bed ${bam.baseName}.dedup.bam ${bam.baseName}.dedup.bam.flagstat ${bam.baseName}.dedup.bam.idxstat
+    touch ${meta.id}.TagAlign.bed
+    for ext in dedup.bam dedup.bam.bai dedup.bam.flagstat dedup.bam.idxstat; do
+        touch ${bam.baseName}.\${ext}
+    done
     """
 }
 
-process NGSQC_GEN { // TODO segfault
+process NGSQC_GEN { // TODO segfault - https://github.com/CCBR/CHAMPAGNE/issues/13
     tag { meta.id }
     label 'qc'
 
@@ -234,6 +233,13 @@ process NGSQC_GEN { // TODO segfault
     """
 }
 
+/*
+process PLOT_NGSQC {
+    // TODO refactor bin/ngsqc_plot.py for simplicity
+
+}
+*/
+
 process QC_STATS {
     tag { meta.id }
     label 'qc'
@@ -244,7 +250,7 @@ process QC_STATS {
         tuple path(dedup_flagstat), path(idxstat)
         path(preseq_nrf)
         path(ppqt_spp)
-        path(ppqt_fraglen)
+        tuple val(meta), val(fraglen)
 
 
     output:
@@ -266,8 +272,12 @@ process QC_STATS {
     # NSC, RSC, Qtag
     awk '{{print \$(NF-2),\$(NF-1),\$NF}}' ${ppqt_spp} | filterMetrics.py ${meta.id} ppqt >> ${outfile}
     # Fragment Length
-    fragLen=\$(cat ${ppqt_fraglen})
-    echo "${meta.id}\tFragmentLength\t\$fragLen" >> ${outfile}
+    echo "${meta.id}\tFragmentLength\t${fraglen}" >> ${outfile}
+    """
+
+    stub:
+    """
+    touch ${meta.id}.qc_stats.txt
     """
 
 }
@@ -283,6 +293,11 @@ process QC_TABLE {
     script:
     """
     cat ${qc_stats.join(' ')} | createtable.py > qc_table.txt
+    """
+
+    stub:
+    """
+    touch qc_table.txt
     """
 
 }
@@ -320,15 +335,3 @@ process MULTIQC {
     touch multiqc_report.html
     """
 }
-
-/*
-process PLOT_NGSQC {
-    // TODO refactor bin/ngsqc_plot.py for simplicity
-
-}
-
- // TODO -- come back to this later. hard to deal with on biowulf and long-running. have to copy entire db to lscratch on biowulf.
-process KRAKEN_SE {
-    tag { meta.id }
-}
-*/
