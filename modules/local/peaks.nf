@@ -183,6 +183,7 @@ process GEM {
 
     stub:
     """
-    touch ${meta.id}.GEM_events.txt
+    mkdir ${meta.id}
+    touch ${meta.id}/${meta.id}.GEM_events.txt
     """
 }
