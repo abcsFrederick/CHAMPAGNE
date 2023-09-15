@@ -2,6 +2,8 @@
 process CALC_GENOME_FRAC {
     label 'peaks'
 
+    container = "${params.containers.base}"
+
     input:
         path(chrom_sizes)
 
@@ -25,6 +27,8 @@ process SICER {
     tag { meta.id }
     label 'peaks'
     label 'process_high'
+
+    container = "${params.containers.sicer}"
 
     input:
         tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
@@ -76,6 +80,8 @@ process MACS_BROAD {
     tag { meta.id }
     label 'peaks'
 
+    container = "${params.containers.macs2}"
+
     input:
         tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
 
@@ -112,6 +118,8 @@ process MACS_NARROW {
     tag { meta.id }
     label 'peaks'
 
+    container = "${params.containers.macs2}"
+
     input:
         tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
 
@@ -145,6 +153,10 @@ process GEM {
     tag { meta.id }
     label 'peaks'
     label 'process_high'
+
+    container = "${params.containers.gem}"
+    // TODO: --bind does not work with docker, only singularity
+    containerOptions = "--bind ${params.chromosomes_dir}"
 
     input:
         tuple val(meta), path(chip), path(input), path(read_dists), path(chrom_sizes)

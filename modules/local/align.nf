@@ -4,6 +4,8 @@ process ALIGN_BLACKLIST {
     label 'align'
     label 'process_higher'
 
+    container = "${params.containers.base}"
+
     input:
         tuple val(meta), path(fastq)
         path(blacklist_files)
@@ -34,6 +36,8 @@ process ALIGN_GENOME {
     tag { meta.id }
     label 'align'
     label 'process_higher'
+
+    container = "${params.containers.base}"
 
     input:
         tuple val(meta), path(fastq)
@@ -75,6 +79,8 @@ process INDEX_BAM {
     tag { meta.id }
     label 'align'
     label 'process_higher'
+
+    container = "${params.containers.base}"
 
     input:
         tuple val(meta), path(bam)

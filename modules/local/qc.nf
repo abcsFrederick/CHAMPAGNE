@@ -5,6 +5,8 @@ process FASTQC {
     label 'process_higher'
     publishDir "${params.outdir}/qc/fastqc_${fqtype}/${meta.id}", mode: "${params.publish_dir_mode}"
 
+    container = "${params.containers.fastqc}"
+
     input:
         tuple val(meta), path(fastq), val(fqtype)
     output:
@@ -29,6 +31,10 @@ process FASTQ_SCREEN {
     tag { meta.id }
     label 'qc'
     label 'process_high'
+
+    container = "${params.containers.fastq_screen}"
+    // TODO bind flag not recognized by Docker on gh actions?
+    containerOptions = "--bind ${params.fastq_screen.db_dir}"
 
     input:
         tuple val(meta), path(fastq), path(conf)
@@ -55,6 +61,8 @@ process PRESEQ {
     tag { meta.id }
     label 'qc'
     label 'preseq'
+
+    container = "${params.containers.preseq}"
 
     // preseq is known to fail inexplicably, especially on small datasets.
     // https://github.com/nf-core/methylseq/issues/161
@@ -87,6 +95,8 @@ process HANDLE_PRESEQ_ERROR {
     label 'qc'
     label 'preseq'
 
+    container = "${params.containers.base}"
+
     input:
         tuple val(meta), val(log)
 
@@ -107,6 +117,8 @@ process PARSE_PRESEQ_LOG {
     tag { meta.id }
     label 'qc'
     label 'preseq'
+
+    container = "${params.containers.base}"
 
     input:
         tuple val(meta), path(log)
@@ -131,6 +143,8 @@ process PHANTOM_PEAKS {
     tag { meta.id }
     label 'qc'
     label 'ppqt'
+
+    container = "${params.containers.phantom_peaks}"
 
     input:
         tuple val(meta), path(bam), path(bai)
@@ -160,6 +174,8 @@ process PPQT_PROCESS {
     label 'qc'
     label 'ppqt'
 
+    container = "${params.containers.base}"
+
     input:
         tuple val(meta), path(fraglen)
     output:
@@ -182,6 +198,8 @@ process DEDUPLICATE {
     tag { meta.id }
     label 'qc'
     label 'process_medium'
+
+    container = "${params.containers.macs2}"
 
     input:
         tuple val(meta), path(bam), path(chrom_sizes)
@@ -216,6 +234,8 @@ process NGSQC_GEN { // TODO segfault - https://github.com/CCBR/CHAMPAGNE/issues/
     tag { meta.id }
     label 'qc'
 
+    container = "${params.containers.ngsqc}"
+
     input:
         tuple val(meta), path(bed), path(chrom_sizes)
 
@@ -243,6 +263,8 @@ process PLOT_NGSQC {
 process QC_STATS {
     tag { meta.id }
     label 'qc'
+
+    container = "${params.containers.base}"
 
     input:
         tuple val(meta), path(raw_fastq)
@@ -284,6 +306,9 @@ process QC_STATS {
 
 process QC_TABLE {
     label 'qc'
+
+    container = "${params.containers.base}"
+
     input:
         path(qc_stats)
 
@@ -304,6 +329,8 @@ process QC_TABLE {
 
 process MULTIQC {
     label 'qc'
+
+    container = "${params.containers.multiqc}"
 
     input:
         path(multiqc_conf)
