@@ -155,11 +155,10 @@ process GEM {
     label 'process_high'
 
     container = "${params.containers.gem}"
-    // TODO: --bind does not work with docker, only singularity
-    containerOptions = "--bind ${params.chromosomes_dir}"
 
     input:
         tuple val(meta), path(chip), path(input), path(read_dists), path(chrom_sizes)
+        path(chrom_files)
 
     output:
         path("${meta.id}/*.GEM_events.txt")
@@ -171,7 +170,7 @@ process GEM {
       --t ${task.cpus} \\
       --d ${read_dists} \\
       --g ${chrom_sizes} \\
-      --genome ${params.chromosomes_dir} \\
+      --genome ${chrom_files} \\
       --expt ${chip} \\
       --ctrl ${input} \\
       --out ${meta.id} \\

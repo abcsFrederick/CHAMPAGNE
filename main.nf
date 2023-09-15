@@ -103,7 +103,7 @@ workflow {
   PPQT_PROCESS(PHANTOM_PEAKS.out.fraglen)
   frag_lengths = PPQT_PROCESS.out.fraglen
 
-  ///* optional qc
+  ///* start qc
   QC_STATS(
     raw_fastqs,
     ALIGN_GENOME.out.flagstat,
@@ -167,7 +167,7 @@ workflow {
   )
 
   NORMALIZE_INPUT(ch_ip_ctrl_bigwig)
-  //*/
+  //*/ // end of qc
   // peak calling
 
   genome_frac = CALC_GENOME_FRAC(chrom_sizes)
@@ -191,9 +191,10 @@ workflow {
     .combine(Channel.fromPath(params.gem_read_dists))
     .combine(chrom_sizes)
     .set { ch_gem }
+  chrom_files = Channel.fromPath(params.chromosomes_dir).collect()
 
   ch_tagalign  | SICER
   ch_tagalign  | MACS_BROAD
   ch_tagalign  | MACS_NARROW
-  ch_gem       | GEM
+  GEM(ch_gem, chrom_files)
 }
