@@ -7,10 +7,6 @@
 
 🚧 **This project is under active development. It is not yet ready for production use.** 🚧
 
-## Getting started
-
-TODO
-
 ## Usage
 
 ### champagne CLI
@@ -18,13 +14,6 @@ TODO
 You can run champagne from the command line.
 The CLI includes helper steps for execution on supported
 high performance computing clusters including Biowulf and FRCE.
-
-Install the champagne CLI:
-
-```sh
-cd CHAMPAGNE
-pip3 install .
-```
 
 Run the test dataset using the test profile:
 
@@ -39,6 +28,7 @@ champagne run -profile singularity --outdir results/test --input assets/samplesh
 ```
 
 Run preview to view that steps that will run without actually executing any code:
+
 ```sh
 champagne run -profile ci_stub -preview
 ```
