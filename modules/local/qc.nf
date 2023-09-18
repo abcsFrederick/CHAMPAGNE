@@ -209,11 +209,27 @@ process DEDUPLICATE {
 
     script:
     """
+    # current working directory is a tmpdir when 'scratch' is set
+    TMP=tmp
+    mkdir \$TMP
+    trap 'rm -rf "\$TMP"' EXIT
+
     macs2 filterdup -i ${bam} -g ${params.genomes[ params.genome ].effective_genome_size} --keep-dup="auto" -o TmpTagAlign1
     awk -F"\\t" -v OFS="\\t" '{{if (\$2>0 && \$3>0) {{print}}}}' TmpTagAlign1 > TmpTagAlign2
-    awk -F"\\t" -v OFS="\\t" '{{print \$1,1,\$2}}' ${chrom_sizes} | sort -k1,1 -k2,2n > GenomeFile.bed
+    awk -F"\\t" -v OFS="\\t" '{{print \$1,1,\$2}}' ${chrom_sizes} > \$TMP/GenomeFile_unsorted.bed
+    sort \\
+      -k1,1 -k2,2n \\
+      -T \$TMP \\
+      -S 2G \\
+      --parallel ${task.cpus} \\
+      \$TMP/GenomeFile_unsorted.bed > GenomeFile.bed
     bedtools intersect -wa -f 1.0 -a TmpTagAlign2 -b GenomeFile.bed | awk -F"\\t" -v OFS="\\t" '{\$5="0"; print}' > ${meta.id}.TagAlign.bed
-    bedtools bedtobam -i ${meta.id}.TagAlign.bed -g ${chrom_sizes} | samtools sort -@ ${task.cpus} -o ${bam.baseName}.dedup.bam
+    bedtools bedtobam -i ${meta.id}.TagAlign.bed -g ${chrom_sizes} > \$TMP/${meta.id}.TagAlign.bed.bam
+    samtools sort \\
+        -@ ${task.cpus} \\
+        -m 2G \\
+        -T \$TMP \\
+        \$TMP/${meta.id}.TagAlign.bed.bam > ${bam.baseName}.dedup.bam
     samtools index ${bam.baseName}.dedup.bam
     samtools flagstat ${bam.baseName}.dedup.bam > ${bam.baseName}.dedup.bam.flagstat
     samtools idxstats ${bam.baseName}.dedup.bam > ${bam.baseName}.dedup.bam.idxstat
