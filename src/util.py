@@ -1,5 +1,6 @@
 import sys
 import os
+import pprint
 import subprocess
 import yaml
 import collections.abc
@@ -106,8 +107,31 @@ class OrderedCommands(click.Group):
         return list(self.commands)
 
 
+def scontrol_show():
+    scontrol_dict = dict()
+    scontrol_out = subprocess.run(
+        "scontrol show config", shell=True, capture_output=True, text=True
+    ).stdout
+
+    if len(scontrol_out) > 0:
+        for line in scontrol_out.split("\n"):
+            line_split = line.split("=")
+            if len(line_split) > 1:
+                scontrol_dict[line_split[0].strip()] = line_split[1].strip()
+    # pprint.pprint(scontrol_dict)
+    return scontrol_dict
+
+
 def is_biowulf():
     is_biowulf = False
+    scontrol_out = scontrol_show()
+    if "ClusterName" in scontrol_out.keys():
+        print("ClusterName", scontrol_out["ClusterName"])
+        if scontrol_out["ClusterName"] == "biowulf":
+            is_biowulf = True
+        # TODO support FRCE / FNLCR
+    return is_biowulf
+
     for env_var in ("HOSTNAME", "SLURM_SUBMIT_HOST"):
         if env_var in os.environ.keys() and os.environ[env_var] == "biowulf.nih.gov":
             is_biowulf = True
