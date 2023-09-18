@@ -6,6 +6,8 @@ process TRIM_SE {
   label 'qc'
   label 'process_high'
 
+  container = "${params.containers.cutadapt}"
+
   input:
     tuple val(meta), path(fastq)
 

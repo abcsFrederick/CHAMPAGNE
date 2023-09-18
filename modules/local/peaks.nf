@@ -2,6 +2,8 @@
 process CALC_GENOME_FRAC {
     label 'peaks'
 
+    container = "${params.containers.base}"
+
     input:
         path(chrom_sizes)
 
@@ -25,6 +27,8 @@ process SICER {
     tag { meta.id }
     label 'peaks'
     label 'process_high'
+
+    container = "${params.containers.sicer}"
 
     input:
         tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
@@ -76,6 +80,8 @@ process MACS_BROAD {
     tag { meta.id }
     label 'peaks'
 
+    container = "${params.containers.macs2}"
+
     input:
         tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
 
@@ -112,6 +118,8 @@ process MACS_NARROW {
     tag { meta.id }
     label 'peaks'
 
+    container = "${params.containers.macs2}"
+
     input:
         tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
 
@@ -146,8 +154,11 @@ process GEM {
     label 'peaks'
     label 'process_high'
 
+    container = "${params.containers.gem}"
+
     input:
         tuple val(meta), path(chip), path(input), path(read_dists), path(chrom_sizes)
+        path(chrom_files)
 
     output:
         path("${meta.id}/*.GEM_events.txt")
@@ -159,7 +170,7 @@ process GEM {
       --t ${task.cpus} \\
       --d ${read_dists} \\
       --g ${chrom_sizes} \\
-      --genome ${params.chromosomes_dir} \\
+      --genome ${chrom_files} \\
       --expt ${chip} \\
       --ctrl ${input} \\
       --out ${meta.id} \\
@@ -171,6 +182,7 @@ process GEM {
 
     stub:
     """
-    touch ${meta.id}.GEM_events.txt
+    mkdir ${meta.id}
+    touch ${meta.id}/${meta.id}.GEM_events.txt
     """
 }

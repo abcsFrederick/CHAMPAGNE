@@ -32,4 +32,9 @@ jobs:
           pip install .[dev,test]
       - name: Test stub run
         run: |
-          champagne run -profile ci_stub -stub
+          champagne run -profile ci_stub,docker -stub
+      - name: "Upload Artifact"
+        uses: actions/upload-artifact@v3
+        with:
+          name: nextflow-log
+          path: .nextflow.log

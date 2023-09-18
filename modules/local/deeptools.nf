@@ -5,6 +5,8 @@ process BAM_COVERAGE {
     label 'deeptools'
     label 'process_higher'
 
+    container = "${params.containers.deeptools}"
+
     input:
         tuple val(meta), path(bam), path(bai)
         tuple val(meta), val(fraglen)
@@ -38,6 +40,8 @@ process BIGWIG_SUM {
     label 'deeptools'
     label 'process_high'
 
+    container = "${params.containers.deeptools}"
+
     input:
         path(bigwigs)
 
@@ -61,6 +65,8 @@ process BIGWIG_SUM {
 process PLOT_CORRELATION {
     label 'qc'
     label 'deeptools'
+
+    container = "${params.containers.deeptools}"
 
     input:
         tuple path(array), val(plottype)
@@ -93,6 +99,8 @@ process PLOT_PCA {
     label 'qc'
     label 'deeptools'
 
+    container = "${params.containers.deeptools}"
+
     input:
         path(array)
 
@@ -118,6 +126,8 @@ process PLOT_FINGERPRINT {
   label 'qc'
   label 'deeptools'
   label 'process_higher'
+
+  container = "${params.containers.deeptools}"
 
   input:
     tuple val(meta), path(bams), path(bais)
@@ -154,6 +164,8 @@ process PLOT_FINGERPRINT {
 process BED_PROTEIN_CODING {
     label 'qc'
 
+    container = "${params.containers.base}"
+
     input:
       path(bed)
 
@@ -175,6 +187,8 @@ process COMPUTE_MATRIX {
   label 'qc'
   label 'deeptools'
   label 'process_higher'
+
+  container = "${params.containers.deeptools}"
 
   input:
     path(bigwigs)
@@ -224,6 +238,8 @@ process PLOT_HEATMAP {
   label 'qc'
   label 'deeptools'
 
+  container = "${params.containers.deeptools}"
+
   input:
     path(mat)
 
@@ -252,6 +268,8 @@ process PLOT_HEATMAP {
 process PLOT_PROFILE {
   label 'qc'
   label 'deeptools'
+
+  container = "${params.containers.deeptools}"
 
   input:
     path(mat)
@@ -285,6 +303,8 @@ process NORMALIZE_INPUT {
   label 'qc'
   label 'deeptools'
   label 'process_higher'
+
+  container = "${params.containers.deeptools}"
 
   input:
     tuple val(meta), path(chip), path(input)
