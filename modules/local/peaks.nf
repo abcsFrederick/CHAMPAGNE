@@ -23,6 +23,80 @@ process CALC_GENOME_FRAC {
     """
 }
 
+
+process MACS_BROAD {
+    tag { meta.id }
+    label 'peaks'
+
+    container = "${params.containers.macs2}"
+
+    input:
+        tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
+
+    output:
+        path("${meta.id}_peaks.xls")
+        path("${meta.id}_peaks.broadPeak"), emit: broad_peak
+        path("${meta.id}_peaks.gappedPeak")
+
+    script:
+    """
+    macs2 callpeak \\
+      -t ${chip} \\
+      -c ${input} \\
+      -g ${params.align.effective_genome_size} \\
+      -n ${meta.id} \\
+      --extsize ${fraglen} \\
+      --nomodel \\
+      -q 0.01 \\
+      --keep-dup='all' \\
+      --broad \\
+      --broad-cutoff 0.01
+    """
+
+    stub:
+    """
+    for ext in xls broadPeak gappedPeak; do
+        touch ${meta.id}_peaks.\${ext}
+    done
+    """
+
+}
+
+process MACS_NARROW {
+    tag { meta.id }
+    label 'peaks'
+
+    container = "${params.containers.macs2}"
+
+    input:
+        tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
+
+    output:
+        path("${meta.id}_peaks.xls")
+        path("${meta.id}_peaks.narrowPeak"), emit: narrow_peak
+        path("${meta.id}_summits.bed")
+
+    script:
+    """
+    macs2 callpeak \\
+      -t ${chip} \\
+      -c ${input} \\
+      -g ${params.align.effective_genome_size} \\
+      -n ${meta.id} \\
+      --extsize ${fraglen} \\
+      --nomodel \\
+      -q 0.01 \\
+      --keep-dup='all'
+    """
+
+    stub:
+    """
+    for ext in peaks.xls peaks.narrowPeak summits.bed; do
+        touch ${meta.id}_\${ext}
+    done
+    """
+}
+
 process SICER {
     tag { meta.id }
     label 'peaks'
@@ -75,80 +149,6 @@ process SICER_NO_CTRL { // TODO just use one process for each peak caller with o
     """
 }
 */
-
-process MACS_BROAD {
-    tag { meta.id }
-    label 'peaks'
-
-    container = "${params.containers.macs2}"
-
-    input:
-        tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
-
-    output:
-        path("${meta.id}_peaks.xls")
-        path("${meta.id}_peaks.broadPeak")
-        path("${meta.id}_peaks.gappedPeak")
-
-    script:
-    """
-    macs2 callpeak \\
-      -t ${chip} \\
-      -c ${input} \\
-      -g ${params.align.effective_genome_size} \\
-      -n ${meta.id} \\
-      --extsize ${fraglen} \\
-      --nomodel \\
-      -q 0.01 \\
-      --keep-dup='all' \\
-      --broad \\
-      --broad-cutoff 0.01
-    """
-
-    stub:
-    """
-    for ext in xls broadPeak gappedPeak; do
-        touch ${meta.id}_peaks.\${ext}
-    done
-    """
-
-}
-
-process MACS_NARROW {
-    tag { meta.id }
-    label 'peaks'
-
-    container = "${params.containers.macs2}"
-
-    input:
-        tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
-
-    output:
-        path("${meta.id}_peaks.xls")
-        path("${meta.id}_peaks.narrowPeak")
-        path("${meta.id}_summits.bed")
-
-    script:
-    """
-    macs2 callpeak \\
-      -t ${chip} \\
-      -c ${input} \\
-      -g ${params.align.effective_genome_size} \\
-      -n ${meta.id} \\
-      --extsize ${fraglen} \\
-      --nomodel \\
-      -q 0.01 \\
-      --keep-dup='all'
-    """
-
-    stub:
-    """
-    for ext in peaks.xls peaks.narrowPeak summits.bed; do
-        touch ${meta.id}_\${ext}
-    done
-    """
-}
-
 process GEM {
     tag { meta.id }
     label 'peaks'
@@ -161,7 +161,7 @@ process GEM {
         path(chrom_files)
 
     output:
-        path("${meta.id}/*.GEM_events.txt")
+        path("${meta.id}/*.GEM_events.txt"), emit: events
 
     script:
     // $GEMJAR is defined in the docker container
