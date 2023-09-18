@@ -7,10 +7,13 @@
 
 ### Bug fixes
 
-- CLI error when biowulf-specific environment variables are not defined. (#54)
-- Using `--mount type=bind` instead of `--bind` for Docker compatibility. (#69)
-- Specify containers in process definitions instead of `withName`/`withLabel` for better control. (#69)
-  - Shared containers are specified as parameters in the config file.
+- CLI:
+  - Error when biowulf-specific environment variables are not defined. (#54)
+  - The host is now correctly detected as biowulf via `scontrol`. (#75)
+- Containers:
+  - When mount binding paths to containers, we use `--mount type=bind` for Singularity and `--volume` for Docker for compatibility. (#69)
+  - Containers are now specified in process definitions instead of `withName`/`withLabel` for better control. (#69)
+    - Shared containers are specified as parameters in the config file.
 
 ## CHAMPAGNE 0.1.0
 
