@@ -3,6 +3,7 @@
 ### New features
 
 - Implemented peak calling with sicer2, macs2, and gem. (#52)
+- Added parameter options to skip QC, input normalization, and/or peak calling steps. (#72)
 
 ### Bug fixes
 
