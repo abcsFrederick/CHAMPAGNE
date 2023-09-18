@@ -38,7 +38,12 @@ or explicitly specify the output directory and input:
 champagne run -profile singularity --outdir results/test --input assets/samplesheet_test.csv
 ```
 
-Launch a stub run to view the steps that will run without performing the full analysis.
+Run preview to view that steps that will run without actually executing any code:
+```sh
+champagne run -profile ci_stub -preview
+```
+
+Launch a stub run to view the steps that will run and download containers without performing the full analysis.
 
 ```sh
 champagne run -profile ci_stub -stub
