@@ -33,8 +33,6 @@ process FASTQ_SCREEN {
     label 'process_high'
 
     container = "${params.containers.fastq_screen}"
-    // TODO bind flag not recognized by Docker on gh actions?
-    containerOptions = "--mount type=bind,src=${params.fastq_screen.db_dir},dst=${params.fastq_screen.db_dir}"
 
     input:
         tuple val(meta), path(fastq), path(conf)
