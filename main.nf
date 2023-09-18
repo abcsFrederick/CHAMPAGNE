@@ -13,6 +13,7 @@ log.info """\
          workDir      : $workflow.workDir
          homeDir      : $workflow.homeDir
          input        : ${params.input}
+         genome       : ${params.genome}
          """
          .stripIndent()
 
@@ -37,16 +38,16 @@ workflow {
     raw_fastqs | TRIM_SE
     TRIM_SE.out.set{ trimmed_fastqs }
     blacklist_files = Channel
-                        .fromPath(params.align.blacklist_files)
+                        .fromPath(params.genomes[ params.genome ].blacklist_files)
                         .collect()
     ALIGN_BLACKLIST(trimmed_fastqs, blacklist_files)
     reference_files = Channel
-                        .fromPath(params.align.reference_files)
+                        .fromPath(params.genomes[ params.genome ].reference_files)
                         .collect()
     ALIGN_GENOME(ALIGN_BLACKLIST.out.reads, reference_files)
     ALIGN_GENOME.out.bam.set{ aligned_bam }
 
-    chrom_sizes = Channel.fromPath(params.align.chrom_sizes)
+    chrom_sizes = Channel.fromPath(params.genomes[ params.genome ].chrom_sizes)
     aligned_bam.combine(chrom_sizes) | DEDUPLICATE
     DEDUPLICATE.out.bam.set{ deduped_bam }
     DEDUPLICATE.out.tag_align.set{ deduped_tagalign }

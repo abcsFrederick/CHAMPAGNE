@@ -12,7 +12,7 @@ process CALC_GENOME_FRAC {
 
     script:
     """
-    genome_frac=`calc_effective_genome_fraction.py ${params.align.effective_genome_size} ${chrom_sizes} ${params.deeptools.excluded_chroms}`
+    genome_frac=`calc_effective_genome_fraction.py ${params.genomes[ params.genome ].effective_genome_size} ${chrom_sizes} ${params.deeptools.excluded_chroms}`
     echo \$genome_frac
     """
 
@@ -43,7 +43,7 @@ process MACS_BROAD {
     macs2 callpeak \\
       -t ${chip} \\
       -c ${input} \\
-      -g ${params.align.effective_genome_size} \\
+      -g ${params.genomes[ params.genome ].effective_genome_size} \\
       -n ${meta.id} \\
       --extsize ${fraglen} \\
       --nomodel \\
@@ -81,7 +81,7 @@ process MACS_NARROW {
     macs2 callpeak \\
       -t ${chip} \\
       -c ${input} \\
-      -g ${params.align.effective_genome_size} \\
+      -g ${params.genomes[ params.genome ].effective_genome_size} \\
       -n ${meta.id} \\
       --extsize ${fraglen} \\
       --nomodel \\

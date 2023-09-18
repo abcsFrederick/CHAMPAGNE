@@ -78,7 +78,7 @@ workflow QC {
             }
             .set { ch_ip_ctrl_bam_bai }
         PLOT_FINGERPRINT(ch_ip_ctrl_bam_bai)
-        BED_PROTEIN_CODING(Channel.fromPath(params.gene_info))
+        BED_PROTEIN_CODING(Channel.fromPath(params.genomes[ params.genome ].gene_info))
         COMPUTE_MATRIX(bigwig_list,
                        BED_PROTEIN_CODING.out.bed.combine(Channel.from('metagene','TSS'))
         )

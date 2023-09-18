@@ -209,7 +209,7 @@ process DEDUPLICATE {
 
     script:
     """
-    macs2 filterdup -i ${bam} -g ${params.align.effective_genome_size} --keep-dup="auto" -o TmpTagAlign1
+    macs2 filterdup -i ${bam} -g ${params.genomes[ params.genome ].effective_genome_size} --keep-dup="auto" -o TmpTagAlign1
     awk -F"\\t" -v OFS="\\t" '{{if (\$2>0 && \$3>0) {{print}}}}' TmpTagAlign1 > TmpTagAlign2
     awk -F"\\t" -v OFS="\\t" '{{print \$1,1,\$2}}' ${chrom_sizes} | sort -k1,1 -k2,2n > GenomeFile.bed
     bedtools intersect -wa -f 1.0 -a TmpTagAlign2 -b GenomeFile.bed | awk -F"\\t" -v OFS="\\t" '{\$5="0"; print}' > ${meta.id}.TagAlign.bed

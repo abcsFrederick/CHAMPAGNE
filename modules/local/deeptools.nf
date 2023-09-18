@@ -25,7 +25,7 @@ process BAM_COVERAGE {
       --ignoreForNormalization ${params.deeptools.excluded_chroms} \
       --numberOfProcessors ${task.cpus} \
       --normalizeUsing ${params.deeptools.normalize_using} \
-      --effectiveGenomeSize ${params.align.effective_genome_size} \
+      --effectiveGenomeSize ${params.genomes[ params.genome ].effective_genome_size} \
       --extendReads ${fraglen}
     """
 
