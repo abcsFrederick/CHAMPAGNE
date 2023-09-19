@@ -35,7 +35,10 @@ workflow CALL_PEAKS {
             .combine(Channel.fromPath(params.gem_read_dists))
             .combine(chrom_sizes)
             .set { ch_gem }
-            chrom_files = Channel.fromPath(params.genomes[ params.genome ].chromosomes_dir).collect()
+        println "chr dir ${params.genomes[ params.genome ].chromosomes_dir}"
+        Channel.fromPath("${params.genomes[ params.genome ].chromosomes_dir}", type: 'dir')
+            .set{ chrom_files }
+        chrom_files.view()
 
         ch_tagalign | MACS_BROAD
         ch_tagalign | MACS_NARROW
