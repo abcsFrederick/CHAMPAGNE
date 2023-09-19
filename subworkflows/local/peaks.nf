@@ -1,9 +1,10 @@
 
-include { CALC_GENOME_FRAC } from "../../modules/local/peaks.nf"
-include { SICER            } from "../../modules/local/peaks.nf"
-include { MACS_BROAD       } from "../../modules/local/peaks.nf"
-include { MACS_NARROW      } from "../../modules/local/peaks.nf"
-include { GEM              } from "../../modules/local/peaks.nf"
+include { CALC_GENOME_FRAC  } from "../../modules/local/peaks.nf"
+include { SICER             } from "../../modules/local/peaks.nf"
+include { MACS_BROAD        } from "../../modules/local/peaks.nf"
+include { MACS_NARROW       } from "../../modules/local/peaks.nf"
+include { GEM               } from "../../modules/local/peaks.nf"
+include { FRACTION_IN_PEAKS } from "../../modules/local/peaks.nf"
 
 
 workflow CALL_PEAKS {
@@ -43,9 +44,26 @@ workflow CALL_PEAKS {
         ch_tagalign | SICER
         GEM(ch_gem, chrom_files)
 
+        MACS_BROAD.out.peak.set{ macs_broad_peaks }
+        MACS_NARROW.out.peak.set{ macs_narrow_peaks }
+        SICER.out.peak.set{ sicer_peaks }
+        GEM.out.peak.set{ gem_peaks }
+        gem_peaks.mix(sicer_peaks, macs_broad_peaks, macs_narrow_peaks).set{ ch_peaks }
+
+        // Create Channel with meta, tag align, peak file, and peak-calling tool
+        deduped_tagalign.cross(ch_peaks)
+            .map{ it ->
+               it.flatten()
+            }
+            .map{  meta1, tag_align, meta2, peak, tool ->
+                meta1 == meta2 ? [ meta1, tag_align, peak, tool ] : null
+            }
+            .set{ ch_peaks_tagalign }
+        ch_peaks_tagalign | FRACTION_IN_PEAKS
+
     emit:
-        macs_broad_peaks = MACS_BROAD.out.broad_peak
-        macs_narrow_peaks = MACS_NARROW.out.narrow_peak
-        sicer_peaks = SICER.out
-        gem_peaks = GEM.out.events
+        macs_broad_peaks
+        macs_narrow_peaks
+        sicer_peaks
+        gem_peaks
 }

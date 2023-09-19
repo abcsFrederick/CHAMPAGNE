@@ -34,8 +34,8 @@ process MACS_BROAD {
         tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
 
     output:
+        tuple val(meta), path("${meta.id}_peaks.broadPeak"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
         path("${meta.id}_peaks.xls")
-        path("${meta.id}_peaks.broadPeak"), emit: broad_peak
         path("${meta.id}_peaks.gappedPeak")
 
     script:
@@ -72,8 +72,8 @@ process MACS_NARROW {
         tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
 
     output:
+        tuple val(meta), path("${meta.id}_peaks.narrowPeak"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
         path("${meta.id}_peaks.xls")
-        path("${meta.id}_peaks.narrowPeak"), emit: narrow_peak
         path("${meta.id}_summits.bed")
 
     script:
@@ -108,7 +108,8 @@ process SICER {
         tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
 
     output:
-        tuple path("*.scoreisland"), path("*normalized.wig"), path("*islands-summary"), path("*island.bed")
+        tuple val(meta), path("*island.bed"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
+        tuple path("*.scoreisland"), path("*normalized.wig"), path("*islands-summary")
 
     script:
     """
@@ -161,7 +162,7 @@ process GEM {
         path(chrom_files)
 
     output:
-        path("${meta.id}/*.GEM_events.txt"), emit: events
+        tuple val(meta), path("${meta.id}/*.GEM_events.txt"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
 
     script:
     // $GEMJAR is defined in the docker container
@@ -184,5 +185,48 @@ process GEM {
     """
     mkdir ${meta.id}
     touch ${meta.id}/${meta.id}.GEM_events.txt
+    """
+}
+
+process FRACTION_IN_PEAKS {
+    tag { meta.id }
+    label 'peaks'
+    label 'process_single'
+
+    container "${params.containers.base}"
+
+    input:
+        tuple val(meta), path(tag_align), path(peaks), val(peak_tool)
+
+    output:
+        path("*.frip.txt")
+
+    script:
+    """
+    filetype=\$(file -b --mime-type ${tag_align})
+    if [ \$filetype == "application/gzip" ] ; then
+        cat_tool=zcat
+    else
+        cat_tool=cat
+    fi
+    total_reads=\$(\$cat_tool ${tag_align} | wc -l)
+    peak_reads=\$(bedtools intersect -wa -a ${tag_align} -b ${peaks} | wc -l)
+    frip=\$(echo "scale=3;\$peak_reads/\$total_reads" | bc)
+    echo -ne "${meta.id}\tFRiP${peak_tool}\t\$frip\n" > ${meta.id}_${peak_tool}.frip.txt
+    """
+
+    stub:
+    """
+    touch ${meta.id}_${peak_tool}.frip.txt
+    """
+}
+
+process PLOT_FRIP {
+    tag { meta.id }
+    label 'peaks'
+    label 'process_single'
+
+    script:
+    """
     """
 }
