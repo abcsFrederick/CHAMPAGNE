@@ -33,7 +33,10 @@ workflow QC {
     main:
         raw_fastqs.combine(Channel.value("raw")) | FASTQC_RAW
         trimmed_fastqs.combine(Channel.value("trimmed")) | FASTQC_TRIMMED
-        trimmed_fastqs.combine(Channel.fromPath(params.fastq_screen.conf)) | FASTQ_SCREEN
+        trimmed_fastqs
+          .combine(Channel.fromPath(params.fastq_screen.conf, checkIfExists: true))
+          .combine(Channel.fromPath(params.fastq_screen.db_dir,
+                                    type: 'dir', checkIfExists: true)) | FASTQ_SCREEN
 
         PRESEQ(aligned_bam)
         // when preseq fails, write NAs for the stats that are calculated from its log

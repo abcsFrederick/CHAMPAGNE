@@ -35,7 +35,8 @@ process FASTQ_SCREEN {
     container = "${params.containers.fastq_screen}"
 
     input:
-        tuple val(meta), path(fastq), path(conf)
+        tuple val(meta), path(fastq), path(conf), path(db_dir)
+
     output:
         path("${meta.id}*_screen.*"), emit: screen
 
