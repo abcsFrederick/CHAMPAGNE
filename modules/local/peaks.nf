@@ -196,27 +196,14 @@ process FRACTION_IN_PEAKS {
     container "${params.containers.base}"
 
     input:
-        tuple val(meta), path(tag_align), path(peaks), val(peak_tool)
+        tuple val(meta), path(dedup_bam), path(peaks), val(peak_tool), path(chrom_sizes)
 
     output:
         path("*.frip.txt")
 
     script:
     """
-    filetype=\$(file -b --mime-type ${tag_align})
-    if [ \$filetype == "application/gzip" ] ; then
-        cat_tool=zcat
-    else
-        cat_tool=cat
-    fi
-    total_reads=\$(\$cat_tool ${tag_align} | wc -l)
-
-    # fix extra tab char in bed file https://github.com/arq5x/bedtools2/issues/617
-    sed 's/\t\$//' ${peaks} > ${peaks.baseName}.untab.bed
-    peak_reads=\$(bedtools intersect -wa -a ${tag_align} -b ${peaks.baseName}.untab.bed | wc -l)
-
-    frip=\$(python3 -c "print(round(\$peak_reads/\$total_reads, 3), end='')")
-    echo -ne "${meta.id}\t${peak_tool}\t\$frip\n" > ${meta.id}_${peak_tool}.frip.txt
+    frip.py -p ${peaks} -b ${dedup_bam} -g ${chrom_sizes} -o ${meta.id}_${peak_tool}.frip.txt
     """
 
     stub:

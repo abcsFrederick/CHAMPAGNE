@@ -11,6 +11,7 @@ workflow CALL_PEAKS {
     take:
         chrom_sizes
         deduped_tagalign
+        deduped_bam
         frag_lengths
 
     main:
@@ -48,22 +49,20 @@ workflow CALL_PEAKS {
         MACS_NARROW.out.peak.set{ macs_narrow_peaks }
         SICER.out.peak.set{ sicer_peaks }
         GEM.out.peak.set{ gem_peaks }
-        gem_peaks.mix(sicer_peaks, macs_broad_peaks, macs_narrow_peaks).set{ ch_peaks }
+        sicer_peaks.mix(gem_peaks, macs_broad_peaks, macs_narrow_peaks).set{ ch_peaks }
 
-        // Create Channel with meta, tag align, peak file, and peak-calling tool
-        deduped_tagalign.cross(ch_peaks)
+        // Create Channel with meta, deduped bam, peak file, peak-calling tool, and chrom sizes fasta
+        deduped_bam.cross(ch_peaks)
             .map{ it ->
                it.flatten()
             }
-            .map{  meta1, tag_align, meta2, peak, tool ->
-                meta1 == meta2 ? [ meta1, tag_align, peak, tool ] : null
+            .map{  meta1, bam, bai, meta2, peak, tool ->
+                [ meta1, bam, peak, tool ]
             }
-            .set{ ch_peaks_tagalign }
-        ch_peaks_tagalign | FRACTION_IN_PEAKS
+            .combine(chrom_sizes)
+            .set{ ch_bam_peaks }
+        ch_bam_peaks | FRACTION_IN_PEAKS
 
     emit:
-        macs_broad_peaks
-        macs_narrow_peaks
-        sicer_peaks
-        gem_peaks
+        ch_bam_peaks
 }

@@ -72,6 +72,6 @@ workflow {
     }
 
     if (params.run.call_peaks) {
-        CALL_PEAKS(chrom_sizes, deduped_tagalign, frag_lengths)
+        CALL_PEAKS(chrom_sizes, deduped_tagalign, deduped_bam, frag_lengths)
     }
 }
