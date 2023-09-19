@@ -216,7 +216,7 @@ process FRACTION_IN_PEAKS {
     peak_reads=\$(bedtools intersect -wa -a ${tag_align} -b ${peaks.baseName}.untab.bed | wc -l)
 
     frip=\$(python3 -c "print(round(\$peak_reads/\$total_reads, 3), end='')")
-    echo -ne "${meta.id}\tFRiP_${peak_tool}\t\$frip\n" > ${meta.id}_${peak_tool}.frip.txt
+    echo -ne "${meta.id}\t${peak_tool}\t\$frip\n" > ${meta.id}_${peak_tool}.frip.txt
     """
 
     stub:
@@ -230,7 +230,20 @@ process PLOT_FRIP {
     label 'peaks'
     label 'process_single'
 
+    input:
+        path(frips)
+
+    output:
+        path("*.pdf")
+
     script:
     """
+    cat ${frips} > frips.txt
+    Rscript bin/plot_frip.R frips.txt
+    """
+
+    stub:
+    """
+    touch FRiP_barplot.pdf
     """
 }
