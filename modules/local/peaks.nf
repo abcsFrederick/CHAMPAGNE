@@ -211,7 +211,7 @@ process FRACTION_IN_PEAKS {
     fi
     total_reads=\$(\$cat_tool ${tag_align} | wc -l)
     peak_reads=\$(bedtools intersect -wa -a ${tag_align} -b ${peaks} | wc -l)
-    frip=\$(echo "scale=3;\$peak_reads/\$total_reads" | bc)
+    frip=\$(python3 -c "print(round(\$peak_reads/\$total_reads, 3), end='')")
     echo -ne "${meta.id}\tFRiP${peak_tool}\t\$frip\n" > ${meta.id}_${peak_tool}.frip.txt
     """
 
