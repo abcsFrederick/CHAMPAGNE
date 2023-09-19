@@ -62,12 +62,11 @@ workflow {
            deduped_bam, DEDUPLICATE.out.flagstat,
            PHANTOM_PEAKS.out.spp, frag_lengths
            )
-    }
-
-    if (params.run.normalize_input) {
-        // Create channel: [ meta, [ ip_bam, control_bam ] [ ip_bai, control_bai ] ]
         QC.out.bigwigs.set{ ch_ip_ctrl_bigwig }
-        ch_ip_ctrl_bigwig | NORMALIZE_INPUT
+
+        if (params.run.normalize_input) {
+            ch_ip_ctrl_bigwig | NORMALIZE_INPUT
+        }
     }
 
     if (params.run.call_peaks) {
