@@ -210,9 +210,13 @@ process FRACTION_IN_PEAKS {
         cat_tool=cat
     fi
     total_reads=\$(\$cat_tool ${tag_align} | wc -l)
-    peak_reads=\$(bedtools intersect -wa -a ${tag_align} -b ${peaks} | wc -l)
+
+    # fix extra tab char in bed file https://github.com/arq5x/bedtools2/issues/617
+    sed 's/\t\$//' ${peaks} > ${peaks.baseName}.untab.bed
+    peak_reads=\$(bedtools intersect -wa -a ${tag_align} -b ${peaks.baseName}.untab.bed | wc -l)
+
     frip=\$(python3 -c "print(round(\$peak_reads/\$total_reads, 3), end='')")
-    echo -ne "${meta.id}\tFRiP${peak_tool}\t\$frip\n" > ${meta.id}_${peak_tool}.frip.txt
+    echo -ne "${meta.id}\tFRiP_${peak_tool}\t\$frip\n" > ${meta.id}_${peak_tool}.frip.txt
     """
 
     stub:
