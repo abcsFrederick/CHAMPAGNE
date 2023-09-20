@@ -304,13 +304,16 @@ process JACCARD_INDEX {
         path("jaccard*.txt")
 
     script:
+    // if groups are defined, use them as labels. otherwise use sample IDs.
+    def labelA = metaA.group ?: metaA.id
+    def labelB = metaB.group ?: metaB.id
     """
     bedtools sort -i ${peakA} -g ${chrom_sizes} > ${peakA.baseName}.sorted.bed
     bedtools sort -i ${peakB} -g ${chrom_sizes} > ${peakB.baseName}.sorted.bed
     bedtools jaccard -a ${peakA.baseName}.sorted.bed -b ${peakB.baseName}.sorted.bed -g ${chrom_sizes} |\\
       tail -n 1 |\\
-      awk -v fA=${metaA.id} -v fB=${metaB.id} -v tA=${toolA} -v tB=${toolB} \\
-        '{printf("%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n",fA,tA,fB,tB,\$1,\$2,\$3,\$4)}' > \\
+      awk -v fA=${peakA} -v fB=${peakB} -v lA=${labelA} -v lB=${labelB} -v tA=${toolA} -v tB=${toolB} \\
+        '{printf("%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n",fA,lA,tA,fB,lB,tB,\$1,\$2,\$3,\$4)}' > \\
         jaccard_${toolA}_${metaA.id}_vs_${toolB}_${metaB.id}.txt
     """
     stub:
@@ -331,7 +334,7 @@ process CONCAT_JACCARD {
 
     script:
     """
-    echo -e "labelA\\ttoolA\\tlabelB\\ttoolB\\tintersection\\tunion\\tjaccard\\tn_intersections" > jaccard_all.txt
+    echo -e "fileA\\tlabelA\\ttoolA\\tfileB\\labelB\\ttoolB\\tintersection\\tunion\\tjaccard\\tn_intersections" > jaccard_all.txt
     cat ${jaccards} |\\
       sort -k 1,1 -k 2,2 >>\\
       jaccard_all.txt
