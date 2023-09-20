@@ -313,7 +313,7 @@ process JACCARD_INDEX {
     """
     stub:
     """
-    touch jaccard_blank.txt
+    touch jaccard_${toolA}_${metaA.id}_vs_${toolB}_${metaB.id}.txt
     """
 }
 
