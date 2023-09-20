@@ -291,3 +291,49 @@ process PLOT_FRIP {
     touch FRiP_barplot.pdf
     """
 }
+
+process JACCARD_INDEX {
+    tag "${tool} ${metaA.id} vs. ${metaB.id}"
+    label 'peaks'
+    label 'process_single'
+
+    input:
+        tuple val(tool), val(metaA), path(peakA), val(metaB), path(peakB), path(chrom_sizes)
+
+    output:
+        path("jaccard*.txt")
+
+    script:
+    """
+    labelA=${peakA.baseName}
+    labelB=${peakB.baseName}
+    bedtools jaccard -a ${peakA} -b ${peakB} -g ${chrom_sizes} |\\
+      tail -n 1 |\\
+      awk -v a=\$labelA -v b=\$labelB -v tool=${tool} \\
+        '{printf("%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n",tool,a,b,\$1,\$2,\$3,\$4)}' > \\
+        jaccard_${tool}_\${labelA}_vs_\${labelB}.txt
+    """
+    stub:
+    """
+    touch jaccard_blank.txt
+    """
+}
+
+process CONCAT_JACCARD {
+    label 'peaks'
+    label 'process_single'
+
+    input:
+        path(jaccards)
+
+    output:
+        path("jaccard_all.txt")
+
+    script:
+    """
+    echo -e "tool\\tlabelA\\tlabelB\\tintersection\\tunion\\tjaccard\\tn_intersections" > jaccard_all.txt
+    cat ${jaccards} |\\
+      sort -k 1,1 -k 2,2 >>\\
+      jaccard_all.txt
+    """
+}

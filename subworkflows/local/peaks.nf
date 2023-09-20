@@ -6,6 +6,8 @@ include { SICER             } from "../../modules/local/peaks.nf"
 include { CONVERT_SICER     } from "../../modules/local/peaks.nf"
 include { GEM               } from "../../modules/local/peaks.nf"
 include { FRACTION_IN_PEAKS } from "../../modules/local/peaks.nf"
+include { JACCARD_INDEX     } from "../../modules/local/peaks.nf"
+include { CONCAT_JACCARD    } from "../../modules/local/peaks.nf"
 
 
 workflow CALL_PEAKS {
@@ -63,6 +65,15 @@ workflow CALL_PEAKS {
             .combine(chrom_sizes)
             .set{ ch_bam_peaks }
         //ch_bam_peaks | FRACTION_IN_PEAKS
+        ch_peaks
+            .combine(ch_peaks)
+            .map{ meta1, peaks1, tool1, meta2, peaks2, tool2 ->
+                tool1 == tool2 && meta1 != meta2 ? [ tool1, meta1, peaks1, meta2, peaks2 ]: null
+            }
+            .combine(chrom_sizes)
+            .set{ pairwise_peaks }
+        pairwise_peaks | JACCARD_INDEX
+        JACCARD_INDEX.out.collect() | CONCAT_JACCARD
 
     emit:
         ch_bam_peaks
