@@ -305,7 +305,9 @@ process JACCARD_INDEX {
 
     script:
     """
-    bedtools jaccard -a ${peakA} -b ${peakB} -g ${chrom_sizes} |\\
+    bedtools sort -i ${peakA} -g ${chrom_sizes} > ${peakA.baseName}.sorted.bed
+    bedtools sort -i ${peakB} -g ${chrom_sizes} > ${peakB.baseName}.sorted.bed
+    bedtools jaccard -a ${peakA.baseName}.sorted.bed -b ${peakB.baseName}.sorted.bed -g ${chrom_sizes} |\\
       tail -n 1 |\\
       awk -v fA=${metaA.id} -v fB=${metaB.id} -v tA=${toolA} -v tB=${toolB} \\
         '{printf("%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n",fA,tA,fB,tB,\$1,\$2,\$3,\$4)}' > \\
@@ -338,4 +340,26 @@ process CONCAT_JACCARD {
     """
     touch jaccard_all.txt
     """
+}
+
+process PLOT_JACCARD {
+    label 'peaks'
+    label 'process_single'
+
+    input:
+        path(jaccard)
+
+    output:
+        path("*.png")
+
+    script:
+    """
+    plot_jaccard.R ${jaccard}
+    """
+
+    stub:
+    """
+    touch plot.png
+    """
+
 }
