@@ -1,8 +1,9 @@
 
 include { CALC_GENOME_FRAC  } from "../../modules/local/peaks.nf"
-include { SICER             } from "../../modules/local/peaks.nf"
 include { MACS_BROAD        } from "../../modules/local/peaks.nf"
 include { MACS_NARROW       } from "../../modules/local/peaks.nf"
+include { SICER             } from "../../modules/local/peaks.nf"
+include { CONVERT_SICER     } from "../../modules/local/peaks.nf"
 include { GEM               } from "../../modules/local/peaks.nf"
 include { FRACTION_IN_PEAKS } from "../../modules/local/peaks.nf"
 
@@ -42,12 +43,12 @@ workflow CALL_PEAKS {
 
         ch_tagalign | MACS_BROAD
         ch_tagalign | MACS_NARROW
-        ch_tagalign | SICER
+        ch_tagalign | SICER | CONVERT_SICER
         GEM(ch_gem, chrom_files)
 
         MACS_BROAD.out.peak.set{ macs_broad_peaks }
         MACS_NARROW.out.peak.set{ macs_narrow_peaks }
-        SICER.out.peak.set{ sicer_peaks }
+        CONVERT_SICER.out.peak.set{ sicer_peaks }
         GEM.out.peak.set{ gem_peaks }
         sicer_peaks.mix(gem_peaks, macs_broad_peaks, macs_narrow_peaks).set{ ch_peaks }
 
@@ -61,7 +62,7 @@ workflow CALL_PEAKS {
             }
             .combine(chrom_sizes)
             .set{ ch_bam_peaks }
-        ch_bam_peaks | FRACTION_IN_PEAKS
+        //ch_bam_peaks | FRACTION_IN_PEAKS
 
     emit:
         ch_bam_peaks
