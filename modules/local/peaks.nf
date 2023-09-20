@@ -250,7 +250,7 @@ process FRACTION_IN_PEAKS {
     label 'peaks'
     label 'process_single'
 
-    container "${params.containers.base}"
+    container "${params.containers.frip}"
 
     input:
         tuple val(meta), path(dedup_bam), path(peaks), val(peak_tool), path(chrom_sizes)
