@@ -293,25 +293,23 @@ process PLOT_FRIP {
 }
 
 process JACCARD_INDEX {
-    tag "${tool} ${metaA.id} vs. ${metaB.id}"
+    tag "${toolA} ${metaA.id} vs. ${toolB} ${metaB.id}"
     label 'peaks'
     label 'process_single'
 
     input:
-        tuple val(tool), val(metaA), path(peakA), val(metaB), path(peakB), path(chrom_sizes)
+        tuple val(metaA), path(peakA), val(toolA),  val(metaB), path(peakB), val(toolB), path(chrom_sizes)
 
     output:
         path("jaccard*.txt")
 
     script:
     """
-    labelA=${peakA.baseName}
-    labelB=${peakB.baseName}
     bedtools jaccard -a ${peakA} -b ${peakB} -g ${chrom_sizes} |\\
       tail -n 1 |\\
-      awk -v a=\$labelA -v b=\$labelB -v tool=${tool} \\
-        '{printf("%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n",tool,a,b,\$1,\$2,\$3,\$4)}' > \\
-        jaccard_${tool}_\${labelA}_vs_\${labelB}.txt
+      awk -v fA=${peakA} -v fB=${peakB} -v tA=${toolA} -v tB=${toolB} \\
+        '{printf("%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n",fA,tA,fB,tB,\$1,\$2,\$3,\$4)}' > \\
+        jaccard_${toolA}_${metaA.id}_vs_${toolB}_${metaB.id}.txt
     """
     stub:
     """
@@ -331,9 +329,13 @@ process CONCAT_JACCARD {
 
     script:
     """
-    echo -e "tool\\tlabelA\\tlabelB\\tintersection\\tunion\\tjaccard\\tn_intersections" > jaccard_all.txt
+    echo -e "fileA\\ttoolA\\tfileB\\ttoolB\\tintersection\\tunion\\tjaccard\\tn_intersections" > jaccard_all.txt
     cat ${jaccards} |\\
       sort -k 1,1 -k 2,2 >>\\
       jaccard_all.txt
+    """
+    stub:
+    """
+    touch jaccard_all.txt
     """
 }
