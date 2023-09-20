@@ -307,7 +307,7 @@ process JACCARD_INDEX {
     """
     bedtools jaccard -a ${peakA} -b ${peakB} -g ${chrom_sizes} |\\
       tail -n 1 |\\
-      awk -v fA=${peakA} -v fB=${peakB} -v tA=${toolA} -v tB=${toolB} \\
+      awk -v fA=${metaA.id} -v fB=${metaB.id} -v tA=${toolA} -v tB=${toolB} \\
         '{printf("%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n",fA,tA,fB,tB,\$1,\$2,\$3,\$4)}' > \\
         jaccard_${toolA}_${metaA.id}_vs_${toolB}_${metaB.id}.txt
     """
@@ -329,7 +329,7 @@ process CONCAT_JACCARD {
 
     script:
     """
-    echo -e "fileA\\ttoolA\\tfileB\\ttoolB\\tintersection\\tunion\\tjaccard\\tn_intersections" > jaccard_all.txt
+    echo -e "labelA\\ttoolA\\tlabelB\\ttoolB\\tintersection\\tunion\\tjaccard\\tn_intersections" > jaccard_all.txt
     cat ${jaccards} |\\
       sort -k 1,1 -k 2,2 >>\\
       jaccard_all.txt
