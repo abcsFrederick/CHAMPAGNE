@@ -48,14 +48,11 @@ workflow CALL_PEAKS {
         ch_tagalign | SICER | CONVERT_SICER
         GEM(ch_gem, chrom_files)
 
-        MACS_BROAD.out.peak.set{ macs_broad_peaks }
-        MACS_NARROW.out.peak.set{ macs_narrow_peaks }
-        CONVERT_SICER.out.peak.set{ sicer_peaks }
-        GEM.out.peak.set{ gem_peaks }
-        sicer_peaks.mix(gem_peaks,
-                        macs_broad_peaks,
-                        macs_narrow_peaks
-                       ).set{ ch_peaks }
+        CONVERT_SICER.out.peak
+            .mix(GEM.out.peak,
+                 MACS_BROAD.out.peak,
+                 MACS_NARROW.out.peak
+                ).set{ ch_peaks }
 
         // Create Channel with meta, deduped bam, peak file, peak-calling tool, and chrom sizes fasta
         deduped_bam.cross(ch_peaks)
@@ -71,7 +68,7 @@ workflow CALL_PEAKS {
         ch_peaks
             .combine(ch_peaks) // jaccard index on all-vs-all samples & peak-calling tools
             .map{ meta1, peaks1, tool1, meta2, peaks2, tool2 ->
-                !(meta1 == meta2 && tool1 == tool2) ? [ meta1, peaks1, tool1, meta2, peaks2, tool2 ]: null
+                !(meta1.id == meta2.id && tool1 == tool2) ? [ meta1, peaks1, tool1, meta2, peaks2, tool2 ]: null
             }
             .combine(chrom_sizes)
             .set{ pairwise_peaks }
