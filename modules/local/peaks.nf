@@ -297,6 +297,8 @@ process JACCARD_INDEX {
     label 'peaks'
     label 'process_single'
 
+    container "${params.containers.base}"
+
     input:
         tuple val(metaA), path(peakA), val(toolA),  val(metaB), path(peakB), val(toolB), path(chrom_sizes)
 
@@ -326,6 +328,8 @@ process CONCAT_JACCARD {
     label 'peaks'
     label 'process_single'
 
+    container "${params.containers.base}"
+
     input:
         path(jaccards)
 
@@ -348,6 +352,8 @@ process CONCAT_JACCARD {
 process PLOT_JACCARD {
     label 'peaks'
     label 'process_single'
+
+    container "${params.containers.r}"
 
     input:
         path(jaccard)
