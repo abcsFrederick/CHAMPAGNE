@@ -50,7 +50,8 @@ workflow CALL_PEAKS {
         MACS_NARROW.out.peak.set{ macs_narrow_peaks }
         CONVERT_SICER.out.peak.set{ sicer_peaks }
         GEM.out.peak.set{ gem_peaks }
-        sicer_peaks.mix(gem_peaks, macs_broad_peaks, macs_narrow_peaks).set{ ch_peaks }
+        sicer_peaks.mix(gem_peaks,
+            macs_broad_peaks, macs_narrow_peaks).set{ ch_peaks }
 
         // Create Channel with meta, deduped bam, peak file, peak-calling tool, and chrom sizes fasta
         deduped_bam.cross(ch_peaks)
@@ -58,11 +59,11 @@ workflow CALL_PEAKS {
                it.flatten()
             }
             .map{  meta1, bam, bai, meta2, peak, tool ->
-                [ meta1, bam, peak, tool ]
+                [ meta1, bam, bai, peak, tool ]
             }
             .combine(chrom_sizes)
             .set{ ch_bam_peaks }
-        //ch_bam_peaks | FRACTION_IN_PEAKS
+        ch_bam_peaks | FRACTION_IN_PEAKS
 
     emit:
         ch_bam_peaks
