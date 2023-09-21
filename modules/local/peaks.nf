@@ -256,18 +256,45 @@ process FRACTION_IN_PEAKS {
         tuple val(meta), path(dedup_bam), path(dedup_bai), path(peaks), val(peak_tool), path(chrom_sizes)
 
     output:
-        path("*.frip.txt")
+        path("*.FRiP.txt")
 
     script:
     """
     export OPENBLAS_NUM_THREADS='1'
-    frip.py -p ${peaks} -b ${dedup_bam} -g ${chrom_sizes} -o ${meta.id}_${peak_tool}.frip.txt
+    frip.py -p ${peaks} -b ${dedup_bam} -g ${chrom_sizes} -t ${peak_tool} -s ${meta.id} -o ${meta.id}_${peak_tool}.FRiP.txt
     """
 
     stub:
     """
-    touch ${meta.id}_${peak_tool}.frip.txt
+    touch ${meta.id}_${peak_tool}.FRiP.txt
     """
+}
+
+process CONCAT_FRIPS {
+    label 'peaks'
+    label 'process_single'
+
+    container "${params.containers.base}"
+
+    input:
+        path(frips)
+
+    output:
+        path("FRiP.txt")
+
+    script:
+    """
+    header=`head -n 1 ${frips.get(1)}`
+    echo \$header > FRiP.txt
+    for f in ${frips}; do
+        tail -n 1 \$f >> FRiP.txt
+    done
+    """
+    stub:
+    """
+    touch FRiP.txt
+    """
+
 }
 
 process PLOT_FRIP {
@@ -279,16 +306,15 @@ process PLOT_FRIP {
         path(frips)
 
     output:
-        path("*.pdf")
+        path("*.png")
 
     script:
     """
-    cat ${frips} > frips.txt
-    Rscript bin/plot_frip.R frips.txt
+    Rscript bin/plot_frip.R ${frips}
     """
 
     stub:
     """
-    touch FRiP_barplot.pdf
+    touch FRiP_barplot.png
     """
 }

@@ -92,7 +92,7 @@ def clip_bedfile_name(bedfile, filetype):
     return (toolused, sample)
 
 
-def process_files(bamfile, bedfiles, genome, filetypes):
+def process_files(bamfile, bedfiles, genome, filetypes, bedtool=None, bedsample=None):
     """
     this is the main function to take in list of input files and
     put out an array containing key file name information, read
@@ -120,7 +120,8 @@ def process_files(bamfile, bedfiles, genome, filetypes):
             filetype = filetypesL[i]
         else:
             filetype = filetypesL[0]
-        (bedtool, bedsample) = clip_bedfile_name(bed, filetype)
+        if not bedtool and not bedsample:
+            (bedtool, bedsample) = clip_bedfile_name(bed, filetype)
         noverlaps = count_reads_in_bed(bamfile, bed, genome)
         frip = calculate_frip(nreads, noverlaps)
         nbases = measure_bedfile_coverage(bed, genome) / 1000000
@@ -182,15 +183,27 @@ size of every chromosome.",
         "-o",
         dest="outroot",
         default="",
-        help='The root name of the multiple output files. Default: ""',
+        help='The root name of the output file. Default: ""',
     )
     parser.add_option(
-        "-t",
+        "-f",
         dest="filetypes",
         default="",
         help='A space- \
 or semicolon-delimited list of input file sources/types. Only needed when \
 source of bed file is not built into the script. Default: ""',
+    )
+    parser.add_option(
+        "-t",
+        dest="tool",
+        default="",
+        help='Name of the peak-calling tool'
+    )
+    parser.add_option(
+        "-s",
+        dest="sample",
+        default="",
+        help='Sample name/ID of the bedfile(s)'
     )
 
     (options, args) = parser.parse_args()
@@ -199,10 +212,13 @@ source of bed file is not built into the script. Default: ""',
     genomefile = options.genomefile
     outroot = options.outroot
     filetypes = options.filetypes
+    tool = options.tool
+    sample = options.sample
 
-    out2 = process_files(bamfile, bedfiles, genomefile, filetypes)
-    outtable = create_outfile_name(bamfile, outroot)
-    write_table(out2, outtable)
+    out2 = process_files(bamfile, bedfiles, genomefile, filetypes, tool, sample)
+    #outtable = create_outfile_name(bamfile, outroot)
+    #write_table(out2, outtable)
+    out2.to_csv(outroot, sep="\t", index=False)
 
 
 if __name__ == "__main__":
