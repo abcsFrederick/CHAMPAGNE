@@ -338,7 +338,7 @@ process CONCAT_JACCARD {
 
     script:
     """
-    echo -e "fileA\\tlabelA\\ttoolA\\tfileB\\labelB\\ttoolB\\tintersection\\tunion\\tjaccard\\tn_intersections" > jaccard_all.txt
+    echo -e "fileA\\tlabelA\\ttoolA\\tfileB\\tlabelB\\ttoolB\\tintersection\\tunion\\tjaccard\\tn_intersections" > jaccard_all.txt
     cat ${jaccards} |\\
       sort -k 1,1 -k 2,2 >>\\
       jaccard_all.txt
