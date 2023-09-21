@@ -6,8 +6,12 @@ include { SICER             } from "../../modules/local/peaks.nf"
 include { CONVERT_SICER     } from "../../modules/local/peaks.nf"
 include { GEM               } from "../../modules/local/peaks.nf"
 include { FRACTION_IN_PEAKS } from "../../modules/local/peaks.nf"
+<<<<<<< HEAD
 include { JACCARD_INDEX     } from "../../modules/local/peaks.nf"
 include { CONCAT_JACCARD    } from "../../modules/local/peaks.nf"
+=======
+include { CONCAT_FRIPS      } from "../../modules/local/peaks.nf"
+>>>>>>> frip
 
 
 workflow CALL_PEAKS {
@@ -54,16 +58,20 @@ workflow CALL_PEAKS {
                  MACS_NARROW.out.peak
                 ).set{ ch_peaks }
 
+
         // Create Channel with meta, deduped bam, peak file, peak-calling tool, and chrom sizes fasta
         deduped_bam.cross(ch_peaks)
             .map{ it ->
                it.flatten()
             }
             .map{  meta1, bam, bai, meta2, peak, tool ->
-                [ meta1, bam, peak, tool ]
+                [ meta1, bam, bai, peak, tool ]
             }
             .combine(chrom_sizes)
             .set{ ch_bam_peaks }
+        ch_bam_peaks | FRACTION_IN_PEAKS
+        FRACTION_IN_PEAKS.out.collect() | CONCAT_FRIPS
+
         //ch_bam_peaks | FRACTION_IN_PEAKS
         ch_peaks
             .combine(ch_peaks) // jaccard index on all-vs-all samples & peak-calling tools
@@ -74,6 +82,8 @@ workflow CALL_PEAKS {
             .set{ pairwise_peaks }
         pairwise_peaks | JACCARD_INDEX
         JACCARD_INDEX.out.collect() | CONCAT_JACCARD
+
+
 
     emit:
         ch_bam_peaks
