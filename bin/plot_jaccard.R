@@ -8,7 +8,7 @@ library(readr)
 
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) < 1) {
-  stop("Error: not enough positional arguments.\n\tExample usage:\n\t\tRscript plot_jaccard.R path/to/jaccard.txt")
+  stop("Error: not enough positional arguments.\n  Example usage:\n   Rscript plot_jaccard.R path/to/jaccard.txt")
 }
 jaccard_tsv <- args[1]
 jaccard_dat <- read_tsv(jaccard_tsv)
@@ -39,8 +39,7 @@ per_tool <- peak_callers %>% sapply(function(tool) {
 })
 
 # one plot with all tools on same samples
-dat <- jaccard_dat %>%
-  filter(toolA != toolB & fileA == fileB)
+dat <- jaccard_dat %>% filter(toolA != toolB & labelA == labelB)
 pca <- dat %>%
   select(jaccard) %>%
   prcomp(scale = TRUE)
