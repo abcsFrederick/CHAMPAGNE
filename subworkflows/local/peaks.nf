@@ -6,12 +6,9 @@ include { SICER             } from "../../modules/local/peaks.nf"
 include { CONVERT_SICER     } from "../../modules/local/peaks.nf"
 include { GEM               } from "../../modules/local/peaks.nf"
 include { FRACTION_IN_PEAKS } from "../../modules/local/peaks.nf"
-<<<<<<< HEAD
+include { CONCAT_FRIPS      } from "../../modules/local/peaks.nf"
 include { JACCARD_INDEX     } from "../../modules/local/peaks.nf"
 include { CONCAT_JACCARD    } from "../../modules/local/peaks.nf"
-=======
-include { CONCAT_FRIPS      } from "../../modules/local/peaks.nf"
->>>>>>> frip
 
 
 workflow CALL_PEAKS {
