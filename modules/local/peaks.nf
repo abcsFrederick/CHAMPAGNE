@@ -304,6 +304,8 @@ process PLOT_FRIP {
     label 'peaks'
     label 'process_single'
 
+    container "${params.containers.r}"
+
     input:
         path(frips)
 
@@ -312,11 +314,11 @@ process PLOT_FRIP {
 
     script:
     """
-    Rscript bin/plot_frip.R ${frips}
+    plot_frip.R ${frips}
     """
 
     stub:
     """
-    touch FRiP_barplot.png
+    touch blank.png
     """
 }
