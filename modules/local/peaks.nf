@@ -215,8 +215,7 @@ process GEM {
     container = "${params.containers.gem}"
 
     input:
-        tuple val(meta), path(chip), path(input), path(read_dists), path(chrom_sizes)
-        path(chrom_files)
+        tuple val(meta), path(chip), path(input), path(read_dists), path(chrom_sizes), path(chrom_dir)
 
     output:
         tuple val(meta), path("${meta.id}/*.narrowPeak"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
@@ -229,7 +228,7 @@ process GEM {
       --t ${task.cpus} \\
       --d ${read_dists} \\
       --g ${chrom_sizes} \\
-      --genome ${chrom_files} \\
+      --genome ${chrom_dir} \\
       --expt ${chip} \\
       --ctrl ${input} \\
       --out ${meta.id} \\

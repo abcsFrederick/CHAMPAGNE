@@ -38,14 +38,13 @@ workflow CALL_PEAKS {
             }
             .combine(Channel.fromPath(params.gem_read_dists, checkIfExists: true))
             .combine(chrom_sizes)
+            .combine(Channel.fromPath("${params.genomes[ params.genome ].chromosomes_dir}", type: 'dir', checkIfExists: true))
             .set { ch_gem }
-        Channel.fromPath("${params.genomes[ params.genome ].chromosomes_dir}", type: 'dir', checkIfExists: true)
-            .set{ chrom_files }
 
         ch_tagalign | MACS_BROAD
         ch_tagalign | MACS_NARROW
         ch_tagalign | SICER | CONVERT_SICER
-        GEM(ch_gem, chrom_files)
+        GEM(ch_gem)
 
         MACS_BROAD.out.peak.set{ macs_broad_peaks }
         MACS_NARROW.out.peak.set{ macs_narrow_peaks }
