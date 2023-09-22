@@ -242,7 +242,9 @@ process GEM {
     stub:
     """
     mkdir ${meta.id}
-    touch ${meta.id}/${meta.id}.GEM_events.txt
+    for ext in GEM_events.txt narrowPeak; do
+        touch ${meta.id}/${meta.id}.\$ext
+    done
     """
 }
 
