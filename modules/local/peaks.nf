@@ -219,7 +219,8 @@ process GEM {
         path(chrom_files)
 
     output:
-        tuple val(meta), path("${meta.id}/*.GEM_events.txt"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
+        tuple val(meta), path("${meta.id}/*.narrowPeak"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
+        tuple val(meta), path("${meta.id}/*.txt"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: event
 
     script:
     // $GEMJAR is defined in the docker container
