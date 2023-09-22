@@ -215,12 +215,11 @@ process GEM {
     container = "${params.containers.gem}"
 
     input:
-        tuple val(meta), path(chip), path(input), path(read_dists), path(chrom_sizes)
-        path(chrom_files)
+        tuple val(meta), path(chip), path(input), path(read_dists), path(chrom_sizes), path(chrom_dir)
 
     output:
-        tuple val(meta), path("${meta.id}/*.narrowPeak"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
-        tuple val(meta), path("${meta.id}/*.txt"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: event
+        tuple val(meta), path("${meta.id}/*GEM_events.narrowPeak"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
+        tuple val(meta), path("${meta.id}/*GEM_events.txt"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: event
 
     script:
     // $GEMJAR is defined in the docker container
@@ -229,7 +228,7 @@ process GEM {
       --t ${task.cpus} \\
       --d ${read_dists} \\
       --g ${chrom_sizes} \\
-      --genome ${chrom_files} \\
+      --genome ${chrom_dir} \\
       --expt ${chip} \\
       --ctrl ${input} \\
       --out ${meta.id} \\
@@ -242,8 +241,8 @@ process GEM {
     stub:
     """
     mkdir ${meta.id}
-    for ext in GEM_events.txt narrowPeak; do
-        touch ${meta.id}/${meta.id}.\$ext
+    for ext in txt narrowPeak; do
+        touch ${meta.id}/${meta.id}.GEM_events.\$ext
     done
     """
 }

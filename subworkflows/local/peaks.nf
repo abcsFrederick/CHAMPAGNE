@@ -40,14 +40,13 @@ workflow CALL_PEAKS {
             }
             .combine(Channel.fromPath(params.gem_read_dists, checkIfExists: true))
             .combine(chrom_sizes)
+            .combine(Channel.fromPath("${params.genomes[ params.genome ].chromosomes_dir}", type: 'dir', checkIfExists: true))
             .set { ch_gem }
-        Channel.fromPath("${params.genomes[ params.genome ].chromosomes_dir}", type: 'dir', checkIfExists: true)
-            .set{ chrom_files }
 
         ch_tagalign | MACS_BROAD
         ch_tagalign | MACS_NARROW
         ch_tagalign | SICER | CONVERT_SICER
-        GEM(ch_gem, chrom_files)
+        GEM(ch_gem)
 
         CONVERT_SICER.out.peak
             .mix(GEM.out.peak,
@@ -62,7 +61,7 @@ workflow CALL_PEAKS {
                it.flatten()
             }
             .map{  meta1, bam, bai, meta2, peak, tool ->
-                [ meta1, bam, bai, peak, tool ]
+                meta1 == meta2 ? [ meta1, bam, bai, peak, tool ] : null
             }
             .combine(chrom_sizes)
             .set{ ch_bam_peaks }
