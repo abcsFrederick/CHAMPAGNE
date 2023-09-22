@@ -59,7 +59,7 @@ workflow CALL_PEAKS {
                it.flatten()
             }
             .map{  meta1, bam, bai, meta2, peak, tool ->
-                [ meta1, bam, bai, peak, tool ]
+                meta1 == meta2 ? [ meta1, bam, bai, peak, tool ] : null
             }
             .combine(chrom_sizes)
             .set{ ch_bam_peaks }
