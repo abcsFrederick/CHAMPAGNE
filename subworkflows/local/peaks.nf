@@ -68,7 +68,6 @@ workflow CALL_PEAKS {
         ch_bam_peaks | FRACTION_IN_PEAKS
         FRACTION_IN_PEAKS.out.collect() | CONCAT_FRIPS
 
-        //ch_bam_peaks | FRACTION_IN_PEAKS
         ch_peaks
             .combine(ch_peaks) // jaccard index on all-vs-all samples & peak-calling tools
             .map{ meta1, peaks1, tool1, meta2, peaks2, tool2 ->
