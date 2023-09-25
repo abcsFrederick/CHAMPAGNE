@@ -72,9 +72,6 @@ workflow CALL_PEAKS {
 
         ch_peaks
             .combine(ch_peaks) // jaccard index on all-vs-all samples & peak-calling tools
-            .map{ meta1, peaks1, tool1, meta2, peaks2, tool2 ->
-                !(meta1.id == meta2.id && tool1 == tool2) ? [ meta1, peaks1, tool1, meta2, peaks2, tool2 ]: null
-            }
             .combine(chrom_sizes)
             .set{ pairwise_peaks }
         pairwise_peaks | JACCARD_INDEX
