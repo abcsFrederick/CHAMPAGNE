@@ -72,11 +72,14 @@ workflow CALL_PEAKS {
 
         ch_peaks
             .combine(ch_peaks) // jaccard index on all-vs-all samples & peak-calling tools
-            .combine(chrom_sizes)
-            .set{ pairwise_peaks }
-        pairwise_peaks | JACCARD_INDEX
+            .map{ meta1, peak1, tool1, meta2, peak2, tool2 ->
+                meta1 != meta2 || tool1 != tool2 -> meta1, peak1, tool1, meta2, peak2, tool2
+            }
+            .combine(chrom_sizes) | JACCARD_INDEX
         JACCARD_INDEX.out.collect() | CONCAT_JACCARD | PLOT_JACCARD
 
     emit:
-        ch_bam_peaks
+        peaks = ch_bam_peaks
+        frip_plots = PLOT_FRIP.out
+        jaccard_plots = PLOT_JACCARD.out
 }
