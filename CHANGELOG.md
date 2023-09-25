@@ -4,6 +4,7 @@
 
 - Implemented peak calling with sicer2, macs2, and gem. (#52)
 - Added parameter options to skip QC, input normalization, and/or peak calling steps. (#72)
+- Calculate and plot the Fraction in Peaks (FRiP) metric (#89)
 
 ### Bug fixes
 
