@@ -78,6 +78,10 @@ workflow CALL_PEAKS {
             .combine(chrom_sizes) | JACCARD_INDEX
         JACCARD_INDEX.out.collect() | CONCAT_JACCARD | PLOT_JACCARD
 
+        ch_plots = PLOT_FRIP.out
+            .mix(PLOT_JACCARD.out)
+
     emit:
-        ch_bam_peaks
+        peaks = ch_bam_peaks
+        plots = ch_plots
 }

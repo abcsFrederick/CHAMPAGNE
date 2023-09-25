@@ -100,7 +100,7 @@ workflow QC {
                     meta1.control == meta2.id ? [ meta1, bw1, bw2 ] : null
             }
             .set { ch_ip_ctrl_bigwig }
-
+        /*
         MULTIQC(
             Channel.fromPath(params.multiqc_config, checkIfExists: true),
             FASTQC_RAW.out.zip.collect(),
@@ -116,9 +116,22 @@ workflow QC {
             PLOT_PCA.out.tab.collect(),
             PLOT_PROFILE.out.tab.collect()
         )
+        */
+        ch_multiqc = FASTQC_RAW.out.zip.mix(
+            FASTQC_TRIMMED.out.zip,
+            FASTQ_SCREEN.out.screen,
+            deduped_flagstat,
+            ppqt_spp,
+            QC_TABLE.out,
+            PLOT_FINGERPRINT.out.matrix,
+            PLOT_FINGERPRINT.out.metrics,
+            PLOT_CORRELATION.out.tab,
+            PLOT_PCA.out.tab,
+            PLOT_PROFILE.out.tab
+        )
 
     emit:
         bigwigs = ch_ip_ctrl_bigwig
-        multiqc_report = MULTIQC.out.html
+        multiqc_input = ch_multiqc
 
 }
