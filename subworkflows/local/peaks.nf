@@ -1,15 +1,16 @@
 
-include { CALC_GENOME_FRAC  } from "../../modules/local/peaks.nf"
-include { MACS_BROAD        } from "../../modules/local/peaks.nf"
-include { MACS_NARROW       } from "../../modules/local/peaks.nf"
-include { SICER             } from "../../modules/local/peaks.nf"
-include { CONVERT_SICER     } from "../../modules/local/peaks.nf"
-include { GEM               } from "../../modules/local/peaks.nf"
-include { FRACTION_IN_PEAKS } from "../../modules/local/peaks.nf"
-include { CONCAT_FRIPS      } from "../../modules/local/peaks.nf"
-include { PLOT_FRIP         } from "../../modules/local/peaks.nf"
-include { JACCARD_INDEX     } from "../../modules/local/peaks.nf"
-include { CONCAT_JACCARD    } from "../../modules/local/peaks.nf"
+include { CALC_GENOME_FRAC
+          MACS_BROAD
+          MACS_NARROW
+          SICER
+          CONVERT_SICER
+          GEM
+          FRACTION_IN_PEAKS
+          CONCAT_FRIPS
+          PLOT_FRIP
+          JACCARD_INDEX
+          CONCAT_JACCARD
+          PLOT_JACCARD      } from "../../modules/local/peaks.nf"
 
 
 workflow CALL_PEAKS {
@@ -77,9 +78,7 @@ workflow CALL_PEAKS {
             .combine(chrom_sizes)
             .set{ pairwise_peaks }
         pairwise_peaks | JACCARD_INDEX
-        JACCARD_INDEX.out.collect() | CONCAT_JACCARD
-
-
+        JACCARD_INDEX.out.collect() | CONCAT_JACCARD | PLOT_JACCARD
 
     emit:
         ch_bam_peaks
