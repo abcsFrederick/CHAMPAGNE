@@ -23,7 +23,7 @@ sample_frip_plot <- frip_dat %>%
   labs(x = "Fraction of Reads in Peaks", y = "") +
   theme_bw() +
   theme(panel.grid.major.y = element_blank())
-ggsave(filename = "FRiP_samples_mqc.png", plot = sample_frip_plot, device = "png")
+ggsave(filename = "samples_FRiP_mqc.png", plot = sample_frip_plot, device = "png")
 
 nbasesM_frip_plot <- frip_dat %>%
   ggplot(aes(n_basesM, FRiP, color = bedsample, shape = bedtool)) +
@@ -34,4 +34,4 @@ nbasesM_frip_plot <- frip_dat %>%
   ) +
   labs(x = "Number of Bases (millions) in Peaks", y = "Fraction of Reads in Peaks") +
   theme_bw()
-ggsave(filename = "FRiP_nbasesM_mqc.png", plot = nbasesM_frip_plot, device = "png")
+ggsave(filename = "nbasesM_FRiP_mqc.png", plot = nbasesM_frip_plot, device = "png")
