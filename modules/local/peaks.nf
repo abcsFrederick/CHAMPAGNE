@@ -286,8 +286,7 @@ process CONCAT_FRIPS {
 
     script:
     """
-    header=`head -n 1 ${frips.get(1)}`
-    echo \$header > FRiP.txt
+    head -n 1 ${frips.get(1)} > FRiP.txt
     for f in ${frips}; do
         tail -n 1 \$f >> FRiP.txt
     done
@@ -300,9 +299,10 @@ process CONCAT_FRIPS {
 }
 
 process PLOT_FRIP {
-    tag { meta.id }
     label 'peaks'
     label 'process_single'
+
+    container "${params.containers.r}"
 
     input:
         path(frips)
@@ -312,12 +312,12 @@ process PLOT_FRIP {
 
     script:
     """
-    Rscript bin/plot_frip.R ${frips}
+    plot_frip.R ${frips}
     """
 
     stub:
     """
-    touch FRiP_barplot.png
+    touch blank.png
     """
 }
 

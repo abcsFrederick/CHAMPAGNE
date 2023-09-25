@@ -7,6 +7,7 @@ include { CONVERT_SICER     } from "../../modules/local/peaks.nf"
 include { GEM               } from "../../modules/local/peaks.nf"
 include { FRACTION_IN_PEAKS } from "../../modules/local/peaks.nf"
 include { CONCAT_FRIPS      } from "../../modules/local/peaks.nf"
+include { PLOT_FRIP         } from "../../modules/local/peaks.nf"
 include { JACCARD_INDEX     } from "../../modules/local/peaks.nf"
 include { CONCAT_JACCARD    } from "../../modules/local/peaks.nf"
 
@@ -66,7 +67,7 @@ workflow CALL_PEAKS {
             .combine(chrom_sizes)
             .set{ ch_bam_peaks }
         ch_bam_peaks | FRACTION_IN_PEAKS
-        FRACTION_IN_PEAKS.out.collect() | CONCAT_FRIPS
+        FRACTION_IN_PEAKS.out.collect() | CONCAT_FRIPS | PLOT_FRIP
 
         ch_peaks
             .combine(ch_peaks) // jaccard index on all-vs-all samples & peak-calling tools
