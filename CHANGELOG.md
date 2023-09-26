@@ -7,6 +7,7 @@
 - Calculate and plot QC metrics for called peaks:
   - Fraction in Peaks (FRiP) (#89)
   - Jaccard index (#92)
+  - Histogram of peak widths (#92)
 
 ### Bug fixes
 
