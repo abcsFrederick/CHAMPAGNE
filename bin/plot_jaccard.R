@@ -4,6 +4,7 @@ library(broom)
 library(dplyr)
 library(ggplot2)
 library(glue)
+library(purrr)
 library(readr)
 library(tidyr)
 
@@ -42,11 +43,6 @@ jaccard_dat <- read_tsv(jaccard_tsv) %>%
     tool_label_B = glue("{toolB} | {labelB}")
   )
 
-# one PCA with all tools & samples
-jaccard_dat %>%
-  plot_jaccard_pca() %>%
-  ggsave(plot = ., filename = "jaccard_pca_all_mqc.png", device = "png")
-
 # heatmap on all tools & samples
 jaccard_heatmap <- jaccard_dat %>%
   ggplot(aes(x = tool_label_A, y = tool_label_B, fill = jaccard)) +
@@ -58,7 +54,12 @@ jaccard_heatmap <- jaccard_dat %>%
     axis.title.x = element_blank(),
     axis.title.y = element_blank()
   )
-ggsave(plot = jaccard_heatmap, filename = "jaccard_heatmap_all_mqc.png", device = "png")
+ggsave(plot = jaccard_heatmap, filename = "jaccard_heatmap_all.png", device = "png")
+
+# one PCA with all tools & samples
+jaccard_dat %>%
+  plot_jaccard_pca() %>%
+  ggsave(plot = ., filename = "jaccard_pca_all.png", device = "png")
 
 # plot PCA per peak-calling tool
 peak_callers <- c(
@@ -66,14 +67,25 @@ peak_callers <- c(
   jaccard_dat %>% pull(toolB)
 ) %>%
   unique()
-per_tool <- peak_callers %>% sapply(function(tool) {
-  plot <- jaccard_dat %>%
-    filter(toolA == tool & toolB == tool) %>%
-    plot_jaccard_pca() + guides(shape = FALSE)
-  plot %>%
-    ggsave(
-      plot = .,
-      filename = glue("jaccard_pca_{tool}_mqc.png"),
-      device = "png"
-    )
-})
+pca_per_tool <- peak_callers %>%
+  map(function(tool) {
+    dat_wide <- jaccard_dat %>%
+      filter(toolA == tool & toolB == tool) %>%
+      select(labelA, labelB, jaccard) %>%
+      pivot_wider(names_from = labelA, values_from = jaccard) %>%
+      mutate(across(where(is.numeric), ~ replace_na(., 1)))
+    pca_tidy <- dat_wide %>%
+      select(-labelB) %>%
+      prcomp(scale = TRUE) %>%
+      augment(dat_wide) %>%
+      mutate(tool = tool) %>%
+      rename(label = labelB)
+    return(pca_tidy)
+  }) %>%
+  list_rbind() %>%
+  ggplot(aes(.fittedPC1, .fittedPC2, color = label, shape = tool)) +
+  geom_point(size = 2.5, alpha = 0.8) +
+  facet_wrap("tool") +
+  labs(x = "PC1", y = "PC2") +
+  theme_bw()
+ggsave(plot = pca_per_tool, filename = "jaccard_pca_tool.png", device = "png")

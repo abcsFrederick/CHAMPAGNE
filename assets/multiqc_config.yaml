@@ -1,4 +1,4 @@
-custom_logo: "assets/ccbr_logo.png"
+custom_logo: "ccbr_logo.png"
 custom_url: "https://bioinformatics.ccr.cancer.gov/ccbr/"
 custom_logo_title: "CCR Collaborative Bioinformatics Resource"
 
@@ -129,20 +129,28 @@ custom_data:
       ymax: 100
       ymin: 1
   frip_samples:
+    parent_id: peak_qc
+    parent_name: "Peak QC"
+    parent_description: "Qualtiy control metrics on called peaks"
+    id: frip_samples
     section_name: "FRiP of all samples"
-    parent_id: frip
   frip_nbases:
+    parent_id: peak_qc
+    id: frip_nbases
     section_name: "FRiP vs. number of bases"
-    parent_id: frip
-  jaccard_pca:
-    section_name: "PCA on Jaccard index of peaks from all-vs-all samples & tools"
-    parent_id: jaccard
-  jaccard_heatmap:
-    section_name: "Heatmap of Jaccard index"
-    parent_id: jaccard
   peak_widths:
+    parent_id: peak_qc
+    id: peak_widths
     section_name: "Distribution of peak widths"
-    parent_id: frip
+  jaccard_heatmap:
+    parent_id: peak_qc
+    id: jaccard_heatmap
+    section_name: "Heatmap of Jaccard index"
+  jaccard_pca_all:
+    parent_id: peak_qc
+    id: jaccard_pca_all
+    section_name: "PCA of Jaccard index"
+    description: "PCA on Jaccard index of peaks from all-vs-all samples & tools"
 
 sp:
   QC_Table:
@@ -153,9 +161,12 @@ sp:
     fn: "FRiP_samples*.png"
   frip_nbases:
     fn: "FRiP_nbases*.png"
-  jaccard_pca:
-    fn: "jaccard_pca*.png"
   jaccard_heatmap:
-    fn: "jaccard_heatmap*.png"
+    fn: "jaccard_heatmap_all*.png"
+  jaccard_pca_all:
+    fn: "jaccard_pca_all*.png"
+  jaccard_pca_tool:
+    fn: "jaccard_pca_tool*.png"
   peak_widths:
     fn: "peak_widths*.png"
+ignore_images: false

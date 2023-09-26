@@ -81,7 +81,8 @@ workflow {
     }
 
     MULTIQC(
-        Channel.fromPath(params.multiqc_config, checkIfExists: true),
+        file(params.multiqc.config, checkIfExists: true),
+        file(params.multiqc.logo, checkIfExists: true),
         ch_multiqc.collect()
     )
 

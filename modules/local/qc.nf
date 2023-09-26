@@ -347,6 +347,7 @@ process MULTIQC {
 
     input:
         path(multiqc_conf)
+        path(custom_logo)
         path(input_files)
 
     output:
