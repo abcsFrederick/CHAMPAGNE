@@ -320,3 +320,157 @@ process PLOT_FRIP {
     touch blank.png
     """
 }
+
+process JACCARD_INDEX {
+    tag "${toolA} ${metaA.id} vs. ${toolB} ${metaB.id}"
+    label 'peaks'
+    label 'process_single'
+
+    container "${params.containers.base}"
+
+    input:
+        tuple val(metaA), path(peakA), val(toolA),  val(metaB), path(peakB), val(toolB), path(chrom_sizes)
+
+    output:
+        path("jaccard*.txt")
+
+    script:
+    // if groups are defined, use them as labels. otherwise use sample IDs.
+    def labelA = metaA.group ?: metaA.id
+    def labelB = metaB.group ?: metaB.id
+    """
+    bedtools sort -i ${peakA} -g ${chrom_sizes} > ${peakA.baseName}.sorted.bed
+    bedtools sort -i ${peakB} -g ${chrom_sizes} > ${peakB.baseName}.sorted.bed
+    bedtools jaccard -a ${peakA.baseName}.sorted.bed -b ${peakB.baseName}.sorted.bed -g ${chrom_sizes} |\\
+      tail -n 1 |\\
+      awk -v fA=${peakA} -v fB=${peakB} -v lA=${labelA} -v lB=${labelB} -v tA=${toolA} -v tB=${toolB} \\
+        '{printf("%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n",fA,lA,tA,fB,lB,tB,\$1,\$2,\$3,\$4)}' > \\
+        jaccard_${toolA}_${metaA.id}_vs_${toolB}_${metaB.id}.txt
+    """
+    stub:
+    """
+    touch jaccard_${toolA}_${metaA.id}_vs_${toolB}_${metaB.id}.txt
+    """
+}
+
+process CONCAT_JACCARD {
+    label 'peaks'
+    label 'process_single'
+
+    container "${params.containers.base}"
+
+    input:
+        path(jaccards)
+
+    output:
+        path("jaccard_all.txt")
+
+    script:
+    """
+    echo -e "fileA\\tlabelA\\ttoolA\\tfileB\\tlabelB\\ttoolB\\tintersection\\tunion\\tjaccard\\tn_intersections" > jaccard_all.txt
+    cat ${jaccards} |\\
+      sort -k 1,1 -k 2,2 >>\\
+      jaccard_all.txt
+    """
+    stub:
+    """
+    touch jaccard_all.txt
+    """
+}
+
+process PLOT_JACCARD {
+    label 'peaks'
+    label 'process_single'
+
+    container "${params.containers.r}"
+
+    input:
+        path(jaccard)
+
+    output:
+        path("*.png")
+
+    script:
+    """
+    plot_jaccard.R ${jaccard}
+    """
+
+    stub:
+    """
+    touch plot.png
+    """
+
+}
+
+process GET_PEAK_META {
+    tag "${meta.id}_${peak_tool}"
+    label 'peaks'
+    label 'process_single'
+
+    container "${params.containers.base}"
+
+    input:
+        tuple val(meta), path(dedup_bam), path(dedup_bai), path(peaks), val(peak_tool), path(chrom_sizes)
+
+    output:
+        path("*.tsv")
+
+    script:
+    """
+    awk -v id=${meta.id} -v tool=${peak_tool} 'BEGIN{FS=OFS="\\t"}{print id,tool,\$1,\$2,\$3}' ${peaks} > peak_meta_${meta.id}_${peak_tool}.tsv
+    """
+
+    stub:
+    """
+    touch peak_meta_${meta.id}_${peak_tool}.tsv
+    """
+}
+
+process CONCAT_PEAK_META {
+    label 'peaks'
+    label 'process_single'
+
+    container "${params.containers.base}"
+
+    input:
+        path(peak_metas)
+
+    output:
+        path("*.tsv")
+
+    script:
+    """
+    echo -e "sample_id\\ttool\\tchrom\\tchromStart\\tchromEnd" > peak_meta.tsv
+    cat ${peak_metas} |\\
+      sort -k 1,1 -k 2,2 >>\\
+      peak_meta.tsv
+    """
+
+    stub:
+    """
+    touch peak_meta.tsv
+    """
+}
+
+process PLOT_PEAK_WIDTHS {
+    label 'peaks'
+    label 'process_single'
+
+    container "${params.containers.r}"
+
+    input:
+        path(peak_meta)
+
+    output:
+        path("*.png")
+
+    script:
+    """
+    plot_peak_widths.R ${peak_meta}
+    """
+
+    stub:
+    """
+    touch peak_widths.png
+    """
+}
