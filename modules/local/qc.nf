@@ -343,8 +343,6 @@ process QC_TABLE {
 }
 
 process MULTIQC {
-    label 'qc'
-
     container = "${params.containers.multiqc}"
 
     input:
