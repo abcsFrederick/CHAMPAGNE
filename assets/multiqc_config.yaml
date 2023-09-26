@@ -140,6 +140,9 @@ custom_data:
   jaccard_heatmap:
     section_name: "Heatmap of Jaccard index"
     parent_id: jaccard
+  peak_widths:
+    section_name: "Distribution of peak widths"
+    parent_id: frip
 
 sp:
   QC_Table:
@@ -154,3 +157,5 @@ sp:
     fn: "jaccard_pca*.png"
   jaccard_heatmap:
     fn: "jaccard_heatmap*.png"
+  peak_widths:
+    fn: "peak_widths*.png"

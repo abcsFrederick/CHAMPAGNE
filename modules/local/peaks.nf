@@ -401,3 +401,76 @@ process PLOT_JACCARD {
     """
 
 }
+
+process GET_PEAK_META {
+    tag "${meta.id}_${peak_tool}"
+    label 'peaks'
+    label 'process_single'
+
+    container "${params.containers.base}"
+
+    input:
+        tuple val(meta), path(dedup_bam), path(dedup_bai), path(peaks), val(peak_tool), path(chrom_sizes)
+
+    output:
+        path("*.tsv")
+
+    script:
+    """
+    awk -v id=${meta.id} -v tool=${peak_tool} 'BEGIN{FS=OFS="\\t"}{print id,tool,\$1,\$2,\$3}' ${peaks} > peak_meta_${meta.id}_${peak_tool}.tsv
+    """
+
+    stub:
+    """
+    touch peak_meta_${meta.id}_${peak_tool}.tsv
+    """
+}
+
+process CONCAT_PEAK_META {
+    label 'peaks'
+    label 'process_single'
+
+    container "${params.containers.base}"
+
+    input:
+        path(peak_metas)
+
+    output:
+        path("*.tsv")
+
+    script:
+    """
+    echo -e "sample_id\\ttool\\tchrom\\tchromStart\\tchromEnd" > peak_meta.tsv
+    cat ${peak_metas} |\\
+      sort -k 1,1 -k 2,2 >>\\
+      peak_meta.tsv
+    """
+
+    stub:
+    """
+    touch peak_meta.tsv
+    """
+}
+
+process PLOT_PEAK_WIDTHS {
+    label 'peaks'
+    label 'process_single'
+
+    container "${params.containers.r}"
+
+    input:
+        path(peak_meta)
+
+    output:
+        path("*.png")
+
+    script:
+    """
+    plot_peak_widths.R ${peak_meta}
+    """
+
+    stub:
+    """
+    touch peak_widths.png
+    """
+}

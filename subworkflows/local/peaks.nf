@@ -10,7 +10,10 @@ include { CALC_GENOME_FRAC
           PLOT_FRIP
           JACCARD_INDEX
           CONCAT_JACCARD
-          PLOT_JACCARD      } from "../../modules/local/peaks.nf"
+          PLOT_JACCARD
+          GET_PEAK_META
+          CONCAT_PEAK_META
+          PLOT_PEAK_WIDTHS   } from "../../modules/local/peaks.nf"
 
 
 workflow CALL_PEAKS {
@@ -78,8 +81,12 @@ workflow CALL_PEAKS {
             .combine(chrom_sizes) | JACCARD_INDEX
         JACCARD_INDEX.out.collect() | CONCAT_JACCARD | PLOT_JACCARD
 
+        ch_bam_peaks | GET_PEAK_META
+        GET_PEAK_META.out.collect() | CONCAT_PEAK_META | PLOT_PEAK_WIDTHS
+
         ch_plots = PLOT_FRIP.out
             .mix(PLOT_JACCARD.out)
+            .mix(PLOT_PEAK_WIDTHS.out)
 
     emit:
         peaks = ch_bam_peaks
