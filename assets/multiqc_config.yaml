@@ -131,7 +131,7 @@ custom_data:
   frip_samples:
     parent_id: peak_qc
     parent_name: "Peak QC"
-    parent_description: "Qualtiy control metrics on called peaks"
+    parent_description: "Quality control metrics on called peaks"
     id: frip_samples
     section_name: "FRiP of all samples"
   frip_nbases:
@@ -149,8 +149,13 @@ custom_data:
   jaccard_pca_all:
     parent_id: peak_qc
     id: jaccard_pca_all
-    section_name: "PCA of Jaccard index"
-    description: "PCA on Jaccard index of peaks from all-vs-all samples & tools"
+    section_name: "PCA of Jaccard index all-vs-all"
+    description: "Peaks from all-vs-all samples & tools"
+  jaccard_pca_tools:
+    parent_id: peak_qc
+    id: jaccard_pca_tools
+    section_name: "PCA of Jaccard index on peak-calling tools"
+    description: "Separate PCAs on peaks from peal-calling tools"
 
 sp:
   QC_Table:
@@ -161,12 +166,12 @@ sp:
     fn: "FRiP_samples*.png"
   frip_nbases:
     fn: "FRiP_nbases*.png"
+  peak_widths:
+    fn: "peak_widths*.png"
   jaccard_heatmap:
     fn: "jaccard_heatmap_all*.png"
   jaccard_pca_all:
     fn: "jaccard_pca_all*.png"
-  jaccard_pca_tool:
+  jaccard_pca_tools:
     fn: "jaccard_pca_tool*.png"
-  peak_widths:
-    fn: "peak_widths*.png"
 ignore_images: false
