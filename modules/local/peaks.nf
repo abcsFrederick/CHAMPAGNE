@@ -224,7 +224,7 @@ process GEM {
     script:
     // $GEMJAR is defined in the docker container
     """
-    java -Xmx30g -jar \$GEMJAR \\
+    java -Xmx${task.memory} -jar \$GEMJAR \\
       --t ${task.cpus} \\
       --d ${read_dists} \\
       --g ${chrom_sizes} \\
