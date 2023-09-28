@@ -7,7 +7,7 @@
                 "CCBR": {
                     "cutadapt": {
                         "branch": "main",
-                        "git_sha": "8b90cd40d0161f5243cd4028c43fe858fec232fd",
+                        "git_sha": "7a78633cb964d61a663edf2fbff333790658bb00",
                         "installed_by": ["modules"]
                     }
                 }

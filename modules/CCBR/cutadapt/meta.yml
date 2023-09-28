@@ -1,5 +1,5 @@
 name: cutadapt
-description: Perform adapter/quality trimming on sequencing reads
+description: Perform adapter/quality trimming on sequencing reads. Adapted from the nf-core cutadapt module.
 keywords:
   - trimming
   - adapter trimming
@@ -9,7 +9,6 @@ tools:
   - cuatadapt:
       description: |
         Cutadapt finds and removes adapter sequences, primers, poly-A tails and other types of unwanted sequence from your high-throughput sequencing reads.
-        Adapted from the nf-core/cutadapt module.
       documentation: https://cutadapt.readthedocs.io/en/stable/index.html
       doi: 10.14806/ej.17.1.200
       licence: ["MIT"]

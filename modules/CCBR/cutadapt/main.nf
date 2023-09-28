@@ -3,7 +3,7 @@ process CUTADAPT {
     label 'process_high'
 
     conda "bioconda::cutadapt=3.4"
-    container "${params.containers.cutadapt}"
+    container 'nciccbr/ncigb_cutadapt_v1.18:latest'
 
     input:
     tuple val(meta), path(reads)
@@ -17,11 +17,13 @@ process CUTADAPT {
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: """--nextseq-trim=2 \\
-        --trim-n -n 5 -O 5 \\
-        -q ${params.cutadapt.leadingquality},${params.cutadapt.trailingquality} \\
-        -m ${params.cutadapt.minlen} \\
-        -b file:${params.cutadapt.adapters}"""
+    def args = task.ext.args ?: [
+            '--nextseq-trim=2',
+            '--trim-n -n 5 -O 5',
+            '-q 10,10',
+            '-m 20',
+            '-b file:/opt2/TruSeq_and_nextera_adapters.consolidated.fa'
+        ].join(' ').trim()
     def prefix = task.ext.prefix ?: "${meta.id}"
     def trimmed  = meta.single_end ? "-o ${prefix}.trim.fastq.gz" : "-o ${prefix}_1.trim.fastq.gz -p ${prefix}_2.trim.fastq.gz"
     """
