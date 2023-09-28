@@ -229,13 +229,16 @@ process GEM {
       --d ${read_dists} \\
       --g ${chrom_sizes} \\
       --genome ${chrom_dir} \\
+      --s ${params.genomes[ params.genome ].effective_genome_size} \\
       --expt ${chip} \\
       --ctrl ${input} \\
       --out ${meta.id} \\
-      --k_min 6 \\
-      --k_max 13 \\
+      --fold ${params.gem.fold}
+      --k_min ${params.gem.k_min} \\
+      --k_max ${params.gem.k_max} \\
+      --nrf \\
       --outNP \\
-      --nrf
+      --outMEME
     """
 
     stub:
