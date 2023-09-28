@@ -1,0 +1,17 @@
+{
+    "name": "CCBR/CHAMPAGNE",
+    "homePage": "https://github.com/CCBR/CHAMPAGNE",
+    "repos": {
+        "https://github.com/CCBR/nf-modules": {
+            "modules": {
+                "CCBR": {
+                    "cutadapt": {
+                        "branch": "main",
+                        "git_sha": "7a78633cb964d61a663edf2fbff333790658bb00",
+                        "installed_by": ["modules"]
+                    }
+                }
+            }
+        }
+    }
+}
