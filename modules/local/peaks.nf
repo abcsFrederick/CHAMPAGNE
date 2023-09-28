@@ -47,10 +47,11 @@ process MACS_BROAD {
       -n ${meta.id} \\
       --extsize ${fraglen} \\
       --nomodel \\
-      -q 0.01 \\
+      -q ${params.macs.broad.q} \\
       --keep-dup='all' \\
+      --format BED \\
       --broad \\
-      --broad-cutoff 0.01
+      --broad-cutoff ${params.macs.broad.cutoff}
     """
 
     stub:
@@ -85,8 +86,9 @@ process MACS_NARROW {
       -n ${meta.id} \\
       --extsize ${fraglen} \\
       --nomodel \\
-      -q 0.01 \\
-      --keep-dup='all'
+      -q ${params.macs.narrow.q} \\
+      --keep-dup='all' \\
+      --format BED
     """
 
     stub:
@@ -224,18 +226,21 @@ process GEM {
     script:
     // $GEMJAR is defined in the docker container
     """
-    java -Xmx30g -jar \$GEMJAR \\
+    java -Xmx${task.memory.toGiga()}G -jar \$GEMJAR \\
       --t ${task.cpus} \\
       --d ${read_dists} \\
       --g ${chrom_sizes} \\
       --genome ${chrom_dir} \\
+      --s ${params.genomes[ params.genome ].effective_genome_size} \\
       --expt ${chip} \\
       --ctrl ${input} \\
       --out ${meta.id} \\
-      --k_min 6 \\
-      --k_max 13 \\
+      --fold ${params.gem.fold}
+      --k_min ${params.gem.k_min} \\
+      --k_max ${params.gem.k_max} \\
+      --nrf \\
       --outNP \\
-      --nrf
+      --outMEME
     """
 
     stub:

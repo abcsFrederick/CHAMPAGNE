@@ -43,7 +43,7 @@ workflow CALL_PEAKS {
                 meta1, tag1, meta2, tag2 ->
                     meta1.control == meta2.id ? [ meta1, tag1, tag2 ]: null
             }
-            .combine(Channel.fromPath(params.gem_read_dists, checkIfExists: true))
+            .combine(Channel.fromPath(params.gem.read_dists, checkIfExists: true))
             .combine(chrom_sizes)
             .combine(Channel.fromPath("${params.genomes[ params.genome ].chromosomes_dir}", type: 'dir', checkIfExists: true))
             .set { ch_gem }
