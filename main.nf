@@ -28,7 +28,8 @@ include { ALIGN_BLACKLIST          } from "./modules/local/align.nf"
 include { ALIGN_GENOME             } from "./modules/local/align.nf"
 include { DEDUPLICATE              } from "./modules/local/qc.nf"
 include { PHANTOM_PEAKS            } from "./modules/local/qc.nf"
-include { PPQT_PROCESS             } from "./modules/local/qc.nf"
+include { PPQT_PROCESS
+          MULTIQC                  } from "./modules/local/qc.nf"
 include { NORMALIZE_INPUT          } from "./modules/local/deeptools.nf"
 
 // MAIN WORKFLOW
@@ -58,6 +59,7 @@ workflow {
     PHANTOM_PEAKS.out.fraglen | PPQT_PROCESS
     PPQT_PROCESS.out.fraglen.set {frag_lengths }
 
+    ch_multiqc = Channel.of()
     if (params.run.qc) {
         QC(raw_fastqs, trimmed_fastqs,
            aligned_bam, ALIGN_GENOME.out.flagstat,
@@ -69,9 +71,19 @@ workflow {
         if (params.run.normalize_input) {
             ch_ip_ctrl_bigwig | NORMALIZE_INPUT
         }
+
+        ch_multiqc = ch_multiqc.mix(QC.out.multiqc_input)
     }
 
     if (params.run.call_peaks) {
-        CALL_PEAKS(chrom_sizes, deduped_tagalign, frag_lengths)
+        CALL_PEAKS(chrom_sizes, deduped_tagalign, deduped_bam, frag_lengths)
+        ch_multiqc = ch_multiqc.mix(CALL_PEAKS.out.plots)
     }
+
+    MULTIQC(
+        file(params.multiqc.config, checkIfExists: true),
+        file(params.multiqc.logo, checkIfExists: true),
+        ch_multiqc.collect()
+    )
+
 }

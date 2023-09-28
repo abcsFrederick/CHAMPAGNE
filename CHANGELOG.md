@@ -4,6 +4,10 @@
 
 - Implemented peak calling with sicer2, macs2, and gem. (#52)
 - Added parameter options to skip QC, input normalization, and/or peak calling steps. (#72)
+- Calculate and plot QC metrics for called peaks:
+  - Fraction in Peaks (FRiP) (#89)
+  - Jaccard index (#92)
+  - Histogram of peak widths (#92)
 
 ### Bug fixes
 
