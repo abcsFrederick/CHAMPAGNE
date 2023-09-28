@@ -23,7 +23,7 @@ include { QC          } from './subworkflows/local/qc.nf'
 include { CALL_PEAKS  } from './subworkflows/local/peaks.nf'
 
 // MODULES
-include { TRIM_SE                  } from "./modules/local/trim.nf"
+include { CUTADAPT                  } from "./modules/CCBR/cutadapt"
 include { ALIGN_BLACKLIST          } from "./modules/local/align.nf"
 include { ALIGN_GENOME             } from "./modules/local/align.nf"
 include { DEDUPLICATE              } from "./modules/local/qc.nf"
@@ -36,8 +36,8 @@ include { NORMALIZE_INPUT          } from "./modules/local/deeptools.nf"
 workflow {
     INPUT_CHECK(file(params.input), params.seq_center)
     INPUT_CHECK.out.reads.set { raw_fastqs }
-    raw_fastqs | TRIM_SE
-    TRIM_SE.out.set{ trimmed_fastqs }
+    raw_fastqs | CUTADAPT
+    CUTADAPT.out.reads.set{ trimmed_fastqs }
 
     Channel.fromPath(params.genomes[ params.genome ].blacklist_files, checkIfExists: true)
         .collect()
