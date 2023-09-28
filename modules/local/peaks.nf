@@ -47,10 +47,11 @@ process MACS_BROAD {
       -n ${meta.id} \\
       --extsize ${fraglen} \\
       --nomodel \\
-      -q 0.01 \\
+      -q ${params.macs.broad.q} \\
       --keep-dup='all' \\
+      --format BED \\
       --broad \\
-      --broad-cutoff 0.01
+      --broad-cutoff ${params.macs.broad.cutoff}
     """
 
     stub:
@@ -85,8 +86,9 @@ process MACS_NARROW {
       -n ${meta.id} \\
       --extsize ${fraglen} \\
       --nomodel \\
-      -q 0.01 \\
-      --keep-dup='all'
+      -q ${params.macs.narrow.q} \\
+      --keep-dup='all' \\
+      --format BED
     """
 
     stub:
