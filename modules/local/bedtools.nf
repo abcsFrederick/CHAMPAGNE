@@ -7,7 +7,7 @@ process BAM_TO_BED {
         tuple val(meta), path(bam)
 
     output:
-        tuple val(meta), path(bed), emit: bed
+        tuple val(meta), path("${bam.baseName}.bed"), emit: bed
 
     script:
     """
