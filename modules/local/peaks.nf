@@ -235,7 +235,7 @@ process GEM {
       --expt ${chip} \\
       --ctrl ${input} \\
       --out ${meta.id} \\
-      --fold ${params.gem.fold}
+      --fold ${params.gem.fold} \\
       --k_min ${params.gem.k_min} \\
       --k_max ${params.gem.k_max} \\
       --nrf \\

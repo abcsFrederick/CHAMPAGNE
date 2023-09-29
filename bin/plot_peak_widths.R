@@ -9,15 +9,21 @@ if (length(args) < 1) {
   stop("Error: not enough positional arguments.\n  Example usage:\n   Rscript plot_peak_widths.R path/to/peak_widths.tsv")
 }
 tsv_filename <- args[1]
-peak_dat <- read_tsv(tsv_filename)
+peak_dat <- read_tsv(tsv_filename) %>%
+  mutate(peak_width = chromEnd - chromStart)
+xmin <- peak_dat %>%
+  pull(peak_width) %>%
+  min()
+xmax <- peak_dat %>%
+  pull(peak_width) %>%
+  max()
 
 peak_widths_hist <- peak_dat %>%
-  mutate(peak_width = chromEnd - chromStart) %>%
   ggplot(aes(peak_width, fill = tool)) +
   geom_histogram(alpha = 0.7, position = "identity") +
   scale_x_log10(
-    breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::trans_format("log10", scales::math_format(10^.x))
+    limits = c(xmin - 10^2, xmax + 10^2),
+    labels = scales::label_log(digits = 2)
   ) +
   scale_fill_viridis_d() +
   guides(fill = guide_legend(
