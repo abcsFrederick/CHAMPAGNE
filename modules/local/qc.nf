@@ -156,34 +156,43 @@ process PHANTOM_PEAKS {
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     def VERSION = '1.2.2' // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
-    """
-    # current working directory is a tmpdir when 'scratch' is set
-    TMP=tmp/
-    mkdir \$TMP
-    trap 'rm -rf "\$TMP"' EXIT
-
-    Rscript \$(which run_spp.R) -c=${bam} -savp=${prefix}.ppqt.pdf -out=${prefix}.spp.out -tmpdir=\$TMP
-
-    # get fragment length
-    frag_len=`cut -f 3 ${prefix}.spp.out | sed 's/,.*//g'`
-    echo \$frag_len > "${meta.id}.fraglen.txt"
-
-    # export versions
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        phantompeakqualtools: $VERSION
-    END_VERSIONS
-    """
+    def prep_env = """
+        # current working directory is a tmpdir when 'scratch' is set
+        TMP=tmp/
+        mkdir \$TMP
+        trap 'rm -rf "\$TMP"' EXIT
+        # get spp path
+        RUN_SPP=\$(which run_spp.R)
+        """
+    def cleanup = """
+        # get fragment length
+        frag_len=`cut -f 3 ${prefix}.spp.out | sed 's/,.*//g'`
+        echo \$frag_len > "${meta.id}.fraglen.txt"
+        # export versions
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            phantompeakqualtools: $VERSION
+        END_VERSIONS
+        """
+    if (meta.single_end) {
+        """
+        ${prep_env}
+        Rscript \$RUN_SPP -c=${bam} -savp=${prefix}.ppqt.pdf -out=${prefix}.spp.out -tmpdir=\$TMP
+        ${cleanup}
+        """
+    } else { // for PE, just use first read of each pair
+        """
+        ${prep_env}
+        samtools view -b -f 66 -o \$TMP/${bam.baseName}.f66.bam ${bam}
+        samtools index \$TMP/${bam.baseName}.f66.bam
+        Rscript \$RUN_SPP -c=\$TMP/${bam.baseName}.f66.bam -savp=${prefix}.ppqt.pdf -out=${prefix}.spp.out -tmpdir=\$TMP
+        ${cleanup}
+        """
+    }
 
     stub:
     """
     touch ${meta.id}.ppqt.pdf ${meta.id}.spp.out "${meta.id}.fraglen.txt"
-
-    # export versions
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        phantompeakqualtools: $VERSION
-    END_VERSIONS
     """
 }
 
