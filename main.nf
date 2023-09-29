@@ -25,8 +25,9 @@ include { CALL_PEAKS               } from './subworkflows/local/peaks.nf'
 
 // MODULES
 include { CUTADAPT                 } from "./modules/CCBR/cutadapt"
-include { ALIGN_BLACKLIST          } from "./modules/local/align.nf"
-include { ALIGN_GENOME             } from "./modules/local/align.nf"
+include { ALIGN_BLACKLIST
+          BAM_TO_FASTQ
+          ALIGN_GENOME             } from "./modules/local/align.nf"
 include { PHANTOM_PEAKS            } from "./modules/local/qc.nf"
 include { PPQT_PROCESS
           MULTIQC                  } from "./modules/local/qc.nf"
@@ -42,11 +43,11 @@ workflow {
     Channel.fromPath(params.genomes[ params.genome ].blacklist_files, checkIfExists: true)
         .collect()
         .set{ blacklist_files }
-    ALIGN_BLACKLIST(trimmed_fastqs, blacklist_files)
+    ALIGN_BLACKLIST(trimmed_fastqs, blacklist_files) | BAM_TO_FASTQ
     Channel.fromPath(params.genomes[ params.genome ].reference_files, checkIfExists: true)
         .collect()
         .set{ reference_files }
-    ALIGN_GENOME(ALIGN_BLACKLIST.out.reads, reference_files)
+    ALIGN_GENOME(BAM_TO_FASTQ.out.reads, reference_files)
     ALIGN_GENOME.out.bam.set{ aligned_bam }
 
     Channel.fromPath(params.genomes[ params.genome ].chrom_sizes, checkIfExists: true)
