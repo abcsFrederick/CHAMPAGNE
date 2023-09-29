@@ -21,7 +21,9 @@ workflow DEDUPLICATE {
         INDEX_PAIRED.out.bam
             .mix(INDEX_SINGLE.out.bam)
             .set{ ch_bam_bai }
-
+        INDEX_PAIRED.out.flagstat
+            .mix(INDEX_SINGLE.out.flagstat)
+            .set{ ch_flagstat }
         // mix single bed and paired bam channel for peak callers, with variable to designate format
         INDEX_PAIRED.out.bam
             .map{ meta, bam, bai ->
@@ -34,4 +36,5 @@ workflow DEDUPLICATE {
     emit:
         bam = ch_bam_bai
         tag_align = mixed_tagAlign
+        flagstat = ch_flagstat
 }
