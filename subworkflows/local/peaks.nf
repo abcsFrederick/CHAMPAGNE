@@ -14,6 +14,7 @@ include { CALC_GENOME_FRAC
           GET_PEAK_META
           CONCAT_PEAK_META
           PLOT_PEAK_WIDTHS   } from "../../modules/local/peaks.nf"
+include { BAM_TO_BED    } from "../../modules/local/bedtools.nf"
 
 
 workflow CALL_PEAKS {
@@ -26,31 +27,55 @@ workflow CALL_PEAKS {
     main:
         // peak calling
         genome_frac = CALC_GENOME_FRAC(chrom_sizes)
-        // create channel with [ meta, chip_tag, input_tag, fraglen, genome_frac]
+
+        // create channel with [ meta, chip_tag, input_tag, format ]
         deduped_tagalign
             .combine(deduped_tagalign)
             .map {
-                meta1, tag1, meta2, tag2 ->
-                    meta1.control == meta2.id ? [ meta1, tag1, tag2 ]: null
+                meta1, tag1, format1, meta2, tag2, format2 ->
+                    meta1.control == meta2.id && format1 == format2 ? [ meta1, tag1, tag2, format1 ]: null
+            }
+            .set{ ch_tagalign }
+
+        // create macs channel with [ meta, chip_tag, input_tag, format, fraglen, genome_frac]
+        ch_tagalign
+            .join(frag_lengths)
+            .combine(genome_frac)
+            .set { ch_macs }
+
+        // create sicer channel containing only bed files with [ meta, chip_tag, input_tag, fraglen, genome_frac]
+        deduped_tagalign
+            .branch{ meta, tag, format ->
+                bam: format == 'BAMPE'
+                    return(tuple(meta, tag))
+                bed: format == 'BED'
+                    return(tuple(meta, tag))
+            }.set{ tag_split }
+        tag_split.bam | BAM_TO_BED
+        BAM_TO_BED.out.bed.set{ tag_split_converted }
+        tag_split.bed.mix(tag_split_converted).set{ tag_all_bed }
+        tag_all_bed
+            .combine(tag_all_bed)
+            .map {
+                meta1, tag1, format1, meta2, tag2, format2 ->
+                    meta1.control == meta2.id && format1 == format2 ? [ meta1, tag1, tag2 ]: null
             }
             .join(frag_lengths)
             .combine(genome_frac)
-            .set { ch_tagalign }
+            .set { ch_sicer }
 
-        deduped_tagalign
-            .combine(deduped_tagalign)
-            .map {
-                meta1, tag1, meta2, tag2 ->
-                    meta1.control == meta2.id ? [ meta1, tag1, tag2 ]: null
-            }
+
+        // create gem channel with [ meta, chip_tag, input_tag, format, read_dists, chrom_sizes, chrom_dir ]
+        ch_tagalign
             .combine(Channel.fromPath(params.gem.read_dists, checkIfExists: true))
             .combine(chrom_sizes)
             .combine(Channel.fromPath("${params.genomes[ params.genome ].chromosomes_dir}", type: 'dir', checkIfExists: true))
             .set { ch_gem }
 
-        ch_tagalign | MACS_BROAD
-        ch_tagalign | MACS_NARROW
-        ch_tagalign | SICER | CONVERT_SICER
+
+        ch_macs | MACS_BROAD
+        ch_macs | MACS_NARROW
+        ch_sicer | SICER | CONVERT_SICER
         GEM(ch_gem)
 
         CONVERT_SICER.out.peak

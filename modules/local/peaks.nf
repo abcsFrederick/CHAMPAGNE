@@ -31,7 +31,7 @@ process MACS_BROAD {
     container = "${params.containers.macs2}"
 
     input:
-        tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
+        tuple val(meta), path(chip), path(input), val(format), val(fraglen), val(genome_frac)
 
     output:
         tuple val(meta), path("${meta.id}_peaks.broadPeak"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
@@ -49,7 +49,7 @@ process MACS_BROAD {
       --nomodel \\
       -q ${params.macs.broad.q} \\
       --keep-dup='all' \\
-      --format BED \\
+      --format ${format} \\
       --broad \\
       --broad-cutoff ${params.macs.broad.cutoff}
     """
@@ -70,7 +70,7 @@ process MACS_NARROW {
     container = "${params.containers.macs2}"
 
     input:
-        tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
+        tuple val(meta), path(chip), path(input), val(format), val(fraglen), val(genome_frac)
 
     output:
         tuple val(meta), path("${meta.id}_peaks.narrowPeak"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
@@ -88,7 +88,7 @@ process MACS_NARROW {
       --nomodel \\
       -q ${params.macs.narrow.q} \\
       --keep-dup='all' \\
-      --format BED
+      --format ${format}
     """
 
     stub:
@@ -217,7 +217,7 @@ process GEM {
     container = "${params.containers.gem}"
 
     input:
-        tuple val(meta), path(chip), path(input), path(read_dists), path(chrom_sizes), path(chrom_dir)
+        tuple val(meta), path(chip), path(input), val(format), path(read_dists), path(chrom_sizes), path(chrom_dir)
 
     output:
         tuple val(meta), path("${meta.id}/*GEM_events.narrowPeak"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
@@ -225,6 +225,7 @@ process GEM {
 
     script:
     // $GEMJAR is defined in the docker container
+    def f = format == 'BAMPE' ? 'SAM' : format
     """
     java -Xmx${task.memory.toGiga()}G -jar \$GEMJAR \\
       --t ${task.cpus} \\
@@ -234,6 +235,7 @@ process GEM {
       --s ${params.genomes[ params.genome ].effective_genome_size} \\
       --expt ${chip} \\
       --ctrl ${input} \\
+      --f ${f} \\
       --out ${meta.id} \\
       --fold ${params.gem.fold} \\
       --k_min ${params.gem.k_min} \\

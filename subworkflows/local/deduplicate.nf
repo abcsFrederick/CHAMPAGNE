@@ -29,9 +29,7 @@ workflow DEDUPLICATE {
             }
             .combine(Channel.value("BAMPE"))
             .mix(MACS2_DEDUP.out.bed.combine(Channel.value("BED")))
-            .set{ mixed_tagAlign }
-        // [meta, bed/bam, bampe/bed]
-        mixed_tagAlign | view
+            .set{ mixed_tagAlign } // [meta, bed/bam, bampe/bed]
 
     emit:
         bam = ch_bam_bai
