@@ -156,11 +156,6 @@ process PHANTOM_PEAKS {
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     def VERSION = '1.2.2' // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
-    def prep_env = """
-
-        """
-    def cleanup = """
-        """
     """
     # current working directory is a tmpdir when 'scratch' is set
     TMP=tmp/
