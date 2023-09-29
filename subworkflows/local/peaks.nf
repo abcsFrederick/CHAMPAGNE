@@ -57,8 +57,8 @@ workflow CALL_PEAKS {
         tag_all_bed
             .combine(tag_all_bed)
             .map {
-                meta1, tag1, format1, meta2, tag2, format2 ->
-                    meta1.control == meta2.id && format1 == format2 ? [ meta1, tag1, tag2 ]: null
+                meta1, tag1, meta2, tag2 ->
+                    meta1.control == meta2.id ? [ meta1, tag1, tag2 ]: null
             }
             .join(frag_lengths)
             .combine(genome_frac)
