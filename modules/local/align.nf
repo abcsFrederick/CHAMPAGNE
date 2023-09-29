@@ -11,25 +11,56 @@ process ALIGN_BLACKLIST {
         path(blacklist_files)
 
     output:
-        tuple val(meta), path("${meta.id}.no_blacklist.fastq.gz"), emit: reads
+        tuple val(meta), path("${meta.id}.no_blacklist.bam"), emit: bam
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     def filter_flag = meta.single_end ? '4' : '12'
     """
-    bwa mem -t $task.cpus ${params.genomes[ params.genome ].blacklist} $fastq > ${prefix}.sam
+    bwa mem -t $task.cpus ${params.genomes[ params.genome ].blacklist} $fastq > ${prefix}.bam
     samtools view \\
       -@ ${task.cpus} \\
       -f${filter_flag} \\
       -b \\
-      ${prefix}.sam |\
-    samtools bam2fq |\
-      pigz -p $task.cpus > ${prefix}.no_blacklist.fastq.gz
+      ${prefix}.bam > ${meta.id}.no_blacklist.bam
     """
 
     stub:
     """
-    touch ${meta.id}.no_blacklist.fastq.gz
+    touch ${meta.id}.no_blacklist.bam
+    """
+}
+
+process BAM_TO_FASTQ {
+    tag { meta.id }
+    label 'align'
+    container "${ meta.single_end ? params.containers.base : params.containers.picard }"
+
+    input:
+        tuple val(meta), path(bam)
+
+    output:
+        tuple val(meta), path("*.R?.fastq*"), emit: reads
+
+    script:
+    if (meta.single_end) {
+        """
+        samtools bam2fq ${bam} | pigz -p ${task.cpus} > ${bam.baseName}.R1.fastq.gz
+        """
+    } else {
+        """
+        picard -Xmx${task.memory.toGiga()}G SamToFastq \\
+            --VALIDATION_STRINGENCY SILENT \\
+            --INPUT ${bam} \\
+            --FASTQ ${bam.baseName}.R1.fastq \\
+            --SECOND_END_FASTQ ${bam.baseName}.R2.fastq \\
+            --UNPAIRED_FASTQ ${bam.baseName}.unpaired.fastq
+        # TODO: gzip output. need container w/ both picard & pigz
+        """
+    }
+    stub:
+    """
+    touch ${bam.baseName}.fastq
     """
 }
 
@@ -50,6 +81,21 @@ process ALIGN_GENOME {
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
+    def filter = ''
+    if (meta.single_end) {
+        filter = """samtools view \\
+            -@ ${task.cpus} \\
+            -q ${params.align_min_quality} \\
+            -b \\
+            ${prefix}.sorted.bam > ${prefix}.aligned.filtered.bam
+        """
+    } else {
+        filter = """bam_filter_by_mapq.py \\
+            -q ${params.align_min_quality} \\
+            -i ${prefix}.sorted.bam \\
+            -o ${prefix}.aligned.filtered.bam
+        """
+    }
     """
     # current working directory is a tmpdir when 'scratch' is set
     TMP=tmp/
@@ -62,11 +108,8 @@ process ALIGN_GENOME {
       -m 2G \\
       -T \$TMP \\
       ${prefix}.bam > ${prefix}.sorted.bam
-    samtools view \\
-      -@ ${task.cpus} \\
-      -q ${params.align_min_quality} \\
-      -b \\
-      ${prefix}.sorted.bam > ${prefix}.aligned.filtered.bam
+    samtools index ${prefix}.sorted.bam
+    ${filter}
     samtools flagstat ${prefix}.aligned.filtered.bam > ${prefix}.aligned.filtered.bam.flagstat
     """
 
