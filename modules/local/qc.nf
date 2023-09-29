@@ -138,7 +138,6 @@ process PARSE_PRESEQ_LOG {
 }
 
 process PHANTOM_PEAKS {
-    // TODO: set tmpdir as lscratch if available https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L504
     tag { meta.id }
     label 'qc'
     label 'ppqt'
@@ -149,23 +148,47 @@ process PHANTOM_PEAKS {
         tuple val(meta), path(bam), path(bai)
 
     output:
-        path("${meta.id}.ppqt.pdf"), emit: pdf
-        path("${meta.id}.spp.out"), emit: spp
+        path("${meta.id}.ppqt.pdf")                    , emit: pdf
+        path("${meta.id}.spp.out")                     , emit: spp
         tuple val(meta), path("${meta.id}.fraglen.txt"), emit: fraglen
+        path  "versions.yml"                           , emit: versions
 
-    script: // TODO: for PE, just use first read of each pair
+    script:
     def prefix = task.ext.prefix ?: "${meta.id}"
-    """
-    # current working directory is a tmpdir when 'scratch' is set
-    TMP=tmp/
-    mkdir \$TMP
-    trap 'rm -rf "\$TMP"' EXIT
-
-    RUN_SPP=\$(which run_spp.R)
-    Rscript \$RUN_SPP -c=${bam} -savp=${prefix}.ppqt.pdf -out=${prefix}.spp.out -tmpdir=\$TMP
-    frag_len=`cut -f 3 ${prefix}.spp.out | sed 's/,.*//g'`
-    echo \$frag_len > "${meta.id}.fraglen.txt"
-    """
+    def VERSION = '1.2.2' // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
+    def prep_env = """
+        # current working directory is a tmpdir when 'scratch' is set
+        TMP=tmp/
+        mkdir \$TMP
+        trap 'rm -rf "\$TMP"' EXIT
+        # get spp path
+        RUN_SPP=\$(which run_spp.R)
+        """
+    def cleanup = """
+        # get fragment length
+        frag_len=`cut -f 3 ${prefix}.spp.out | sed 's/,.*//g'`
+        echo \$frag_len > "${meta.id}.fraglen.txt"
+        # export versions
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            phantompeakqualtools: $VERSION
+        END_VERSIONS
+        """
+    if (meta.single_end) {
+        """
+        ${prep_env}
+        Rscript \$RUN_SPP -c=${bam} -savp=${prefix}.ppqt.pdf -out=${prefix}.spp.out -tmpdir=\$TMP
+        ${cleanup}
+        """
+    } else { // for PE, just use first read of each pair
+        """
+        ${prep_env}
+        samtools view -b -f 66 -o \$TMP/${bam.baseName}.f66.bam ${bam}
+        samtools index \$TMP/${bam.baseName}.f66.bam
+        Rscript \$RUN_SPP -c=\$TMP/${bam.baseName}.f66.bam -savp=${prefix}.ppqt.pdf -out=${prefix}.spp.out -tmpdir=\$TMP
+        ${cleanup}
+        """
+    }
 
     stub:
     """
