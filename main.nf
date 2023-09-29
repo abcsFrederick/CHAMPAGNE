@@ -18,15 +18,15 @@ log.info """\
          .stripIndent()
 
 // SUBWORKFLOWS
-include { INPUT_CHECK } from './subworkflows/local/input_check.nf'
-include { QC          } from './subworkflows/local/qc.nf'
-include { CALL_PEAKS  } from './subworkflows/local/peaks.nf'
+include { INPUT_CHECK              } from './subworkflows/local/input_check.nf'
+include { DEDUPLICATE              } from "./subworkflows/local/deduplicate.nf"
+include { QC                       } from './subworkflows/local/qc.nf'
+include { CALL_PEAKS               } from './subworkflows/local/peaks.nf'
 
 // MODULES
-include { CUTADAPT                  } from "./modules/CCBR/cutadapt"
+include { CUTADAPT                 } from "./modules/CCBR/cutadapt"
 include { ALIGN_BLACKLIST          } from "./modules/local/align.nf"
 include { ALIGN_GENOME             } from "./modules/local/align.nf"
-include { DEDUPLICATE              } from "./modules/local/qc.nf"
 include { PHANTOM_PEAKS            } from "./modules/local/qc.nf"
 include { PPQT_PROCESS
           MULTIQC                  } from "./modules/local/qc.nf"
@@ -51,7 +51,7 @@ workflow {
 
     Channel.fromPath(params.genomes[ params.genome ].chrom_sizes, checkIfExists: true)
         .set{ chrom_sizes }
-    aligned_bam.combine(chrom_sizes) | DEDUPLICATE
+    DEDUPLICATE(aligned_bam, chrom_sizes)
     DEDUPLICATE.out.bam.set{ deduped_bam }
     DEDUPLICATE.out.tag_align.set{ deduped_tagalign }
 

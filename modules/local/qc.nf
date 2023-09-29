@@ -221,58 +221,6 @@ process PPQT_PROCESS {
     """
 }
 
-process DEDUPLICATE {
-    tag { meta.id }
-    label 'qc'
-    label 'process_medium'
-
-    container = "${params.containers.macs2}"
-
-    input:
-        tuple val(meta), path(bam), path(chrom_sizes)
-
-    output:
-        tuple val(meta), path("${meta.id}.TagAlign.bed"), emit: tag_align
-        tuple val(meta), path("${bam.baseName}.dedup.bam"), path("${bam.baseName}.dedup.bam.bai"), emit: bam
-        tuple path("${bam.baseName}.dedup.bam.flagstat"), path("${bam.baseName}.dedup.bam.idxstat"), emit: flagstat
-
-    script:
-    """
-    # current working directory is a tmpdir when 'scratch' is set
-    TMP=tmp
-    mkdir \$TMP
-    trap 'rm -rf "\$TMP"' EXIT
-
-    macs2 filterdup -i ${bam} -g ${params.genomes[ params.genome ].effective_genome_size} --keep-dup="auto" -o TmpTagAlign1
-    awk -F"\\t" -v OFS="\\t" '{{if (\$2>0 && \$3>0) {{print}}}}' TmpTagAlign1 > TmpTagAlign2
-    awk -F"\\t" -v OFS="\\t" '{{print \$1,1,\$2}}' ${chrom_sizes} > \$TMP/GenomeFile_unsorted.bed
-    sort \\
-      -k1,1 -k2,2n \\
-      -T \$TMP \\
-      -S 2G \\
-      --parallel ${task.cpus} \\
-      \$TMP/GenomeFile_unsorted.bed > GenomeFile.bed
-    bedtools intersect -wa -f 1.0 -a TmpTagAlign2 -b GenomeFile.bed | awk -F"\\t" -v OFS="\\t" '{\$5="0"; print}' > ${meta.id}.TagAlign.bed
-    bedtools bedtobam -i ${meta.id}.TagAlign.bed -g ${chrom_sizes} > \$TMP/${meta.id}.TagAlign.bed.bam
-    samtools sort \\
-        -@ ${task.cpus} \\
-        -m 2G \\
-        -T \$TMP \\
-        \$TMP/${meta.id}.TagAlign.bed.bam > ${bam.baseName}.dedup.bam
-    samtools index ${bam.baseName}.dedup.bam
-    samtools flagstat ${bam.baseName}.dedup.bam > ${bam.baseName}.dedup.bam.flagstat
-    samtools idxstats ${bam.baseName}.dedup.bam > ${bam.baseName}.dedup.bam.idxstat
-    """
-
-    stub:
-    """
-    touch ${meta.id}.TagAlign.bed
-    for ext in dedup.bam dedup.bam.bai dedup.bam.flagstat dedup.bam.idxstat; do
-        touch ${bam.baseName}.\${ext}
-    done
-    """
-}
-
 process NGSQC_GEN { // TODO segfault - https://github.com/CCBR/CHAMPAGNE/issues/13
     tag { meta.id }
     label 'qc'
