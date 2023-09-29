@@ -156,8 +156,13 @@ process PHANTOM_PEAKS {
     script: // TODO: for PE, just use first read of each pair
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
+    # current working directory is a tmpdir when 'scratch' is set
+    TMP=tmp/
+    mkdir \$TMP
+    trap 'rm -rf "\$TMP"' EXIT
+
     RUN_SPP=\$(which run_spp.R)
-    Rscript \$RUN_SPP -c=${bam} -savp=${prefix}.ppqt.pdf -out=${prefix}.spp.out
+    Rscript \$RUN_SPP -c=${bam} -savp=${prefix}.ppqt.pdf -out=${prefix}.spp.out -tmpdir=\$TMP
     frag_len=`cut -f 3 ${prefix}.spp.out | sed 's/,.*//g'`
     echo \$frag_len > "${meta.id}.fraglen.txt"
     """
