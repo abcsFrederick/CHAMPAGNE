@@ -10,8 +10,8 @@ process FASTQC {
     input:
         tuple val(meta), path(fastq), val(fqtype)
     output:
-        path("${fastq.getBaseName(2)}*.html"), emit: html
-        path ("${fastq.getBaseName(2)}*.zip"), emit: zip
+        path("*.html"), emit: html
+        path ("*.zip"), emit: zip
 
     script:
     """
@@ -23,7 +23,7 @@ process FASTQC {
 
     stub:
     """
-    touch ${fastq.getBaseName(2)}_fastqc.html ${fastq.getBaseName(2)}_fastqc.zip
+    touch ${meta.id}_fastqc.html ${meta.id}_fastqc.zip
     """
 }
 
