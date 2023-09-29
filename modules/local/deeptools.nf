@@ -15,18 +15,19 @@ process BAM_COVERAGE {
         val(meta), emit: meta
         path("${meta.id}.bw"), emit: bigwig
 
-    script: // https://deeptools.readthedocs.io/en/2.1.0/content/tools/bamCoverage.html
+    script:
+    def args = meta.single_end ? "--extendReads ${fraglen}" : '--centerReads'
     """
-    bamCoverage \
-      --bam ${bam} \
-      -o ${meta.id}.bw \
-      --binSize ${params.deeptools.bin_size} \
-      --smoothLength ${params.deeptools.smooth_length} \
-      --ignoreForNormalization ${params.deeptools.excluded_chroms} \
-      --numberOfProcessors ${task.cpus} \
-      --normalizeUsing ${params.deeptools.normalize_using} \
-      --effectiveGenomeSize ${params.genomes[ params.genome ].effective_genome_size} \
-      --extendReads ${fraglen}
+    bamCoverage \\
+      --bam ${bam} \\
+      -o ${meta.id}.bw \\
+      --binSize ${params.deeptools.bin_size} \\
+      --smoothLength ${params.deeptools.smooth_length} \\
+      --ignoreForNormalization ${params.deeptools.excluded_chroms} \\
+      --numberOfProcessors ${task.cpus} \\
+      --normalizeUsing ${params.deeptools.normalize_using} \\
+      --effectiveGenomeSize ${params.genomes[ params.genome ].effective_genome_size} \\
+      ${args}
     """
 
     stub:
@@ -140,6 +141,7 @@ process PLOT_FINGERPRINT {
   script:
   // TODO handle extendReads for single vs paired https://github.com/nf-core/chipseq/blob/51eba00b32885c4d0bec60db3cb0a45eb61e34c5/modules/nf-core/modules/deeptools/plotfingerprint/main.nf
   def prefix = task.ext.prefix ?: "${meta.id}"
+  def args = meta.single_end ? '--extendReads 200' : ''
   """
   plotFingerprint \\
     --bamfiles ${bams.join(' ')} \\
@@ -149,7 +151,7 @@ process PLOT_FINGERPRINT {
     --numberOfProcessors ${task.cpus} \\
     --skipZeros \\
     --smartLabels \\
-    --extendReads 200
+    ${args}
   """
 
   stub:
