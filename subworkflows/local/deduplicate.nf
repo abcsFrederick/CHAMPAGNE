@@ -23,11 +23,15 @@ workflow DEDUPLICATE {
             .set{ ch_bam_bai }
 
         // mix single bed and paired bam channel for peak callers, with variable to designate format
-        INDEX_PAIRED.out.bam.combine(Channel.value("BAMPE"))
-            .mix(MACS2_DEDUP.out.bed.combine(Channel.value("NO_BAI")).combine(Channel.value("TagAlign")))
+        INDEX_PAIRED.out.bam
+            .map{ meta, bam, bai ->
+                [ meta, bam ]
+            }
+            .combine(Channel.value("BAMPE"))
+            .mix(MACS2_DEDUP.out.bed.combine(Channel.value("BED")))
             .set{ mixed_tagAlign }
+        // [meta, bed/bam, bampe/bed]
         mixed_tagAlign | view
-
 
     emit:
         bam = ch_bam_bai
