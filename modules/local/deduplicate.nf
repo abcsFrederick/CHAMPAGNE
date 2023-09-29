@@ -4,7 +4,7 @@ process MACS2_DEDUP {
     label 'dedup'
     label 'process_medium'
 
-    container = "${params.containers.macs2}"
+    container "${params.containers.macs2}"
 
     input:
         tuple val(meta), path(bam), path(chrom_sizes)
@@ -46,7 +46,7 @@ process PICARD_DEDUP {
     label 'dedup'
     label 'process_medium'
 
-    container = "${params.containers.picard}"
+    container "${params.containers.picard}"
 
     input:
         tuple val(meta), path(bam)
