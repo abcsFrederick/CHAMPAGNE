@@ -13,17 +13,18 @@ process ALIGN_BLACKLIST {
     output:
         tuple val(meta), path("${meta.id}.no_blacklist.fastq.gz"), emit: reads
 
-    script: // TODO use samtools -f4 for single-end and -f12 for paired to get unmapped reads https://broadinstitute.github.io/picard/explain-flags.html
+    script:
     def prefix = task.ext.prefix ?: "${meta.id}"
+    def filter_flag = meta.single_end ? '4' : '12'
     """
     bwa mem -t $task.cpus ${params.genomes[ params.genome ].blacklist} $fastq > ${prefix}.sam
     samtools view \\
-        -@ ${task.cpus} \\
-        -f4 \\
-        -b \\
-        ${prefix}.sam |\
+      -@ ${task.cpus} \\
+      -f${filter_flag} \\
+      -b \\
+      ${prefix}.sam |\
     samtools bam2fq |\
-    pigz -p $task.cpus > ${prefix}.no_blacklist.fastq.gz
+      pigz -p $task.cpus > ${prefix}.no_blacklist.fastq.gz
     """
 
     stub:
