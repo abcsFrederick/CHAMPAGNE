@@ -1,0 +1,33 @@
+{
+    "name": "CCBR/CHAMPAGNE",
+    "homePage": "https://github.com/CCBR/CHAMPAGNE",
+    "repos": {
+        "https://github.com/CCBR/nf-modules": {
+            "modules": {
+                "CCBR": {
+                    "bwa/mem": {
+                        "branch": "main",
+                        "git_sha": "a4b80fe5424b4bef8ebb6c35c2e7f3c0a9caaa81",
+                        "installed_by": ["modules"]
+                    }
+                }
+            }
+        },
+        "https://github.com/nf-core/modules.git": {
+            "modules": {
+                "nf-core": {
+                    "bwa/index": {
+                        "branch": "master",
+                        "git_sha": "bfed129da5134b4439b1821c917972570d44d39c",
+                        "installed_by": ["modules"]
+                    },
+                    "khmer/uniquekmers": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
+                    }
+                }
+            }
+        }
+    }
+}

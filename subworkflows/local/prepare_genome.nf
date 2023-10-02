@@ -1,3 +1,6 @@
+include { BWA_INDEX         } from "../../modules/nf-core/bwa/index"
+include { KHMER_UNIQUEKMERS } from '../../modules/nf-core/khmer/uniquekmers'
+
 workflow PREPARE_GENOME {
     main:
         ch_blacklist_name = params.genomes[ params.genome ].blacklist ? Channel.value(params.genomes[ params.genome ].blacklist) : "${params.genome}.blacklist"
@@ -5,6 +8,10 @@ workflow PREPARE_GENOME {
         if (params.fasta && params.gtf) {
             ch_fasta = file(params.fasta)
             ch_gtf = file(params.gtf)
+
+            BWA_INDEX(ch_fasta)
+            KHMER_UNIQUEKMERS(ch_fasta, params.read_length)
+
         } else {
             Channel.fromPath(params.genomes[ params.genome ].blacklist_files, checkIfExists: true)
                 .collect()

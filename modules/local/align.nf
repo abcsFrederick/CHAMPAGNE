@@ -1,5 +1,5 @@
 
-process ALIGN_BLACKLIST {
+process ALIGN_BLACKLIST { // TODO: refactor this as a subworkflow that combines alignment and filtering processes
     tag { meta.id }
     label 'align'
     label 'process_higher'
