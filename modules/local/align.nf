@@ -16,7 +16,9 @@ process ALIGN_BLACKLIST {
     script: // TODO use samtools -f4 for single-end and -f12 for paired to get unmapped reads https://broadinstitute.github.io/picard/explain-flags.html
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    bwa mem -t $task.cpus ${params.genomes[ params.genome ].blacklist} $fastq > ${prefix}.sam
+    INDEX=`find -L ./ -name "*.amb" | sed 's/.amb//' | sed 's|^./||'`
+
+    bwa mem -t $task.cpus \$INDEX $fastq > ${prefix}.sam
     samtools view \\
         -@ ${task.cpus} \\
         -f4 \\

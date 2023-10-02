@@ -18,9 +18,10 @@ log.info """\
          .stripIndent()
 
 // SUBWORKFLOWS
-include { INPUT_CHECK } from './subworkflows/local/input_check.nf'
-include { QC          } from './subworkflows/local/qc.nf'
-include { CALL_PEAKS  } from './subworkflows/local/peaks.nf'
+include { INPUT_CHECK    } from './subworkflows/local/input_check.nf'
+include { PREPARE_GENOME } from './subworkflows/local/prepare_genome.nf'
+include { QC             } from './subworkflows/local/qc.nf'
+include { CALL_PEAKS     } from './subworkflows/local/peaks.nf'
 
 // MODULES
 include { TRIM_SE                  } from "./modules/local/trim.nf"
@@ -38,19 +39,12 @@ workflow {
     raw_fastqs | TRIM_SE
     TRIM_SE.out.set{ trimmed_fastqs }
 
-    Channel.fromPath(params.genomes[ params.genome ].blacklist_files, checkIfExists: true)
-        .collect()
-        .set{ blacklist_files }
-    ALIGN_BLACKLIST(trimmed_fastqs, blacklist_files)
-    Channel.fromPath(params.genomes[ params.genome ].reference_files, checkIfExists: true)
-        .collect()
-        .set{ reference_files }
-    ALIGN_GENOME(ALIGN_BLACKLIST.out.reads, reference_files)
+    PREPARE_GENOME()
+    ALIGN_BLACKLIST(trimmed_fastqs, PREPARE_GENOME.out.blacklist_files)
+    ALIGN_GENOME(ALIGN_BLACKLIST.out.reads, PREPARE_GENOME.out.reference_files)
     ALIGN_GENOME.out.bam.set{ aligned_bam }
 
-    Channel.fromPath(params.genomes[ params.genome ].chrom_sizes, checkIfExists: true)
-        .set{ chrom_sizes }
-    aligned_bam.combine(chrom_sizes) | DEDUPLICATE
+    aligned_bam.combine(PREPARE_GENOME.out.chrom_sizes) | DEDUPLICATE
     DEDUPLICATE.out.bam.set{ deduped_bam }
     DEDUPLICATE.out.tag_align.set{ deduped_tagalign }
 
