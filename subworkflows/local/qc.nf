@@ -29,6 +29,8 @@ workflow QC {
         deduped_flagstat
         ppqt_spp
         frag_lengths
+        gene_info
+        effective_genome_size
 
     main:
         raw_fastqs.combine(Channel.value("raw")) | FASTQC_RAW
@@ -66,7 +68,7 @@ workflow QC {
 
         // Deeptools
 
-        BAM_COVERAGE(deduped_bam, frag_lengths)
+        deduped_bam.join(frag_lengths).combine(effective_genome_size) | BAM_COVERAGE
         BAM_COVERAGE.out.bigwig.collect().set{ bigwig_list }
         BIGWIG_SUM(bigwig_list)
         BIGWIG_SUM.out.array.combine(Channel.from('heatmap', 'scatterplot')) | PLOT_CORRELATION
@@ -81,8 +83,7 @@ workflow QC {
             }
             .set { ch_ip_ctrl_bam_bai }
         ch_ip_ctrl_bam_bai | PLOT_FINGERPRINT
-        Channel.fromPath(params.genomes[ params.genome ].gene_info,
-                         checkIfExists: true) | BED_PROTEIN_CODING
+        gene_info | BED_PROTEIN_CODING
         COMPUTE_MATRIX(bigwig_list,
                        BED_PROTEIN_CODING.out.bed.combine(Channel.from('metagene','TSS'))
         )

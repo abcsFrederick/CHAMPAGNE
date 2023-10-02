@@ -8,8 +8,7 @@ process BAM_COVERAGE {
     container = "${params.containers.deeptools}"
 
     input:
-        tuple val(meta), path(bam), path(bai)
-        tuple val(meta), val(fraglen)
+        tuple val(meta), path(bam), path(bai), val(fraglen), val(effective_genome_size)
 
     output:
         val(meta), emit: meta
@@ -25,7 +24,7 @@ process BAM_COVERAGE {
       --ignoreForNormalization ${params.deeptools.excluded_chroms} \
       --numberOfProcessors ${task.cpus} \
       --normalizeUsing ${params.deeptools.normalize_using} \
-      --effectiveGenomeSize ${params.genomes[ params.genome ].effective_genome_size} \
+      --effectiveGenomeSize ${effective_genome_size} \
       --extendReads ${fraglen}
     """
 

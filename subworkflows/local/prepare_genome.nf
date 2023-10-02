@@ -14,6 +14,11 @@ workflow PREPARE_GENOME {
                 .set{ ch_reference_files }
             Channel.fromPath(params.genomes[ params.genome ].chrom_sizes, checkIfExists: true)
                 .set{ ch_chrom_sizes }
+            Channel.fromPath(params.genomes[ params.genome ].gene_info,
+                         checkIfExists: true)
+                .set{ ch_gene_info }
+            Channel.value(params.genomes[ params.genome ].effective_genome_size)
+                .set{ ch_egs}
         }
 
     emit:
@@ -21,4 +26,6 @@ workflow PREPARE_GENOME {
         blacklist_name = ch_blacklist_name
         reference_files = ch_reference_files
         chrom_sizes = ch_chrom_sizes
+        gene_info = ch_gene_info
+        effective_genome_size = ch_egs
 }

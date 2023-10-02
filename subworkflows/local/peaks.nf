@@ -11,10 +11,11 @@ workflow CALL_PEAKS {
         chrom_sizes
         deduped_tagalign
         frag_lengths
+        effective_genome_size
 
     main:
         // peak calling
-        genome_frac = CALC_GENOME_FRAC(chrom_sizes)
+        genome_frac = CALC_GENOME_FRAC(chrom_sizes, effective_genome_size)
         // create channel with [ meta, chip_tag, input_tag, fraglen, genome_frac]
         deduped_tagalign
             .combine(deduped_tagalign)
