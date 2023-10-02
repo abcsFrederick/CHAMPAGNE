@@ -39,8 +39,8 @@ workflow CALL_PEAKS {
         Channel.fromPath("${params.genomes[ params.genome ].chromosomes_dir}", type: 'dir', checkIfExists: true)
             .set{ chrom_files }
 
-        ch_tagalign | MACS_BROAD
-        ch_tagalign | MACS_NARROW
+        ch_tagalign.combine(effective_genome_size) | MACS_BROAD
+        ch_tagalign.combine(effective_genome_size) | MACS_NARROW
         ch_tagalign | SICER
         GEM(ch_gem, chrom_files)
 
