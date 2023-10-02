@@ -9,6 +9,7 @@ include { GEM              } from "../../modules/local/peaks.nf"
 workflow CALL_PEAKS {
     take:
         chrom_sizes
+        chrom_files
         deduped_tagalign
         frag_lengths
         effective_genome_size
@@ -36,8 +37,6 @@ workflow CALL_PEAKS {
             .combine(Channel.fromPath(params.gem_read_dists, checkIfExists: true))
             .combine(chrom_sizes)
             .set { ch_gem }
-        Channel.fromPath("${params.genomes[ params.genome ].chromosomes_dir}", type: 'dir', checkIfExists: true)
-            .set{ chrom_files }
 
         ch_tagalign.combine(effective_genome_size) | MACS_BROAD
         ch_tagalign.combine(effective_genome_size) | MACS_NARROW

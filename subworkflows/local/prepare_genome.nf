@@ -14,6 +14,8 @@ workflow PREPARE_GENOME {
                 .set{ ch_reference_files }
             Channel.fromPath(params.genomes[ params.genome ].chrom_sizes, checkIfExists: true)
                 .set{ ch_chrom_sizes }
+            Channel.fromPath("${params.genomes[ params.genome ].chromosomes_dir}", type: 'dir', checkIfExists: true)
+                .set{ ch_chrom_files }
             Channel.fromPath(params.genomes[ params.genome ].gene_info,
                          checkIfExists: true)
                 .set{ ch_gene_info }
@@ -26,6 +28,7 @@ workflow PREPARE_GENOME {
         blacklist_name = ch_blacklist_name
         reference_files = ch_reference_files
         chrom_sizes = ch_chrom_sizes
+        chrom_files = ch_chrom_files
         gene_info = ch_gene_info
         effective_genome_size = ch_egs
 }

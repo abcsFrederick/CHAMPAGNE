@@ -40,12 +40,14 @@ workflow {
     TRIM_SE.out.set{ trimmed_fastqs }
 
     PREPARE_GENOME()
+    chrom_sizes = PREPARE_GENOME.out.chrom_sizes
+
     effective_genome_size = PREPARE_GENOME.out.effective_genome_size
     ALIGN_BLACKLIST(trimmed_fastqs, PREPARE_GENOME.out.blacklist_files, PREPARE_GENOME.out.blacklist_name)
     ALIGN_GENOME(ALIGN_BLACKLIST.out.reads, PREPARE_GENOME.out.reference_files)
     ALIGN_GENOME.out.bam.set{ aligned_bam }
 
-    DEDUPLICATE(aligned_bam.combine(PREPARE_GENOME.out.chrom_sizes), effective_genome_size)
+    DEDUPLICATE(aligned_bam.combine(chrom_sizes), effective_genome_size)
     DEDUPLICATE.out.bam.set{ deduped_bam }
     DEDUPLICATE.out.tag_align.set{ deduped_tagalign }
 
@@ -69,6 +71,6 @@ workflow {
     }
 
     if (params.run.call_peaks) {
-        CALL_PEAKS(chrom_sizes, deduped_tagalign, frag_lengths, effective_genome_size)
+        CALL_PEAKS(chrom_sizes, PREPARE_GENOME.out.chrom_files, deduped_tagalign, frag_lengths, effective_genome_size)
     }
 }
