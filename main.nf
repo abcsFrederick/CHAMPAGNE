@@ -40,7 +40,7 @@ workflow {
     TRIM_SE.out.set{ trimmed_fastqs }
 
     PREPARE_GENOME()
-    ALIGN_BLACKLIST(trimmed_fastqs, PREPARE_GENOME.out.blacklist_files)
+    ALIGN_BLACKLIST(trimmed_fastqs, PREPARE_GENOME.out.blacklist_files, PREPARE_GENOME.out.blacklist_name)
     ALIGN_GENOME(ALIGN_BLACKLIST.out.reads, PREPARE_GENOME.out.reference_files)
     ALIGN_GENOME.out.bam.set{ aligned_bam }
 

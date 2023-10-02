@@ -8,7 +8,8 @@ process ALIGN_BLACKLIST {
 
     input:
         tuple val(meta), path(fastq)
-        path(blacklist_files)
+        path(index_files)
+        val(index_name)
 
     output:
         tuple val(meta), path("${meta.id}.no_blacklist.fastq.gz"), emit: reads
@@ -16,9 +17,7 @@ process ALIGN_BLACKLIST {
     script: // TODO use samtools -f4 for single-end and -f12 for paired to get unmapped reads https://broadinstitute.github.io/picard/explain-flags.html
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    INDEX=`find -L ./ -name "*.amb" | sed 's/.amb//' | sed 's|^./||'`
-
-    bwa mem -t $task.cpus \$INDEX $fastq > ${prefix}.sam
+    bwa mem -t ${task.cpus} ${index_name} ${fastq} > ${prefix}.sam
     samtools view \\
         -@ ${task.cpus} \\
         -f4 \\

@@ -16,6 +16,7 @@ workflow PREPARE_GENOME {
 
     emit:
         blacklist_files = ch_blacklist_files
+        blacklist_name = Channel.value(params.genomes[ params.genome ].blacklist)
         reference_files = ch_reference_files
         chrom_sizes = ch_chrom_sizes
 }
