@@ -5,9 +5,35 @@
         "https://github.com/CCBR/nf-modules": {
             "modules": {
                 "CCBR": {
+                    "bwa/index": {
+                        "branch": "main",
+                        "git_sha": "b39dceb9d9dd55804f8cd81181a315a48dc0f4c6",
+                        "installed_by": ["modules"]
+                    },
+                    "bwa/mem": {
+                        "branch": "main",
+                        "git_sha": "520860abefe5e45ac604e92051d2daebdae4aa81",
+                        "installed_by": ["modules"]
+                    },
                     "cutadapt": {
                         "branch": "main",
                         "git_sha": "7a78633cb964d61a663edf2fbff333790658bb00",
+                        "installed_by": ["modules"]
+                    }
+                }
+            }
+        },
+        "https://github.com/nf-core/modules.git": {
+            "modules": {
+                "nf-core": {
+                    "bwa/index": {
+                        "branch": "master",
+                        "git_sha": "bfed129da5134b4439b1821c917972570d44d39c",
+                        "installed_by": ["modules"]
+                    },
+                    "khmer/uniquekmers": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
                         "installed_by": ["modules"]
                     }
                 }

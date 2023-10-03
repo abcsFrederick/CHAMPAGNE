@@ -7,7 +7,7 @@ process MACS2_DEDUP {
     container "${params.containers.macs2}"
 
     input:
-        tuple val(meta), path(bam), path(chrom_sizes)
+        tuple val(meta), path(bam), path(chrom_sizes), val(effective_genome_size)
 
     output:
         tuple val(meta), path("${meta.id}.TagAlign.dedup.bed"), emit: bed
@@ -20,7 +20,7 @@ process MACS2_DEDUP {
     mkdir \$TMP
     trap 'rm -rf "\$TMP"' EXIT
 
-    macs2 filterdup -i ${bam} -g ${params.genomes[ params.genome ].effective_genome_size} --keep-dup="auto" -o TmpTagAlign1
+    macs2 filterdup -i ${bam} -g ${effective_genome_size} --keep-dup="auto" -o TmpTagAlign1
     awk -F"\\t" -v OFS="\\t" '{{if (\$2>0 && \$3>0) {{print}}}}' TmpTagAlign1 > TmpTagAlign2
     awk -F"\\t" -v OFS="\\t" '{{print \$1,1,\$2}}' ${chrom_sizes} > \$TMP/GenomeFile_unsorted.bed
     sort \\

@@ -20,13 +20,17 @@ include { BAM_TO_BED    } from "../../modules/local/bedtools.nf"
 workflow CALL_PEAKS {
     take:
         chrom_sizes
+        chrom_files
         deduped_tagalign
         deduped_bam
         frag_lengths
+        effective_genome_size
 
     main:
         // peak calling
-        genome_frac = CALC_GENOME_FRAC(chrom_sizes)
+
+
+        genome_frac = CALC_GENOME_FRAC(chrom_sizes, effective_genome_size)
 
         // create channel with [ meta, chip_tag, input_tag, format ]
         deduped_tagalign
@@ -41,6 +45,7 @@ workflow CALL_PEAKS {
         ch_tagalign
             .join(frag_lengths)
             .combine(genome_frac)
+            .combine(effective_genome_size)
             .set { ch_macs }
 
         // create sicer channel containing only bed files with [ meta, chip_tag, input_tag, fraglen, genome_frac]
@@ -72,18 +77,16 @@ workflow CALL_PEAKS {
             .combine(Channel.fromPath("${params.genomes[ params.genome ].chromosomes_dir}", type: 'dir', checkIfExists: true))
             .set { ch_gem }
 
-
         ch_macs | MACS_BROAD
         ch_macs | MACS_NARROW
         ch_sicer | SICER | CONVERT_SICER
-        GEM(ch_gem)
+        GEM(ch_gem, chrom_files)
 
         CONVERT_SICER.out.peak
             .mix(GEM.out.peak,
                  MACS_BROAD.out.peak,
                  MACS_NARROW.out.peak
                 ).set{ ch_peaks }
-
 
         // Create Channel with meta, deduped bam, peak file, peak-calling tool, and chrom sizes fasta
         deduped_bam.cross(ch_peaks)

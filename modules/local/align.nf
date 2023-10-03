@@ -1,5 +1,5 @@
 
-process ALIGN_BLACKLIST {
+process ALIGN_BLACKLIST { // TODO: refactor this as a subworkflow that combines alignment and filtering processes
     tag { meta.id }
     label 'align'
     label 'process_higher'
@@ -8,7 +8,8 @@ process ALIGN_BLACKLIST {
 
     input:
         tuple val(meta), path(fastq)
-        path(blacklist_files)
+        path(index_files)
+        val(index_name)
 
     output:
         tuple val(meta), path("${meta.id}.no_blacklist.bam"), emit: bam
@@ -17,7 +18,8 @@ process ALIGN_BLACKLIST {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def filter_flag = meta.single_end ? '4' : '12'
     """
-    bwa mem -t $task.cpus ${params.genomes[ params.genome ].blacklist} $fastq > ${prefix}.bam
+    bwa mem -t ${task.cpus} ${index_name} ${fastq} > ${prefix}.sam
+
     samtools view \\
       -@ ${task.cpus} \\
       -f${filter_flag} \\

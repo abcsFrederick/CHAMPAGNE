@@ -5,6 +5,7 @@ workflow DEDUPLICATE {
     take:
         aligned_bam
         chrom_sizes
+        effective_genome_size
 
     main:
 
@@ -14,7 +15,7 @@ workflow DEDUPLICATE {
             paired: !meta.single_end
 
         }.set{ bam }
-        bam.single.combine(chrom_sizes) | MACS2_DEDUP
+        bam.single.combine(chrom_sizes).combine(effective_genome_size) | MACS2_DEDUP
         MACS2_DEDUP.out.bam | INDEX_SINGLE
         bam.paired | PICARD_DEDUP
         PICARD_DEDUP.out.bam | INDEX_PAIRED

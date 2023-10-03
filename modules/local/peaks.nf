@@ -6,13 +6,14 @@ process CALC_GENOME_FRAC {
 
     input:
         path(chrom_sizes)
+        val(effective_genome_size)
 
     output:
         env(genome_frac), emit: genome_frac
 
     script:
     """
-    genome_frac=`calc_effective_genome_fraction.py ${params.genomes[ params.genome ].effective_genome_size} ${chrom_sizes} ${params.deeptools.excluded_chroms}`
+    genome_frac=`calc_effective_genome_fraction.py ${effective_genome_size} ${chrom_sizes} ${params.deeptools.excluded_chroms}`
     echo \$genome_frac
     """
 
@@ -31,7 +32,7 @@ process MACS_BROAD {
     container = "${params.containers.macs2}"
 
     input:
-        tuple val(meta), path(chip), path(input), val(format), val(fraglen), val(genome_frac)
+        tuple val(meta), path(chip), path(input), val(format), val(fraglen), val(genome_frac), val(effective_genome_size)
 
     output:
         tuple val(meta), path("${meta.id}_peaks.broadPeak"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
@@ -43,7 +44,7 @@ process MACS_BROAD {
     macs2 callpeak \\
       -t ${chip} \\
       -c ${input} \\
-      -g ${params.genomes[ params.genome ].effective_genome_size} \\
+      -g ${effective_genome_size} \\
       -n ${meta.id} \\
       --extsize ${fraglen} \\
       --nomodel \\
@@ -70,7 +71,7 @@ process MACS_NARROW {
     container = "${params.containers.macs2}"
 
     input:
-        tuple val(meta), path(chip), path(input), val(format), val(fraglen), val(genome_frac)
+        tuple val(meta), path(chip), path(input), val(format), val(fraglen), val(genome_frac), val(effective_genome_size)
 
     output:
         tuple val(meta), path("${meta.id}_peaks.narrowPeak"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
@@ -82,7 +83,7 @@ process MACS_NARROW {
     macs2 callpeak \\
       -t ${chip} \\
       -c ${input} \\
-      -g ${params.genomes[ params.genome ].effective_genome_size} \\
+      -g ${effective_genome_size} \\
       -n ${meta.id} \\
       --extsize ${fraglen} \\
       --nomodel \\
