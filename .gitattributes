@@ -4,5 +4,4 @@ modules/nf-core/** linguist-generated
 subworkflows/nf-core/** linguist-generated
 modules/CCBR/** linguist-generated
 subworkflows/CCBR/** linguist-generated
-*.config linguist-language=nextflow
 docs/**.html linguist-generated
