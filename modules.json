@@ -9,6 +9,11 @@
                         "branch": "main",
                         "git_sha": "a4b80fe5424b4bef8ebb6c35c2e7f3c0a9caaa81",
                         "installed_by": ["modules"]
+                    },
+                    "cutadapt": {
+                        "branch": "main",
+                        "git_sha": "7a78633cb964d61a663edf2fbff333790658bb00",
+                        "installed_by": ["modules"]
                     }
                 }
             }
@@ -23,8 +28,7 @@
                     },
                     "khmer/uniquekmers": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
-                        "installed_by": ["modules"]
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73"
                     }
                 }
             }

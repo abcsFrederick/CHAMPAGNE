@@ -44,5 +44,6 @@ replay_pid*
 
 # user-specific dev files
 *KLS*
-.Rproj.user
 *.Rproj
+.Rproj.user
+.Rhistory

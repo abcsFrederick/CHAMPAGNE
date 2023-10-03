@@ -24,20 +24,21 @@ include { QC             } from './subworkflows/local/qc.nf'
 include { CALL_PEAKS     } from './subworkflows/local/peaks.nf'
 
 // MODULES
-include { TRIM_SE                  } from "./modules/local/trim.nf"
+include { CUTADAPT                  } from "./modules/CCBR/cutadapt"
 include { ALIGN_BLACKLIST          } from "./modules/local/align.nf"
 include { ALIGN_GENOME             } from "./modules/local/align.nf"
 include { DEDUPLICATE              } from "./modules/local/qc.nf"
 include { PHANTOM_PEAKS            } from "./modules/local/qc.nf"
-include { PPQT_PROCESS             } from "./modules/local/qc.nf"
+include { PPQT_PROCESS
+          MULTIQC                  } from "./modules/local/qc.nf"
 include { NORMALIZE_INPUT          } from "./modules/local/deeptools.nf"
 
 // MAIN WORKFLOW
 workflow {
     INPUT_CHECK(file(params.input), params.seq_center)
     INPUT_CHECK.out.reads.set { raw_fastqs }
-    raw_fastqs | TRIM_SE
-    TRIM_SE.out.set{ trimmed_fastqs }
+    raw_fastqs | CUTADAPT
+    CUTADAPT.out.reads.set{ trimmed_fastqs }
 
     PREPARE_GENOME()
     chrom_sizes = PREPARE_GENOME.out.chrom_sizes
@@ -55,6 +56,7 @@ workflow {
     PHANTOM_PEAKS.out.fraglen | PPQT_PROCESS
     PPQT_PROCESS.out.fraglen.set {frag_lengths }
 
+    ch_multiqc = Channel.of()
     if (params.run.qc) {
         QC(raw_fastqs, trimmed_fastqs,
            aligned_bam, ALIGN_GENOME.out.flagstat,
@@ -68,9 +70,19 @@ workflow {
         if (params.run.normalize_input) {
             ch_ip_ctrl_bigwig | NORMALIZE_INPUT
         }
+
+        ch_multiqc = ch_multiqc.mix(QC.out.multiqc_input)
     }
 
     if (params.run.call_peaks) {
         CALL_PEAKS(chrom_sizes, PREPARE_GENOME.out.chrom_files, deduped_tagalign, frag_lengths, effective_genome_size)
+        ch_multiqc = ch_multiqc.mix(CALL_PEAKS.out.plots)
     }
+
+    MULTIQC(
+        file(params.multiqc.config, checkIfExists: true),
+        file(params.multiqc.logo, checkIfExists: true),
+        ch_multiqc.collect()
+    )
+
 }

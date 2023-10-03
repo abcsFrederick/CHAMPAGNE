@@ -344,24 +344,12 @@ process QC_TABLE {
 }
 
 process MULTIQC {
-    label 'qc'
-
     container = "${params.containers.multiqc}"
 
     input:
         path(multiqc_conf)
-
-        path(fastqc_raw)
-        path(fastqc_trimmed)
-        path(fastq_screen)
-        path(dedup)
-        path(phantom_peaks)
-        path(qc_table)
-        path(plot_fingerprint_matrix)
-        path(plot_fingerprint_metrics)
-        path(plot_corr)
-        path(plot_pca)
-        path(plot_profile)
+        path(custom_logo)
+        path(input_files)
 
     output:
         path('multiqc_report.html'), emit: html
