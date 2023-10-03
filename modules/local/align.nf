@@ -55,7 +55,7 @@ process BAM_TO_FASTQ {
             --FASTQ ${bam.baseName}.R1.fastq \\
             --SECOND_END_FASTQ ${bam.baseName}.R2.fastq \\
             --UNPAIRED_FASTQ ${bam.baseName}.unpaired.fastq
-        # TODO: gzip output. need container w/ both picard & pigz
+        pigz -p ${task.cpus} *.fastq
         """
     }
     stub:
