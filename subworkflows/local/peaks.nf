@@ -74,13 +74,14 @@ workflow CALL_PEAKS {
         ch_tagalign
             .combine(Channel.fromPath(params.gem.read_dists, checkIfExists: true))
             .combine(chrom_sizes)
-            .combine(Channel.fromPath("${params.genomes[ params.genome ].chromosomes_dir}", type: 'dir', checkIfExists: true))
+            .combine(chrom_files)
+            .combine(effective_genome_size)
             .set { ch_gem }
 
         ch_macs | MACS_BROAD
         ch_macs | MACS_NARROW
         ch_sicer | SICER | CONVERT_SICER
-        GEM(ch_gem, chrom_files)
+        GEM(ch_gem)
 
         CONVERT_SICER.out.peak
             .mix(GEM.out.peak,

@@ -78,7 +78,7 @@ workflow {
     }
 
     if (params.run.call_peaks) {
-        CALL_PEAKS(chrom_sizes, PREPARE_GENOME.out.chrom_files, deduped_tagalign, frag_lengths, effective_genome_size)
+        CALL_PEAKS(chrom_sizes, PREPARE_GENOME.out.chrom_files, deduped_tagalign, deduped_bam, frag_lengths, effective_genome_size)
         ch_multiqc = ch_multiqc.mix(CALL_PEAKS.out.plots)
     }
 
