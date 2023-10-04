@@ -1,3 +1,14 @@
+process EMIT_META {
+    input:
+        path(file)
+    output:
+        tuple val(file.baseName), path(file)
+    script:
+    """
+    echo $file
+    """
+}
+
 process GTF2BED {
     tag { gtf }
     label 'process_single'
@@ -47,6 +58,10 @@ process WRITE_GENOME_CONFIG {
     label 'process_single'
     container "${params.containers.base}"
 
+    publishDir = [
+        path: { "${params.outdir}/genome" },
+        mode: "copy"
+    ]
     input:
         tuple val(meta_ref), path(reference_index)
         tuple val(meta_bl), path(blacklist_index)
@@ -57,7 +72,7 @@ process WRITE_GENOME_CONFIG {
 
     output:
         path("*.config"), emit: conf
-        path("custom_genome/*"), emit: files
+        path("custom_genome/"), emit: files // TODO can't use genome_name variable here, nextflow thinks it's null??
 
     script:
     def genome_name = 'custom_genome'
@@ -76,18 +91,25 @@ process WRITE_GENOME_CONFIG {
     for file in ("${chrom_sizes}", "${gene_info}"):
         shutil.copy(file, "${genome_name}/")
 
-    genome = dict(reference_index = "\${params.index_dir}/${genome_name}/reference/*",
-                    blacklist_index = "\${params.index_dir}/${genome_name}/blacklist/*",
-                    effective_genome_size = "${effective_genome_size}",
-                    chrom_sizes = "\${params.index_dir}/${genome_name}/${chrom_sizes}",
-                    gene_info = "\${params.index_dir}/${genome_name}/${gene_info}",
-                    chromosomes_dir = "\${params.index_dir}/${genome_name}/chroms/*"
+    genome = dict(reference_index = '"\${params.index_dir}/${genome_name}/reference/*"',
+                  blacklist_index = '"\${params.index_dir}/${genome_name}/blacklist/*"',
+                  chromosomes_dir = '"\${params.index_dir}/${genome_name}/chroms/"',
+                  chrom_sizes = '"\${params.index_dir}/${genome_name}/${chrom_sizes}"',
+                  gene_info = '"\${params.index_dir}/${genome_name}/${gene_info}"',
+                  effective_genome_size = "${effective_genome_size}"
     )
     pprint.pprint(genome)
     with open('${genome_name}.config', 'w') as conf_file:
-        conf_file.write("'${genome_name}' {")
+        head = ["params {\\n",
+                '\\tindex_dir = "${params.outdir}/genome/"\\n',
+                "\\tgenomes {\\n"
+                "\\t\\t'${genome_name}' {\\n"]
+        conf_file.writelines(head)
         for k, v in genome.items():
-            conf_file.write(f"\\t{k} = {v}\\n")
-        conf_file.write("}")
+            conf_file.write(f'\\t\\t\\t{k} = {v}\\n')
+        tail = ["\\t\\t}\\n",
+                "\\t}\\n",
+                "}\\n"]
+        conf_file.writelines(tail)
     """
 }
