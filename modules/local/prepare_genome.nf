@@ -41,7 +41,7 @@ process SPLIT_REF_CHROMS {
     """
 }
 
-process CREATE_GENOME_CONFIG {
+process WRITE_GENOME_CONFIG {
     label 'process_single'
     container "${params.containers.base}"
 
@@ -54,28 +54,37 @@ process CREATE_GENOME_CONFIG {
         val(effective_genome_size)
 
     output:
-        path('genome/')
+        path("*.config"), emit: conf
+        path("custom_genome/*"), emit: files
 
     script:
-    def genome_name = 'custom_genome' // TODO allow user to set this
+    def genome_name = 'custom_genome'
     """
     #!/usr/bin/env python
     import os
     import pprint
+    import shutil
+    os.makedirs("${genome_name}/")
+    for subdir, filelist in (('reference/', "${reference_index}"), ('blacklist', "${blacklist_index}"), ('chroms', "${chrom_files}")):
+        dirpath = f"${{genome_name}}/{subdir}"
+        os.mkdir(dirpath)
+        for file in filelist.split():
+            shutil.copy(file, dirpath)
+    for file in ("${chrom_sizes}", "${gene_info}"):
+        shutil.copy(file, "${genome_name}/")
 
-    os.mkdir('genome/')
-    genome = dict(reference_index = "${reference_index}",
-                  blacklist_index = "${blacklist_index}",
-                  effective_genome_size = "${effective_genome_size}",
-                  chrom_sizes = "${chrom_sizes}",
-                  gene_info = "${gene_info}",
-                  chromosomes_dir = "${chrom_files}"
+    genome = dict(reference_index = "\${params.index_dir}/${genome_name}/reference/*",
+                    blacklist_index = "\${params.index_dir}/${genome_name}/blacklist/*",
+                    effective_genome_size = "${effective_genome_size}",
+                    chrom_sizes = "\${params.index_dir}/${genome_name}/${chrom_sizes}",
+                    gene_info = "\${params.index_dir}/${genome_name}/${gene_info}",
+                    chromosomes_dir = "\${params.index_dir}/${genome_name}/chroms/*"
     )
-    print(genome)
-    with open('genome/${genome_name}.config', 'w') as conf_file:
+    pprint.pprint(genome)
+    with open('${genome_name}.config', 'w') as conf_file:
         conf_file.write("'${genome_name}' {")
-        for k, v in genome:
-            conf_file.write(f"\t{k} = \${{params.index_dir}}/{v}")
+        for k, v in genome.items():
+            conf_file.write(f"\\t{k} = {v}\\n")
         conf_file.write("}")
     """
 }
