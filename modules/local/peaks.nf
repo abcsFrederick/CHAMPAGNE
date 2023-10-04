@@ -119,7 +119,7 @@ process SICER {
     sicer \\
       -t ${chip} \\
       -c ${input} \\
-      -s ${params.genome} \\
+      -s ${params.sicer.species} \\
       -rt 100 \\
       -w 300 \\
       -f ${fraglen} \\
