@@ -1,30 +1,44 @@
 include { BWA_INDEX as BWA_INDEX_BL
           BWA_INDEX as BWA_INDEX_REF } from "../../modules/CCBR/bwa/index"
 include { KHMER_UNIQUEKMERS          } from '../../modules/nf-core/khmer/uniquekmers'
+include { BEDTOOLS_GETFASTA          } from '../../modules/nf-core/bedtools/getfasta/main'
 include { SPLIT_REF_CHROMS           } from '../../modules/local/prepare_genome.nf'
 include { GTF2BED                    } from '../../modules/local/prepare_genome.nf'
+include { WRITE_GENOME_CONFIG       } from "../../modules/local/prepare_genome.nf"
 
 workflow PREPARE_GENOME {
     main:
         if (params.genome_fasta && params.genes_gtf) {
             ch_fasta = file(params.genome_fasta)
             ch_blacklist_input = file(params.blacklist)
-            if (ch_blacklist_input.endsWith('.fa') || ch_blacklist_input.endsWith('.fna') || ch_blacklist_input.endsWith('.fasta')) {
+            if (ch_blacklist_input.endsWith('.bed')) {
+                BEDTOOLS_GETFASTA(ch_blacklist_input, ch_fasta)
+                ch_blacklist_fasta = BEDTOOLS_GETFASTA.out.fasta
+            } else {
                 ch_blacklist_fasta = ch_blacklist_input
-            } else { // TODO optionally convert bed to fasta
-                error "The blacklist file must be in fasta nucleotide format. \n\tBlacklist: ${params.blacklist}"
             }
-            ch_blacklist_index = BWA_INDEX_BL(ch_blacklist_fasta).index
-            ch_reference_index = BWA_INDEX_REF(ch_fasta).index
+            ch_blacklist_index = BWA_INDEX_BL([['id': 'blacklist'], ch_blacklist_fasta]).index
+            ch_reference_index = BWA_INDEX_REF([['id': 'genome'], ch_fasta]).index
             KHMER_UNIQUEKMERS(ch_fasta, params.read_length)
             ch_gsize = KHMER_UNIQUEKMERS.out.kmers.map { it.text.trim() }
-            ch_gene_bed = GTF2BED ( file(params.gtf) ).bed
-            //ch_chrom_sizes = CUSTOM_GETCHROMSIZES ( ch_fasta ).sizes
+            ch_gene_info = GTF2BED ( file(params.genes_gtf) ).bed
             SPLIT_REF_CHROMS(ch_fasta)
             ch_chrom_sizes = SPLIT_REF_CHROMS.out.chrom_sizes
             ch_chrom_files = SPLIT_REF_CHROMS.out.chrom_files
-            ch_bwa_index = BWA_INDEX ( ch_fasta ).index
-            ch_bowtie2_index = BOWTIE2_BUILD ( ch_fasta ).index
+
+            // save reference files
+            if (params.save_reference) {
+                //file("${params.outdir}/genome/").mkdirs()
+                WRITE_GENOME_CONFIG(
+                    ch_reference_index,
+                    ch_blacklist_index,
+                    ch_chrom_sizes,
+                    ch_chrom_files,
+                    ch_gene_info,
+                    ch_gsize
+                )
+
+            }
 
         } else {
             Channel.fromPath(params.genomes[ params.genome ].blacklist_files, checkIfExists: true)
