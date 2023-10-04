@@ -78,8 +78,7 @@ workflow {
 
         ch_multiqc = ch_multiqc.mix(QC.out.multiqc_input)
     }
-
-    if (params.run.call_peaks) {
+    if (params.run.call_peaks && [params.run.macs_broad, params.run.macs_narrow, params.run.gem, params.run.sicer].any()) {
         CALL_PEAKS(chrom_sizes, PREPARE_GENOME.out.chrom_dir, deduped_tagalign, deduped_bam, frag_lengths, effective_genome_size)
         ch_multiqc = ch_multiqc.mix(CALL_PEAKS.out.plots)
     }
