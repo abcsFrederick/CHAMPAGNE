@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+import os
 import sys
 
 
@@ -40,13 +41,12 @@ def parsed(filename):
     fh.close()
 
 
-def main():
-    file = sys.argv[1]
-    chromsizesfh = open("chrom.sizes", "w")
+def main(fasta_fn, chrom_sizes_fn, outdir):
+    chromsizesfh = open(chrom_sizes_fn, "w")
 
-    for chrom, seq, chromsize in parsed(file):
+    for chrom, seq, chromsize in parsed(fasta_fn):
         chromsizesfh.write("{}\t{}\n".format(chrom.replace(">", ""), chromsize))
-        outfilename = chrom.replace(">", "") + ".fa"
+        outfilename = os.path.join(outdir, chrom.replace(">", "") + ".fa")
         outfh = open(outfilename, "w")
         print("{}\n".format(chrom))
         outfh.write("{}\n{}\n".format(chrom, seq.rstrip()))
@@ -56,4 +56,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1], sys.argv[2], sys.argv[3])
