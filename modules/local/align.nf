@@ -1,5 +1,5 @@
 
-process ALIGN_BLACKLIST { // TODO: refactor this as a subworkflow that combines alignment and filtering processes
+process FILTER_BLACKLIST { // TODO: refactor this as a subworkflow that combines alignment and filtering processes
     tag { meta.id }
     label 'align'
     label 'process_higher'
@@ -7,9 +7,7 @@ process ALIGN_BLACKLIST { // TODO: refactor this as a subworkflow that combines 
     container = "${params.containers.base}"
 
     input:
-        tuple val(meta), path(fastq)
-        path(index_files)
-        val(index_name)
+        tuple val(meta), path(bam)
 
     output:
         tuple val(meta), path("${meta.id}.no_blacklist.bam"), emit: bam
@@ -18,8 +16,6 @@ process ALIGN_BLACKLIST { // TODO: refactor this as a subworkflow that combines 
     def prefix = task.ext.prefix ?: "${meta.id}"
     def filter_flag = meta.single_end ? '4' : '12'
     """
-    bwa mem -t ${task.cpus} ${index_name} ${fastq} > ${prefix}.sam
-
     samtools view \\
       -@ ${task.cpus} \\
       -f${filter_flag} \\
@@ -66,7 +62,7 @@ process BAM_TO_FASTQ {
     """
 }
 
-process ALIGN_GENOME {
+process ALIGN_GENOME { // TODO refactor as subworkflow
     tag { meta.id }
     label 'align'
     label 'process_higher'
@@ -75,7 +71,7 @@ process ALIGN_GENOME {
 
     input:
         tuple val(meta), path(fastq)
-        path(reference_files)
+        tuple val(meta_ref), path(reference_files)
 
     output:
         tuple val(meta), path("*.aligned.filtered.bam"), emit: bam
@@ -104,7 +100,9 @@ process ALIGN_GENOME {
     mkdir \$TMP
     trap 'rm -rf "\$TMP"' EXIT
 
-    bwa mem -t ${task.cpus} ${params.genome} ${fastq} > ${prefix}.bam
+    INDEX=`find -L ./ -name "*.amb" | sed 's/\\.amb\$//'`
+
+    bwa mem -t ${task.cpus} \$INDEX ${fastq} > ${prefix}.bam
     samtools sort \\
       -@ ${task.cpus} \\
       -m 2G \\

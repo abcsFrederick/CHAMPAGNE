@@ -28,7 +28,8 @@ include { CALL_PEAKS               } from './subworkflows/local/peaks.nf'
 
 // MODULES
 include { CUTADAPT                 } from "./modules/CCBR/cutadapt"
-include { ALIGN_BLACKLIST
+include { BWA_MEM as ALIGN_BLACKLIST } from "./modules/CCBR/bwa/mem"
+include { FILTER_BLACKLIST
           BAM_TO_FASTQ
           ALIGN_GENOME             } from "./modules/local/align.nf"
 include { PHANTOM_PEAKS            } from "./modules/local/qc.nf"
@@ -47,7 +48,8 @@ workflow {
     chrom_sizes = PREPARE_GENOME.out.chrom_sizes
 
     effective_genome_size = PREPARE_GENOME.out.effective_genome_size
-    ALIGN_BLACKLIST(trimmed_fastqs, PREPARE_GENOME.out.blacklist_index, PREPARE_GENOME.out.blacklist_name) | BAM_TO_FASTQ
+    ALIGN_BLACKLIST(trimmed_fastqs, PREPARE_GENOME.out.blacklist_index)
+    ALIGN_BLACKLIST.out.bam | FILTER_BLACKLIST | BAM_TO_FASTQ
     ALIGN_GENOME(BAM_TO_FASTQ.out.reads, PREPARE_GENOME.out.reference_index)
     ALIGN_GENOME.out.bam.set{ aligned_bam }
 
