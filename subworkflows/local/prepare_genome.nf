@@ -41,10 +41,10 @@ workflow PREPARE_GENOME {
             }
 
         } else {
-            Channel.fromPath(params.genomes[ params.genome ].blacklist_files, checkIfExists: true)
+            Channel.fromPath(params.genomes[ params.genome ].blacklist_index, checkIfExists: true)
                 .collect()
                 .set{ ch_blacklist_index }
-            Channel.fromPath(params.genomes[ params.genome ].reference_files, checkIfExists: true)
+            Channel.fromPath(params.genomes[ params.genome ].reference_index, checkIfExists: true)
                 .collect()
                 .set{ ch_reference_index }
             Channel.fromPath(params.genomes[ params.genome ].chrom_sizes, checkIfExists: true)
