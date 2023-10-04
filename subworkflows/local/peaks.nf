@@ -20,7 +20,7 @@ include { BAM_TO_BED    } from "../../modules/local/bedtools.nf"
 workflow CALL_PEAKS {
     take:
         chrom_sizes
-        chrom_files
+        chrom_dir
         deduped_tagalign
         deduped_bam
         frag_lengths
@@ -74,20 +74,27 @@ workflow CALL_PEAKS {
         ch_tagalign
             .combine(Channel.fromPath(params.gem.read_dists, checkIfExists: true))
             .combine(chrom_sizes)
-            .combine(chrom_files)
+            .combine(chrom_dir)
             .combine(effective_genome_size)
             .set { ch_gem }
 
-        ch_macs | MACS_BROAD
-        ch_macs | MACS_NARROW
-        ch_sicer | SICER | CONVERT_SICER
-        GEM(ch_gem)
-
-        CONVERT_SICER.out.peak
-            .mix(GEM.out.peak,
-                 MACS_BROAD.out.peak,
-                 MACS_NARROW.out.peak
-                ).set{ ch_peaks }
+        ch_peaks = Channel.empty()
+        if (params.run.macs_broad) {
+            ch_macs | MACS_BROAD
+            ch_peaks = ch_peaks.mix(MACS_BROAD.out.peak)
+        }
+        if (params.run.macs_narrow) {
+            ch_macs | MACS_NARROW
+            ch_peaks = ch_peaks.mix(MACS_NARROW.out.peak)
+        }
+        if (params.run.sicer) {
+            ch_sicer | SICER | CONVERT_SICER
+            ch_peaks = ch_peaks.mix(CONVERT_SICER.out.peak)
+        }
+        if (params.run.gem) {
+            ch_gem | GEM
+            ch_peaks = ch_peaks.mix(GEM.out.peak)
+        }
 
         // Create Channel with meta, deduped bam, peak file, peak-calling tool, and chrom sizes fasta
         deduped_bam.cross(ch_peaks)
