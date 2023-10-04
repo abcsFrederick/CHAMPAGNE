@@ -29,7 +29,7 @@ process SPLIT_REF_CHROMS {
 
     output:
         path("${fasta.baseName}.chrom.sizes"), emit: chrom_sizes
-        path("chroms/*")                     , emit: chrom_files
+        path("chroms/")                      , emit: chrom_dir
 
     script:
     """
@@ -38,6 +38,8 @@ process SPLIT_REF_CHROMS {
     stub:
     """
     touch ${fasta.baseName}.chrom.sizes
+    mkdir -p chroms/
+    touch chroms/chr1.fa
     """
 }
 
@@ -49,7 +51,7 @@ process WRITE_GENOME_CONFIG {
         tuple val(meta_ref), path(reference_index)
         tuple val(meta_bl), path(blacklist_index)
         path(chrom_sizes)
-        path(chrom_files)
+        path(chrom_dir)
         path(gene_info)
         val(effective_genome_size)
 
@@ -65,11 +67,12 @@ process WRITE_GENOME_CONFIG {
     import pprint
     import shutil
     os.makedirs("${genome_name}/")
-    for subdir, filelist in (('reference/', "${reference_index}"), ('blacklist', "${blacklist_index}"), ('chroms', "${chrom_files}")):
+    for subdir, filelist in (('reference/', "${reference_index}"), ('blacklist', "${blacklist_index}")):
         dirpath = f"${{genome_name}}/{subdir}"
         os.mkdir(dirpath)
         for file in filelist.split():
             shutil.copy(file, dirpath)
+    shutil.copytree("${chrom_dir}", '${genome_name}/chroms/')
     for file in ("${chrom_sizes}", "${gene_info}"):
         shutil.copy(file, "${genome_name}/")
 

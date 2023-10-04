@@ -24,7 +24,7 @@ workflow PREPARE_GENOME {
             ch_gene_info = GTF2BED ( file(params.genes_gtf) ).bed
             SPLIT_REF_CHROMS(ch_fasta)
             ch_chrom_sizes = SPLIT_REF_CHROMS.out.chrom_sizes
-            ch_chrom_files = SPLIT_REF_CHROMS.out.chrom_files
+            ch_chrom_dir = SPLIT_REF_CHROMS.out.chrom_dir
 
             // save reference files
             if (params.save_reference) {
@@ -33,7 +33,7 @@ workflow PREPARE_GENOME {
                     ch_reference_index,
                     ch_blacklist_index,
                     ch_chrom_sizes,
-                    ch_chrom_files,
+                    ch_chrom_dir,
                     ch_gene_info,
                     ch_gsize
                 )
@@ -50,7 +50,7 @@ workflow PREPARE_GENOME {
             Channel.fromPath(params.genomes[ params.genome ].chrom_sizes, checkIfExists: true)
                 .set{ ch_chrom_sizes }
             Channel.fromPath("${params.genomes[ params.genome ].chromosomes_dir}", type: 'dir', checkIfExists: true)
-                .set{ ch_chrom_files }
+                .set{ ch_chrom_dir }
             Channel.fromPath(params.genomes[ params.genome ].gene_info,
                          checkIfExists: true)
                 .set{ ch_gene_info }
@@ -62,7 +62,7 @@ workflow PREPARE_GENOME {
         blacklist_index = ch_blacklist_index
         reference_index = ch_reference_index
         chrom_sizes = ch_chrom_sizes
-        chrom_files = ch_chrom_files
+        chrom_dir = ch_chrom_dir
         gene_info = ch_gene_info
         effective_genome_size = ch_gsize
 }
