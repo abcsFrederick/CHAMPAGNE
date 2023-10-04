@@ -37,6 +37,10 @@ include { PPQT_PROCESS
           MULTIQC                  } from "./modules/local/qc.nf"
 include { NORMALIZE_INPUT          } from "./modules/local/deeptools.nf"
 
+workflow MAKE_REFERENCE {
+    PREPARE_GENOME()
+}
+
 // MAIN WORKFLOW
 workflow {
     INPUT_CHECK(file(params.input), params.seq_center)
