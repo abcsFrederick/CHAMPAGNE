@@ -7,7 +7,7 @@
                 "CCBR": {
                     "bwa/index": {
                         "branch": "main",
-                        "git_sha": "b39dceb9d9dd55804f8cd81181a315a48dc0f4c6",
+                        "git_sha": "a4830988cb507ff060bf45fbac2e81f72413ab53",
                         "installed_by": ["modules"]
                     },
                     "bwa/mem": {
