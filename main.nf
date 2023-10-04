@@ -47,8 +47,8 @@ workflow {
     chrom_sizes = PREPARE_GENOME.out.chrom_sizes
 
     effective_genome_size = PREPARE_GENOME.out.effective_genome_size
-    ALIGN_BLACKLIST(trimmed_fastqs, PREPARE_GENOME.out.blacklist_files, PREPARE_GENOME.out.blacklist_name) | BAM_TO_FASTQ
-    ALIGN_GENOME(BAM_TO_FASTQ.out.reads, PREPARE_GENOME.out.reference_files)
+    ALIGN_BLACKLIST(trimmed_fastqs, PREPARE_GENOME.out.blacklist_index, PREPARE_GENOME.out.blacklist_name) | BAM_TO_FASTQ
+    ALIGN_GENOME(BAM_TO_FASTQ.out.reads, PREPARE_GENOME.out.reference_index)
     ALIGN_GENOME.out.bam.set{ aligned_bam }
 
     DEDUPLICATE(aligned_bam, chrom_sizes, effective_genome_size)
