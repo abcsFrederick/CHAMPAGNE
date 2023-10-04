@@ -42,6 +42,7 @@ def parsed(filename):
 
 
 def main(fasta_fn, chrom_sizes_fn, outdir):
+    os.mkdir(outdir)
     chromsizesfh = open(chrom_sizes_fn, "w")
 
     for chrom, seq, chromsize in parsed(fasta_fn):
