@@ -8,6 +8,7 @@
   - Fraction in Peaks (FRiP) (#89)
   - Jaccard index (#92)
   - Histogram of peak widths (#92)
+- Added an option to use a custom reference from a genome fasta, gtf, and blacklist file.
 
 ### Bug fixes
 
