@@ -24,6 +24,7 @@ process GTF2BED {
     script:
     """
     cat ${gtf} | gtf2bed > ${gtf.baseName}.bed
+
     """
     stub:
     """
@@ -63,6 +64,7 @@ process WRITE_GENOME_CONFIG {
         mode: "copy"
     ]
     input:
+        path(fasta)
         tuple val(meta_ref), path(reference_index)
         tuple val(meta_bl), path(blacklist_index)
         path(chrom_sizes)
@@ -88,7 +90,7 @@ process WRITE_GENOME_CONFIG {
         for file in filelist.split():
             shutil.copy(file, dirpath)
     shutil.copytree("${chrom_dir}", '${genome_name}/chroms/')
-    for file in ("${chrom_sizes}", "${gene_info}"):
+    for file in ("${fasta}", "${chrom_sizes}", "${gene_info}"):
         shutil.copy(file, "${genome_name}/")
 
     genome = dict(reference_index = '"\${params.index_dir}/${genome_name}/reference/*"',

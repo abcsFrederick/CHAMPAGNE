@@ -42,6 +42,7 @@ workflow PREPARE_GENOME {
             ch_chrom_dir = SPLIT_REF_CHROMS.out.chrom_dir
 
             WRITE_GENOME_CONFIG(
+                ch_fasta,
                 ch_reference_index,
                 ch_blacklist_index,
                 ch_chrom_sizes,
