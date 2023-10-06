@@ -5,6 +5,8 @@ include { CALC_GENOME_FRAC
           SICER
           CONVERT_SICER
           GEM
+          MAKE_CHROM_FILTER
+          FILTER_GEM
           FRACTION_IN_PEAKS
           CONCAT_FRIPS
           PLOT_FRIP
@@ -70,7 +72,7 @@ workflow CALL_PEAKS {
             .set { ch_sicer }
 
 
-        // create gem channel with [ meta, chip_tag, input_tag, format, read_dists, chrom_sizes, chrom_dir ]
+        // create gem channel with [ meta, chip_tag, input_tag, format, read_dists, chrom_sizes, chrom_dir, effective_genome_sizes ]
         ch_tagalign
             .combine(Channel.fromPath(params.gem.read_dists, checkIfExists: true))
             .combine(chrom_sizes)
@@ -93,7 +95,9 @@ workflow CALL_PEAKS {
         }
         if (params.run.gem) {
             ch_gem | GEM
-            ch_peaks = ch_peaks.mix(GEM.out.peak)
+            MAKE_CHROM_FILTER(chrom_sizes)
+            FILTER_GEM(GEM.out.peak, MAKE_CHROM_FILTER.out.txt)
+            ch_peaks = ch_peaks.mix(FILTER_GEM.out.peak)
         }
 
         // Create Channel with meta, deduped bam, peak file, peak-calling tool, and chrom sizes fasta

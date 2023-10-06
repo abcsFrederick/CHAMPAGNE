@@ -255,6 +255,57 @@ process GEM {
     """
 }
 
+process MAKE_CHROM_FILTER {
+    // to filter out negative peaks from GEM
+    container "${params.containers.base}"
+
+    input:
+        path(chrom_sizes)
+
+    output:
+        path("${chrom_sizes}.filter.txt"), emit: txt
+
+    script:
+    """
+    #!/usr/bin/env python
+    with open("${chrom_sizes}", "r") as infile:
+        with open("${chrom_sizes}.filter.txt", "w") as outfile:
+            for line in infile:
+                chrom_name, chrom_len = line.strip().split()
+                outfile.write(f"{chrom_name}\\t1\\t1\\n")
+                outfile.write(f"{chrom_name}\\t{chrom_len}\\t{chrom_len}\\n")
+    """
+
+    stub:
+    """
+    touch ${chrom_sizes}.filter.txt
+    """
+
+}
+
+process FILTER_GEM {
+    tag { meta.id }
+
+    container "${params.containers.base}"
+
+    input:
+        tuple val(meta), path(peak), val(tool)
+        path(chrom_filter)
+
+    output:
+        tuple val(meta), path("${peak}.filtered"), val(tool), emit: peak
+
+    script:
+    """
+    bedtools intersect -v -a ${peak} -b ${chrom_filter} > ${peak}.filtered
+    """
+    stub:
+    """
+    touch ${peak}.filtered
+    """
+
+}
+
 process FRACTION_IN_PEAKS {
     tag { meta.id }
     label 'peaks'
