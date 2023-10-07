@@ -289,8 +289,7 @@ process FILTER_GEM {
     container "${params.containers.base}"
 
     input:
-        tuple val(meta), path(peak), val(tool)
-        path(chrom_filter)
+        tuple val(meta), path(peak), val(tool), path(chrom_filter)
 
     output:
         tuple val(meta), path("${peak}.filtered"), val(tool), emit: peak

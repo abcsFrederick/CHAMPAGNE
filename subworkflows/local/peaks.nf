@@ -95,8 +95,10 @@ workflow CALL_PEAKS {
         }
         if (params.run.gem) {
             ch_gem | GEM
-            MAKE_CHROM_FILTER(chrom_sizes)
-            FILTER_GEM(GEM.out.peak, MAKE_CHROM_FILTER.out.txt)
+            GEM.out.peak
+                .combine(
+                    MAKE_CHROM_FILTER(chrom_sizes).txt
+                    ) | FILTER_GEM
             ch_peaks = ch_peaks.mix(FILTER_GEM.out.peak)
         }
 
