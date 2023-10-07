@@ -39,4 +39,8 @@ process BWA_MEM {
         samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
     END_VERSIONS
     """
+    stub:
+    """
+    touch ${meta.id}.bam versions.yml
+    """
 }

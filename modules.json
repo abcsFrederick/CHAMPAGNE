@@ -12,7 +12,7 @@
                     },
                     "bwa/mem": {
                         "branch": "main",
-                        "git_sha": "520860abefe5e45ac604e92051d2daebdae4aa81",
+                        "git_sha": "29ac0b1a6c6b70f8fda38cd9c11c8a2c7f0ff6cd",
                         "installed_by": ["modules"]
                     },
                     "cutadapt": {
