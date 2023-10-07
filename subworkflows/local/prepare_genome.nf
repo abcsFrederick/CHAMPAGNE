@@ -7,9 +7,7 @@ include { SPLIT_REF_CHROMS
           RENAME_FASTA_CONTIGS as RENAME_FASTA_CONTIGS_BL
           RENAME_DELIM_CONTIGS
           GTF2BED
-          WRITE_GENOME_CONFIG
-          EMIT_META as EMIT_META_BL
-          EMIT_META as EMIT_META_REF } from "../../modules/local/prepare_genome.nf"
+          WRITE_GENOME_CONFIG } from "../../modules/local/prepare_genome.nf"
 
 workflow PREPARE_GENOME {
     main:
@@ -17,9 +15,15 @@ workflow PREPARE_GENOME {
             println "Using ${params.genome} as the reference"
 
             ch_blacklist_index = Channel.fromPath(params.genomes[ params.genome ].blacklist_index, checkIfExists: true)
-                .collect() | EMIT_META_BL
+                .collect()
+                .map{ file ->
+                    [file.baseName, file]
+                }
             ch_reference_index = Channel.fromPath(params.genomes[ params.genome ].reference_index, checkIfExists: true)
-                .collect() | EMIT_META_REF
+                .collect()
+                .map{ file ->
+                    [file.baseName, file]
+                }
             ch_chrom_dir = Channel.fromPath("${params.genomes[ params.genome ].chromosomes_dir}", type: 'dir', checkIfExists: true)
             ch_chrom_sizes = Channel.fromPath(params.genomes[ params.genome ].chrom_sizes, checkIfExists: true)
             ch_gene_info = Channel.fromPath(params.genomes[ params.genome ].gene_info, checkIfExists: true)
@@ -27,34 +31,35 @@ workflow PREPARE_GENOME {
 
         } else if (params.genome_fasta && params.genes_gtf && params.blacklist) {
             println "Building a reference from provided genome fasta, gtf, and blacklist files"
-            ch_fasta_input = file(params.genome_fasta, checkIfExists: true)
-            ch_gtf_input = file(params.genes_gtf, checkIfExists: true)
+            fasta_file = Channel.fromPath(params.genome_fasta, checkIfExists: true)
+            gtf_file = file(params.genes_gtf, checkIfExists: true)
 
             // blacklist bed to fasta
-            ch_blacklist = file(params.blacklist, checkIfExists: true)
-            if (ch_blacklist.endsWith('.bed')) {
-                BEDTOOLS_GETFASTA(ch_blacklist, ch_fasta)
+            blacklist_file = file(params.blacklist, checkIfExists: true)
+            if (blacklist_file.endsWith('.bed')) {
+                BEDTOOLS_GETFASTA(blacklist_file, fasta_file)
                 ch_blacklist_input = BEDTOOLS_GETFASTA.out.fasta
             } else {
-                ch_blacklist_input = ch_blacklist
+                ch_blacklist_input = Channel.fromPath(blacklist_file)
             }
 
             // rename contigs from ensembl to UCSC if needed
             if (params.rename_contigs) {
                 contig_map = file(params.rename_contigs, checkIfExists: true)
-                println contig_map
-                ch_fasta = RENAME_FASTA_CONTIGS_REF(ch_fasta_input, contig_map).fasta
-                println ch_fasta
+                ch_fasta = RENAME_FASTA_CONTIGS_REF(fasta_file, contig_map).fasta
                 ch_blacklist_fasta = RENAME_FASTA_CONTIGS_BL(ch_blacklist_input, contig_map).fasta
-                ch_gtf = RENAME_DELIM_CONTIGS(ch_gtf_input, contig_map).delim
+                ch_gtf = RENAME_DELIM_CONTIGS(gtf_file, contig_map).delim
             } else {
-                ch_fasta = [[id: 'genome'], ch_fasta_input]
-                ch_blacklist_fasta = [[id: 'blacklist'], ch_blacklist_input]
-                ch_gtf = ch_gtf_input
+                ch_fasta = fasta_file
+                ch_blacklist_fasta = ch_blacklist_input
+                ch_gtf = gtf_file
             }
 
-            ch_blacklist_index = BWA_INDEX_BL(ch_blacklist_fasta).index
-            ch_reference_index = BWA_INDEX_REF(ch_fasta).index
+            blacklist_meta = ch_blacklist_fasta.map{ it -> [it.baseName, it]}
+            fasta_meta = ch_fasta.map{ it -> [it.baseName, it]}
+
+            ch_blacklist_index =  BWA_INDEX_BL(blacklist_meta).index
+            ch_reference_index = BWA_INDEX_REF(fasta_meta).index
             KHMER_UNIQUEKMERS(ch_fasta, params.read_length)
             ch_gsize = KHMER_UNIQUEKMERS.out.kmers.map { it.text.trim() }
             ch_gene_info = GTF2BED ( ch_gtf ).bed

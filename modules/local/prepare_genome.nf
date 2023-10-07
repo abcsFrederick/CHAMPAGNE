@@ -1,13 +1,3 @@
-process EMIT_META {
-    input:
-        path(file)
-    output:
-        tuple val(file.baseName), path(file)
-    script:
-    """
-    echo $file
-    """
-}
 
 process GTF2BED {
     tag { gtf }
@@ -194,5 +184,7 @@ process WRITE_GENOME_CONFIG {
 
     stub:
     """
+    mkdir custom_genome/
+    touch custom_genome.config custom_genome/genome.fa
     """
 }
