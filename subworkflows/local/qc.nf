@@ -35,11 +35,14 @@ workflow QC {
     main:
         raw_fastqs.combine(Channel.value("raw")) | FASTQC_RAW
         trimmed_fastqs.combine(Channel.value("trimmed")) | FASTQC_TRIMMED
-        trimmed_fastqs
-          .combine(Channel.fromPath(params.fastq_screen.conf, checkIfExists: true))
-          .combine(Channel.fromPath(params.fastq_screen.db_dir,
-                                    type: 'dir', checkIfExists: true)) | FASTQ_SCREEN
-
+        ch_multiqc = Channel.empty()
+        if (params.fastq_screen)  {
+            trimmed_fastqs
+            .combine(Channel.fromPath(params.fastq_screen.conf, checkIfExists: true))
+            .combine(Channel.fromPath(params.fastq_screen.db_dir,
+                                        type: 'dir', checkIfExists: true)) | FASTQ_SCREEN
+            ch_multiqc = ch_multiqc.mix(FASTQ_SCREEN.out.screen)
+        }
         PRESEQ(aligned_bam)
         // when preseq fails, write NAs for the stats that are calculated from its log
         PRESEQ.out.log
@@ -101,26 +104,10 @@ workflow QC {
                     meta1.control == meta2.id ? [ meta1, bw1, bw2 ] : null
             }
             .set { ch_ip_ctrl_bigwig }
-        /*
-        MULTIQC(
-            Channel.fromPath(params.multiqc_config, checkIfExists: true),
-            FASTQC_RAW.out.zip.collect(),
-            FASTQC_TRIMMED.out.zip.collect(),
-            FASTQ_SCREEN.out.screen.collect(),
-            //NGSQC_GEN
-            deduped_flagstat.collect(),
-            ppqt_spp.collect(),
-            QC_TABLE.out.txt,
-            PLOT_FINGERPRINT.out.matrix.collect(),
-            PLOT_FINGERPRINT.out.metrics.collect(),
-            PLOT_CORRELATION.out.tab.collect(),
-            PLOT_PCA.out.tab.collect(),
-            PLOT_PROFILE.out.tab.collect()
-        )
-        */
-        ch_multiqc = FASTQC_RAW.out.zip.mix(
+
+        ch_multiqc = ch_multiqc.mix(
+            FASTQC_RAW.out.zip,
             FASTQC_TRIMMED.out.zip,
-            FASTQ_SCREEN.out.screen,
             deduped_flagstat,
             ppqt_spp,
             QC_TABLE.out,
