@@ -58,8 +58,8 @@ workflow PREPARE_GENOME {
             blacklist_meta = ch_blacklist_fasta.map{ it -> [it.baseName, it]}
             fasta_meta = ch_fasta.map{ it -> [it.baseName, it]}
 
-            ch_blacklist_index =  BWA_INDEX_BL(blacklist_meta).index
-            ch_reference_index = BWA_INDEX_REF(fasta_meta).index
+            ch_blacklist_index =  BWA_INDEX_BL(blacklist_meta).index.collect()
+            ch_reference_index = BWA_INDEX_REF(fasta_meta).index.collect()
             KHMER_UNIQUEKMERS(ch_fasta, params.read_length)
             ch_gsize = KHMER_UNIQUEKMERS.out.kmers.map { it.text.trim() }
             ch_gene_info = GTF2BED ( ch_gtf ).bed
