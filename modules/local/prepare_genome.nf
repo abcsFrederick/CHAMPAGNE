@@ -55,6 +55,71 @@ process SPLIT_REF_CHROMS {
     """
 }
 
+process RENAME_FASTA_CONTIGS {
+    """
+    Convert ensembl to UCSC contig names in a fasta file
+    """
+    tag { fasta }
+
+    container "${params.containers.base}"
+
+    input:
+        path(fasta)
+        path(map)
+
+    output:
+        tuple val(fasta.baseName), path("*_renamed*"), emit: fasta
+
+    script:
+    def renamed_fasta= "${fasta.getSimpleName()}_renamed.${fasta.getExtension()}"
+    """
+    #!/usr/bin/env python
+
+    with open("${map}", "r") as mapfile:
+        contig_map = {line.strip().split()[0]: line.strip().split()[1] for line in mapfile}
+
+    with open("${fasta}", "r") as infile:
+        with open("${renamed_fasta}", "w") as outfile:
+            for line in infile:
+                if line.startswith(">"):
+                    old_contig = line.strip(">").strip()
+                    contig = contig_map[contig] if old_contig in contig_map.keys() else old_contig
+                    outfile.write(f">{config}\n")
+                else:
+                    outfile.write(line)
+
+    """
+}
+
+process RENAME_DELIM_CONTIGS {
+    """
+    Convert ensembl to UCSC contig names in a delimited file (e.g. GTF, BED)
+    using cvbio https://github.com/clintval/cvbio#updatecontignames
+    """
+    tag { delim }
+
+    container "nciccbr/common_cvbio_3.0.0"
+
+    input:
+        path(delim)
+        path(map)
+
+    output:
+        tuple val(delim.baseName), path("*_renamed*"), emit: delim
+
+    script:
+    def renamed_delim = "${delim.getSimpleName()}_renamed.${delim.getExtension()}"
+    """
+    cvbio UpdateContigNames \\
+        -i ${delim} \\
+        -o ${renamed_delim} \\
+        -m ${map} \\
+        --comment-chars '#' \\
+        --columns 0 \\
+        --skip-missing false
+    """
+}
+
 process WRITE_GENOME_CONFIG {
     label 'process_single'
     container "${params.containers.base}"

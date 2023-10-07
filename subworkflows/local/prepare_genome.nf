@@ -2,10 +2,13 @@ include { BWA_INDEX as BWA_INDEX_BL
           BWA_INDEX as BWA_INDEX_REF } from "../../modules/CCBR/bwa/index"
 include { KHMER_UNIQUEKMERS          } from '../../modules/nf-core/khmer/uniquekmers'
 include { BEDTOOLS_GETFASTA          } from '../../modules/nf-core/bedtools/getfasta/main'
-include { SPLIT_REF_CHROMS           } from '../../modules/local/prepare_genome.nf'
-include { GTF2BED                    } from '../../modules/local/prepare_genome.nf'
-include { WRITE_GENOME_CONFIG       } from "../../modules/local/prepare_genome.nf"
-include { EMIT_META as EMIT_META_BL
+include { SPLIT_REF_CHROMS
+          RENAME_FASTA_CONTIGS as RENAME_FASTA_CONTIGS_REF
+          RENAME_FASTA_CONTIGS as RENAME_FASTA_CONTIGS_BL
+          RENAME_DELIM_CONTIGS
+          GTF2BED
+          WRITE_GENOME_CONFIG
+          EMIT_META as EMIT_META_BL
           EMIT_META as EMIT_META_REF } from "../../modules/local/prepare_genome.nf"
 
 workflow PREPARE_GENOME {
@@ -24,19 +27,37 @@ workflow PREPARE_GENOME {
 
         } else if (params.genome_fasta && params.genes_gtf && params.blacklist) {
             println "Building a reference from provided genome fasta, gtf, and blacklist files"
-            ch_fasta = file(params.genome_fasta, checkIfExists: true)
-            ch_blacklist_input = file(params.blacklist, checkIfExists: true)
-            if (ch_blacklist_input.endsWith('.bed')) {
-                BEDTOOLS_GETFASTA(ch_blacklist_input, ch_fasta)
-                ch_blacklist_fasta = BEDTOOLS_GETFASTA.out.fasta
+            ch_fasta_input = file(params.genome_fasta, checkIfExists: true)
+            ch_gtf_input = file(params.genes_gtf, checkIfExists: true)
+
+            // blacklist bed to fasta
+            ch_blacklist = file(params.blacklist, checkIfExists: true)
+            if (ch_blacklist.endsWith('.bed')) {
+                BEDTOOLS_GETFASTA(ch_blacklist, ch_fasta)
+                ch_blacklist_input = BEDTOOLS_GETFASTA.out.fasta
             } else {
-                ch_blacklist_fasta = ch_blacklist_input
+                ch_blacklist_input = ch_blacklist
             }
-            ch_blacklist_index = BWA_INDEX_BL([[id: 'blacklist'], ch_blacklist_fasta]).index
-            ch_reference_index = BWA_INDEX_REF([[id: 'genome'], ch_fasta]).index
+
+            // rename contigs from ensembl to UCSC if needed
+            if (params.rename_contigs) {
+                contig_map = file(params.rename_contigs, checkIfExists: true)
+                println contig_map
+                ch_fasta = RENAME_FASTA_CONTIGS_REF(ch_fasta_input, contig_map).fasta
+                println ch_fasta
+                ch_blacklist_fasta = RENAME_FASTA_CONTIGS_BL(ch_blacklist_input, contig_map).fasta
+                ch_gtf = RENAME_DELIM_CONTIGS(ch_gtf_input, contig_map).delim
+            } else {
+                ch_fasta = [[id: 'genome'], ch_fasta_input]
+                ch_blacklist_fasta = [[id: 'blacklist'], ch_blacklist_input]
+                ch_gtf = ch_gtf_input
+            }
+
+            ch_blacklist_index = BWA_INDEX_BL(ch_blacklist_fasta).index
+            ch_reference_index = BWA_INDEX_REF(ch_fasta).index
             KHMER_UNIQUEKMERS(ch_fasta, params.read_length)
             ch_gsize = KHMER_UNIQUEKMERS.out.kmers.map { it.text.trim() }
-            ch_gene_info = GTF2BED ( file(params.genes_gtf, checkIfExists: true) ).bed
+            ch_gene_info = GTF2BED ( ch_gtf ).bed
             SPLIT_REF_CHROMS(ch_fasta)
             ch_chrom_sizes = SPLIT_REF_CHROMS.out.chrom_sizes
             ch_chrom_dir = SPLIT_REF_CHROMS.out.chrom_dir
