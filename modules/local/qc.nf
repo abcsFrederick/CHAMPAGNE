@@ -23,7 +23,7 @@ process FASTQC {
 
     stub:
     """
-    touch ${meta.id}_fastqc.html ${meta.id}_fastqc.zip
+    touch ${meta.id}_${fqtype}_fastqc.html ${meta.id}_${fqtype}_fastqc.zip
     """
 }
 
@@ -184,7 +184,7 @@ process PHANTOM_PEAKS {
 
     stub:
     """
-    touch ${meta.id}.ppqt.pdf ${meta.id}.spp.out "${meta.id}.fraglen.txt"
+    touch ${meta.id}.ppqt.pdf ${meta.id}.spp.out ${meta.id}.fraglen.txt versions.yml
     """
 }
 
