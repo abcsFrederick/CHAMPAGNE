@@ -89,6 +89,12 @@ process RENAME_FASTA_CONTIGS {
                     outfile.write(line)
 
     """
+
+    stub:
+    def renamed_fasta= "${fasta.getSimpleName()}_renamed.${fasta.getExtension()}"
+    """
+    touch ${renamed_fasta}
+    """
 }
 
 process RENAME_DELIM_CONTIGS {
@@ -117,6 +123,12 @@ process RENAME_DELIM_CONTIGS {
         --comment-chars '#' \\
         --columns 0 \\
         --skip-missing false
+    """
+
+    stub:
+    def renamed_delim = "${delim.getSimpleName()}_renamed.${delim.getExtension()}"
+    """
+    touch ${renamed_delim}
     """
 }
 
@@ -178,5 +190,9 @@ process WRITE_GENOME_CONFIG {
                 "\\t}\\n",
                 "}\\n"]
         conf_file.writelines(tail)
+    """
+
+    stub:
+    """
     """
 }

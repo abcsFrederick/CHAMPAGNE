@@ -58,7 +58,7 @@ process BAM_TO_FASTQ {
     }
     stub:
     """
-    touch ${bam.baseName}.fastq
+    touch ${bam.baseName}.R1.fastq
     """
 }
 
