@@ -29,9 +29,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip setuptools
           pip install .[dev,test]
-      - name: Test stub run
+      - name: Stub run
         run: |
           champagne run -profile ci_stub -stub
+      - name: Test run
+        run: |
+          champagne run -profile ci_test,docker
       - name: "Upload Artifact"
         uses: actions/upload-artifact@v3
         with:
