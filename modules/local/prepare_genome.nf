@@ -74,7 +74,7 @@ process RENAME_FASTA_CONTIGS {
                 if line.startswith(">"):
                     old_contig = line.strip(">").strip()
                     contig = contig_map[contig] if old_contig in contig_map.keys() else old_contig
-                    outfile.write(f">{config}\n")
+                    outfile.write(f">{config}\\n")
                 else:
                     outfile.write(line)
 
