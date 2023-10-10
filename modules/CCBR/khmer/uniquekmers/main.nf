@@ -2,10 +2,7 @@ process KHMER_UNIQUEKMERS {
     tag "$fasta"
     label 'process_low'
 
-    conda "bioconda::khmer=3.0.0a3"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/khmer:3.0.0a3--py37haa7609a_2' :
-        'biocontainers/khmer:3.0.0a3--py37haa7609a_2' }"
+    container 'nciccbr/ccbr_khmer_3.0.0:v1'
 
     input:
     path fasta
@@ -29,6 +26,16 @@ process KHMER_UNIQUEKMERS {
         $fasta
 
     grep ^number report.txt | sed 's/^.*:.[[:blank:]]//g' > kmers.txt
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        khmer: \$( unique-kmers.py --version 2>&1 | grep ^khmer | sed 's/^khmer //;s/ .*\$//' )
+    END_VERSIONS
+    """
+
+    stub:
+    """
+    touch report.txt kmers.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

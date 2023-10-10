@@ -1,6 +1,6 @@
 include { BWA_INDEX as BWA_INDEX_BL
           BWA_INDEX as BWA_INDEX_REF } from "../../modules/CCBR/bwa/index"
-include { KHMER_UNIQUEKMERS          } from '../../modules/nf-core/khmer/uniquekmers'
+include { KHMER_UNIQUEKMERS          } from '../../modules/CCBR/khmer/uniquekmers'
 include { BEDTOOLS_GETFASTA          } from '../../modules/nf-core/bedtools/getfasta/main'
 include { SPLIT_REF_CHROMS
           RENAME_FASTA_CONTIGS as RENAME_FASTA_CONTIGS_REF

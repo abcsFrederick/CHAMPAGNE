@@ -1,5 +1,5 @@
 name: "khmer_uniquekmers"
-description: In-memory nucleotide sequence k-mer counting, filtering, graph traversal and more
+description: In-memory nucleotide sequence k-mer counting, filtering, graph traversal and more. Adapted from nf-core/modules khmer/uniquekhmers.
 keywords:
   - khmer
   - k-mer
@@ -39,4 +39,4 @@ output:
       pattern: "versions.yml"
 
 authors:
-  - "@JoseEspinosa"
+  - "@kelly-sovacool"

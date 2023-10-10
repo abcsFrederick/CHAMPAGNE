@@ -19,6 +19,11 @@
                         "branch": "main",
                         "git_sha": "7a78633cb964d61a663edf2fbff333790658bb00",
                         "installed_by": ["modules"]
+                    },
+                    "khmer/uniquekmers": {
+                        "branch": "khmer",
+                        "git_sha": "b5b4ba5c89b8a6d5fe117183d198616352fa465a",
+                        "installed_by": ["modules"]
                     }
                 }
             }
