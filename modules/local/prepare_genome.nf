@@ -94,7 +94,7 @@ process RENAME_DELIM_CONTIGS {
     """
     tag { delim }
 
-    container "nciccbr/ccbr_cvbio_3.0.0:v1"
+    container "nciccbr/ccbr_cvbio_3.0.0:v1.0.1"
 
     input:
         path(delim)
