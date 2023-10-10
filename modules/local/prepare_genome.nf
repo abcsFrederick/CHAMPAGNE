@@ -58,7 +58,7 @@ process RENAME_FASTA_CONTIGS {
         path(map)
 
     output:
-        tuple val(fasta.baseName), path("*_renamed*"), emit: fasta
+        path("*_renamed*"), emit: fasta
 
     script:
     def renamed_fasta= "${fasta.getSimpleName()}_renamed.${fasta.getExtension()}"
@@ -101,7 +101,7 @@ process RENAME_DELIM_CONTIGS {
         path(map)
 
     output:
-        tuple val(delim.baseName), path("*_renamed*"), emit: delim
+        path("*_renamed*"), emit: delim
 
     script:
     def renamed_delim = "${delim.getSimpleName()}_renamed.${delim.getExtension()}"
