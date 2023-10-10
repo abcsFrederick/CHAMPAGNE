@@ -3,7 +3,7 @@ II	chrII
 III	chrIII
 IV	chrIV
 IX	chrIX
-Mito	chrM
+MT	chrM
 V	chrV
 VI	chrVI
 VII	chrVII
