@@ -71,7 +71,7 @@ def run(**kwargs):
 @click.command()
 def init(**kwargs):
     """Initialize the working directory by copying the system default config files"""
-    paths = ("nextflow.config", "conf/")
+    paths = ("nextflow.config", "conf/", "assets/")
     copy_config(paths)
 
 
