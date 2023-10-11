@@ -15,6 +15,18 @@ You can run champagne from the command line.
 The CLI includes helper steps for execution on supported
 high performance computing clusters including Biowulf and FRCE.
 
+Run preview to view processes that will run:
+
+```sh
+champagne run -profile ci_stub -preview
+```
+
+Launch a stub run to view processes that will run and download containers:
+
+```sh
+champagne run -profile ci_stub,singularity -stub
+```
+
 Run the test dataset using the test profile:
 
 ```sh
@@ -27,16 +39,11 @@ or explicitly specify the output directory and input:
 champagne run -profile singularity --outdir results/test --input assets/samplesheet_test.csv
 ```
 
-Run preview to view that steps that will run without actually executing any code:
+Create and use a custom reference genome:
 
 ```sh
-champagne run -profile ci_stub -preview
-```
-
-Launch a stub run to view the steps that will run and download containers without performing the full analysis.
-
-```sh
-champagne run -profile ci_stub -stub
+nextflow run main.nf -profile test -entry MAKE_REFERENCE
+nextflow run main.nf -profile test -c results/test/genome/custom_genome.config
 ```
 
 ### nextflow pipeline

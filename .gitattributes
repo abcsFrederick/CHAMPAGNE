@@ -2,6 +2,6 @@
 *.nf.test linguist-language=nextflow
 modules/nf-core/** linguist-generated
 subworkflows/nf-core/** linguist-generated
-*.config linguist-language=nextflow
-assets/** linguist-generated
+modules/CCBR/** linguist-generated
+subworkflows/CCBR/** linguist-generated
 docs/**.html linguist-generated

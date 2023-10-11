@@ -10,8 +10,8 @@ process FASTQC {
     input:
         tuple val(meta), path(fastq), val(fqtype)
     output:
-        path("${fastq.getBaseName(2)}*.html"), emit: html
-        path ("${fastq.getBaseName(2)}*.zip"), emit: zip
+        path("*.html"), emit: html
+        path ("*.zip"), emit: zip
 
     script:
     """
@@ -23,7 +23,7 @@ process FASTQC {
 
     stub:
     """
-    touch ${fastq.getBaseName(2)}_fastqc.html ${fastq.getBaseName(2)}_fastqc.zip
+    touch ${meta.id}_${fqtype}_fastqc.html ${meta.id}_${fqtype}_fastqc.zip
     """
 }
 
@@ -138,7 +138,6 @@ process PARSE_PRESEQ_LOG {
 }
 
 process PHANTOM_PEAKS {
-    // TODO: set tmpdir as lscratch if available https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/InitialChIPseqQC.snakefile#L504
     tag { meta.id }
     label 'qc'
     label 'ppqt'
@@ -149,22 +148,43 @@ process PHANTOM_PEAKS {
         tuple val(meta), path(bam), path(bai)
 
     output:
-        path("${meta.id}.ppqt.pdf"), emit: pdf
-        path("${meta.id}.spp.out"), emit: spp
+        path("${meta.id}.ppqt.pdf")                    , emit: pdf
+        path("${meta.id}.spp.out")                     , emit: spp
         tuple val(meta), path("${meta.id}.fraglen.txt"), emit: fraglen
+        path  "versions.yml"                           , emit: versions
 
-    script: // TODO: for PE, just use first read of each pair
+    script:
     def prefix = task.ext.prefix ?: "${meta.id}"
+    def VERSION = '1.2.2' // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
+    def prep_bam = ''
+    if (meta.single_end) {
+        prep_bam = """
+        BAM=${bam}
+        """
+    } else { // for PE, just use first read of each pair
+        prep_bam = """
+        BAM=${bam.baseName}.f66.bam
+        samtools view -b -f 64 -o \$BAM ${bam}
+        samtools index \$BAM
+        """
+    }
     """
-    RUN_SPP=\$(which run_spp.R)
-    Rscript \$RUN_SPP -c=${bam} -savp=${prefix}.ppqt.pdf -out=${prefix}.spp.out
+    ${prep_bam}
+    Rscript \$(which run_spp.R) -c=\$BAM -savp=${prefix}.ppqt.pdf -out=${prefix}.spp.out
+    # get fragment length
     frag_len=`cut -f 3 ${prefix}.spp.out | sed 's/,.*//g'`
     echo \$frag_len > "${meta.id}.fraglen.txt"
+
+    # export versions
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        phantompeakqualtools: $VERSION
+    END_VERSIONS
     """
 
     stub:
     """
-    touch ${meta.id}.ppqt.pdf ${meta.id}.spp.out "${meta.id}.fraglen.txt"
+    touch ${meta.id}.ppqt.pdf ${meta.id}.spp.out ${meta.id}.fraglen.txt versions.yml
     """
 }
 
@@ -190,58 +210,6 @@ process PPQT_PROCESS {
     """
     fraglen=${params.min_fragment_length}
     echo \$fraglen
-    """
-}
-
-process DEDUPLICATE {
-    tag { meta.id }
-    label 'qc'
-    label 'process_medium'
-
-    container = "${params.containers.macs2}"
-
-    input:
-        tuple val(meta), path(bam), path(chrom_sizes)
-
-    output:
-        tuple val(meta), path("${meta.id}.TagAlign.bed"), emit: tag_align
-        tuple val(meta), path("${bam.baseName}.dedup.bam"), path("${bam.baseName}.dedup.bam.bai"), emit: bam
-        tuple path("${bam.baseName}.dedup.bam.flagstat"), path("${bam.baseName}.dedup.bam.idxstat"), emit: flagstat
-
-    script:
-    """
-    # current working directory is a tmpdir when 'scratch' is set
-    TMP=tmp
-    mkdir \$TMP
-    trap 'rm -rf "\$TMP"' EXIT
-
-    macs2 filterdup -i ${bam} -g ${params.genomes[ params.genome ].effective_genome_size} --keep-dup="auto" -o TmpTagAlign1
-    awk -F"\\t" -v OFS="\\t" '{{if (\$2>0 && \$3>0) {{print}}}}' TmpTagAlign1 > TmpTagAlign2
-    awk -F"\\t" -v OFS="\\t" '{{print \$1,1,\$2}}' ${chrom_sizes} > \$TMP/GenomeFile_unsorted.bed
-    sort \\
-      -k1,1 -k2,2n \\
-      -T \$TMP \\
-      -S 2G \\
-      --parallel ${task.cpus} \\
-      \$TMP/GenomeFile_unsorted.bed > GenomeFile.bed
-    bedtools intersect -wa -f 1.0 -a TmpTagAlign2 -b GenomeFile.bed | awk -F"\\t" -v OFS="\\t" '{\$5="0"; print}' > ${meta.id}.TagAlign.bed
-    bedtools bedtobam -i ${meta.id}.TagAlign.bed -g ${chrom_sizes} > \$TMP/${meta.id}.TagAlign.bed.bam
-    samtools sort \\
-        -@ ${task.cpus} \\
-        -m 2G \\
-        -T \$TMP \\
-        \$TMP/${meta.id}.TagAlign.bed.bam > ${bam.baseName}.dedup.bam
-    samtools index ${bam.baseName}.dedup.bam
-    samtools flagstat ${bam.baseName}.dedup.bam > ${bam.baseName}.dedup.bam.flagstat
-    samtools idxstats ${bam.baseName}.dedup.bam > ${bam.baseName}.dedup.bam.idxstat
-    """
-
-    stub:
-    """
-    touch ${meta.id}.TagAlign.bed
-    for ext in dedup.bam dedup.bam.bai dedup.bam.flagstat dedup.bam.idxstat; do
-        touch ${bam.baseName}.\${ext}
-    done
     """
 }
 

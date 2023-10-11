@@ -6,13 +6,14 @@ process CALC_GENOME_FRAC {
 
     input:
         path(chrom_sizes)
+        val(effective_genome_size)
 
     output:
         env(genome_frac), emit: genome_frac
 
     script:
     """
-    genome_frac=`calc_effective_genome_fraction.py ${params.genomes[ params.genome ].effective_genome_size} ${chrom_sizes} ${params.deeptools.excluded_chroms}`
+    genome_frac=`calc_effective_genome_fraction.py ${effective_genome_size} ${chrom_sizes} ${params.deeptools.excluded_chroms}`
     echo \$genome_frac
     """
 
@@ -31,7 +32,7 @@ process MACS_BROAD {
     container = "${params.containers.macs2}"
 
     input:
-        tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
+        tuple val(meta), path(chip), path(input), val(format), val(fraglen), val(genome_frac), val(effective_genome_size)
 
     output:
         tuple val(meta), path("${meta.id}_peaks.broadPeak"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
@@ -43,13 +44,13 @@ process MACS_BROAD {
     macs2 callpeak \\
       -t ${chip} \\
       -c ${input} \\
-      -g ${params.genomes[ params.genome ].effective_genome_size} \\
+      -g ${effective_genome_size} \\
       -n ${meta.id} \\
       --extsize ${fraglen} \\
       --nomodel \\
       -q ${params.macs.broad.q} \\
       --keep-dup='all' \\
-      --format BED \\
+      --format ${format} \\
       --broad \\
       --broad-cutoff ${params.macs.broad.cutoff}
     """
@@ -70,7 +71,7 @@ process MACS_NARROW {
     container = "${params.containers.macs2}"
 
     input:
-        tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
+        tuple val(meta), path(chip), path(input), val(format), val(fraglen), val(genome_frac), val(effective_genome_size)
 
     output:
         tuple val(meta), path("${meta.id}_peaks.narrowPeak"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
@@ -82,13 +83,13 @@ process MACS_NARROW {
     macs2 callpeak \\
       -t ${chip} \\
       -c ${input} \\
-      -g ${params.genomes[ params.genome ].effective_genome_size} \\
+      -g ${effective_genome_size} \\
       -n ${meta.id} \\
       --extsize ${fraglen} \\
       --nomodel \\
       -q ${params.macs.narrow.q} \\
       --keep-dup='all' \\
-      --format BED
+      --format ${format}
     """
 
     stub:
@@ -118,7 +119,7 @@ process SICER {
     sicer \\
       -t ${chip} \\
       -c ${input} \\
-      -s ${params.genome} \\
+      -s ${params.sicer.species} \\
       -rt 100 \\
       -w 300 \\
       -f ${fraglen} \\
@@ -217,7 +218,7 @@ process GEM {
     container = "${params.containers.gem}"
 
     input:
-        tuple val(meta), path(chip), path(input), path(read_dists), path(chrom_sizes), path(chrom_dir)
+        tuple val(meta), path(chip), path(input), val(format), path(read_dists), path(chrom_sizes), path(chrom_dir), val(effective_genome_size)
 
     output:
         tuple val(meta), path("${meta.id}/*GEM_events.narrowPeak"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
@@ -225,15 +226,17 @@ process GEM {
 
     script:
     // $GEMJAR is defined in the docker container
+    def f = format == 'BAMPE' ? 'SAM' : format
     """
     java -Xmx${task.memory.toGiga()}G -jar \$GEMJAR \\
       --t ${task.cpus} \\
       --d ${read_dists} \\
       --g ${chrom_sizes} \\
       --genome ${chrom_dir} \\
-      --s ${params.genomes[ params.genome ].effective_genome_size} \\
+      --s ${effective_genome_size} \\
       --expt ${chip} \\
       --ctrl ${input} \\
+      --f ${f} \\
       --out ${meta.id} \\
       --fold ${params.gem.fold} \\
       --k_min ${params.gem.k_min} \\
@@ -250,6 +253,48 @@ process GEM {
         touch ${meta.id}/${meta.id}.GEM_events.\$ext
     done
     """
+}
+
+process FILTER_GEM {
+    tag { meta.id }
+
+    container "${params.containers.base}"
+
+    input:
+        tuple val(meta), path(peak), val(tool), path(chrom_sizes)
+
+    output:
+        tuple val(meta), path("${peak}.filtered"), val(tool), emit: peak
+
+    script:
+    """
+    #!/usr/bin/env python
+
+    chrom_ends = dict()
+    with open('${chrom_sizes}', 'r') as chrom_file:
+        for line in chrom_file:
+            chrom, end = line.split()
+            chrom_ends[chrom] = int(end)
+
+    count_bad_peaks = 0
+    with open('${peak}', 'r') as infile:
+        with open('${peak}.filtered', 'w') as outfile:
+            for line in infile:
+                line_split = line.split()
+                chrom = line_split[0]
+                start = int(line_split[1])
+                end = int(line_split[2])
+                if start > 0 and end < chrom_ends[chrom]:
+                    outfile.write(line)
+                else:
+                    count_bad_peaks += 1
+    print(f"Filtered out {count_bad_peaks} peaks")
+    """
+    stub:
+    """
+    touch ${peak}.filtered
+    """
+
 }
 
 process FRACTION_IN_PEAKS {

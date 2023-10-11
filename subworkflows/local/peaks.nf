@@ -5,6 +5,7 @@ include { CALC_GENOME_FRAC
           SICER
           CONVERT_SICER
           GEM
+          FILTER_GEM
           FRACTION_IN_PEAKS
           CONCAT_FRIPS
           PLOT_FRIP
@@ -14,51 +15,89 @@ include { CALC_GENOME_FRAC
           GET_PEAK_META
           CONCAT_PEAK_META
           PLOT_PEAK_WIDTHS   } from "../../modules/local/peaks.nf"
+include { BAM_TO_BED    } from "../../modules/local/bedtools.nf"
 
 
 workflow CALL_PEAKS {
     take:
         chrom_sizes
+        chrom_dir
         deduped_tagalign
         deduped_bam
         frag_lengths
+        effective_genome_size
 
     main:
         // peak calling
-        genome_frac = CALC_GENOME_FRAC(chrom_sizes)
-        // create channel with [ meta, chip_tag, input_tag, fraglen, genome_frac]
+
+
+        genome_frac = CALC_GENOME_FRAC(chrom_sizes, effective_genome_size)
+
+        // create channel with [ meta, chip_tag, input_tag, format ]
         deduped_tagalign
             .combine(deduped_tagalign)
+            .map {
+                meta1, tag1, format1, meta2, tag2, format2 ->
+                    meta1.control == meta2.id && format1 == format2 ? [ meta1, tag1, tag2, format1 ]: null
+            }
+            .set{ ch_tagalign }
+
+        // create macs channel with [ meta, chip_tag, input_tag, format, fraglen, genome_frac]
+        ch_tagalign
+            .join(frag_lengths)
+            .combine(genome_frac)
+            .combine(effective_genome_size)
+            .set { ch_macs }
+
+        // create sicer channel containing only bed files with [ meta, chip_tag, input_tag, fraglen, genome_frac]
+        deduped_tagalign
+            .branch{ meta, tag, format ->
+                bam: format == 'BAMPE'
+                    return(tuple(meta, tag))
+                bed: format == 'BED'
+                    return(tuple(meta, tag))
+            }.set{ tag_split }
+        tag_split.bam | BAM_TO_BED
+        BAM_TO_BED.out.bed.set{ tag_split_converted }
+        tag_split.bed.mix(tag_split_converted).set{ tag_all_bed }
+        tag_all_bed
+            .combine(tag_all_bed)
             .map {
                 meta1, tag1, meta2, tag2 ->
                     meta1.control == meta2.id ? [ meta1, tag1, tag2 ]: null
             }
             .join(frag_lengths)
             .combine(genome_frac)
-            .set { ch_tagalign }
+            .set { ch_sicer }
 
-        deduped_tagalign
-            .combine(deduped_tagalign)
-            .map {
-                meta1, tag1, meta2, tag2 ->
-                    meta1.control == meta2.id ? [ meta1, tag1, tag2 ]: null
-            }
+
+        // create gem channel with [ meta, chip_tag, input_tag, format, read_dists, chrom_sizes, chrom_dir, effective_genome_sizes ]
+        ch_tagalign
             .combine(Channel.fromPath(params.gem.read_dists, checkIfExists: true))
             .combine(chrom_sizes)
-            .combine(Channel.fromPath("${params.genomes[ params.genome ].chromosomes_dir}", type: 'dir', checkIfExists: true))
+            .combine(chrom_dir)
+            .combine(effective_genome_size)
             .set { ch_gem }
 
-        ch_tagalign | MACS_BROAD
-        ch_tagalign | MACS_NARROW
-        ch_tagalign | SICER | CONVERT_SICER
-        GEM(ch_gem)
-
-        CONVERT_SICER.out.peak
-            .mix(GEM.out.peak,
-                 MACS_BROAD.out.peak,
-                 MACS_NARROW.out.peak
-                ).set{ ch_peaks }
-
+        ch_peaks = Channel.empty()
+        if (params.run.macs_broad) {
+            ch_macs | MACS_BROAD
+            ch_peaks = ch_peaks.mix(MACS_BROAD.out.peak)
+        }
+        if (params.run.macs_narrow) {
+            ch_macs | MACS_NARROW
+            ch_peaks = ch_peaks.mix(MACS_NARROW.out.peak)
+        }
+        if (params.run.sicer) {
+            ch_sicer | SICER | CONVERT_SICER
+            ch_peaks = ch_peaks.mix(CONVERT_SICER.out.peak)
+        }
+        if (params.run.gem) {
+            ch_gem | GEM
+            GEM.out.peak
+                .combine(chrom_sizes) | FILTER_GEM
+            ch_peaks = ch_peaks.mix(FILTER_GEM.out.peak)
+        }
 
         // Create Channel with meta, deduped bam, peak file, peak-calling tool, and chrom sizes fasta
         deduped_bam.cross(ch_peaks)
