@@ -4,7 +4,7 @@ import pprint
 import subprocess
 import yaml
 import collections.abc
-from shutil import copyfile
+import shutil
 import stat
 from time import localtime, strftime
 
@@ -49,9 +49,16 @@ def append_config_block(nf_config="nextflow.config", scope=None, **kwargs):
         f.write("}\n")
 
 
-def copy_config(local_config=None, system_config=None):
-    msg(f"Copying system default config to {local_config}")
-    copyfile(system_config, local_config)
+def copy_config(config_paths):
+    msg(f"Copying default config files to current working directory")
+    for local_config in config_paths:
+        system_config = nek_base(local_config)
+        if os.path.isfile(system_config):
+            shutil.copyfile(system_config, local_config)
+        elif os.path.isdir(system_config):
+            shutil.copytree(system_config, local_config)
+        else:
+            raise FileNotFoundError(f"Cannot copy {system_config} to {local_config}")
 
 
 def read_config(file):
@@ -132,55 +139,15 @@ def is_biowulf():
         # TODO support FRCE / FNLCR
     return is_biowulf
 
-    for env_var in ("HOSTNAME", "SLURM_SUBMIT_HOST"):
-        if env_var in os.environ.keys() and os.environ[env_var] == "biowulf.nih.gov":
-            is_biowulf = True
-    return is_biowulf
-
 
 def run_nextflow(
-    paramsfile=None,
-    configfile=None,
     nextfile_path=None,
     merge_config=None,
     threads=None,
     nextflow_args=None,
 ):
-    """Run a Nextflow workfile"""
+    """Run a Nextflow workflow"""
     nextflow_command = ["nextflow", "run", nextfile_path]
-
-    if paramsfile:
-        # copy sys default params if needed
-        copy_config(
-            local_config=paramsfile,
-            system_config=nek_base("params.yaml"),
-        )
-        # read the params
-        nf_config = read_config(paramsfile)
-        # merge in command line params if provided
-        if merge_config:
-            update_config(nf_config, merge_config)
-        # update params file
-        write_config(nf_config, paramsfile)
-        nextflow_command += ["-params-file", paramsfile]
-        # display the runtime params
-        msg_box("Runtime parameters", errmsg=yaml.dump(nf_config, Dumper=yaml.Dumper))
-
-    if configfile:
-        if not os.path.exists(configfile):
-            copy_config(
-                local_config=configfile,
-                system_config=nek_base("nextflow.config"),
-            )
-
-        # add threads
-        if threads:  # when threads=None, uses max available
-            append_config_block(scope="executor", cpus=threads)
-
-        nextflow_command += ["-c", configfile]
-
-        # display the runtime configuration
-        # msg_box("Launcher Configuration", errmsg=open(configfile, "r").read()) # TODO verbose flag to toggle printing config?
 
     # add any additional Nextflow commands
     if nextflow_args:

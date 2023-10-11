@@ -20,21 +20,6 @@ from .util import (
 def common_options(func):
     """Common options decorator for use with click commands."""
     options = [
-        click.option(
-            "--configfile",
-            default="nextflow.config",
-            help="Custom config file",
-            show_default=True,
-        ),
-        click.option(
-            "--paramsfile", default=None, help="Custom params file", show_default=True
-        ),
-        click.option(  # when threads=None, uses max available
-            "--threads",
-            help="Number of threads to use",
-            default=None,
-            show_default=True,
-        ),
         click.argument("nextflow_args", nargs=-1),
     ]
     for option in reversed(options):
@@ -77,8 +62,6 @@ Add NextFlow args:  champagne run ... -work-dir workDir -with-docker
 @common_options
 def run(**kwargs):
     """Run the workflow"""
-    # optional: merge config from CLI with nf config
-    # run!
     run_nextflow(
         nextfile_path=nek_base(os.path.join("main.nf")),  # Full path to Nextflow file
         **kwargs,
@@ -86,20 +69,10 @@ def run(**kwargs):
 
 
 @click.command()
-@click.option(
-    "--configfile",
-    default="nextflow.config",
-    help="Copy template config to file",
-    show_default=True,
-)
-def config(configfile, **kwargs):
-    """Copy the system default config files"""
-    for filename in ("nextflow.config", "params.yml"):
-        if os.path.exists(nek_base(filename)):
-            copy_config(
-                local_config=configfile,
-                system_config=nek_base(filename),
-            )
+def init(**kwargs):
+    """Initialize the working directory by copying the system default config files"""
+    paths = ("nextflow.config", "conf/")
+    copy_config(paths)
 
 
 @click.command()
@@ -109,7 +82,7 @@ def citation(**kwargs):
 
 
 cli.add_command(run)
-cli.add_command(config)
+cli.add_command(init)
 # cli.add_command(citation) # TODO uncomment if champagne is published in a journal or Zenodo
 
 
