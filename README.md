@@ -15,6 +15,12 @@ You can run champagne from the command line.
 The CLI includes helper steps for execution on supported
 high performance computing clusters including Biowulf and FRCE.
 
+Copy configuration files to your current working directory
+
+```sh
+champagne init
+```
+
 Run preview to view processes that will run:
 
 ```sh
