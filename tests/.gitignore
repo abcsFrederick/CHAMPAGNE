@@ -1,0 +1,6 @@
+assets/
+conf/
+results/
+work/
+
+nextflow.config

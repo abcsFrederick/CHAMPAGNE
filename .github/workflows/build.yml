@@ -40,10 +40,14 @@ jobs:
           pip install .[dev,test]
       - name: Stub run
         run: |
+          cd tests/
+          champagne init
           champagne run -profile ci_stub -stub
       - name: Test run
         if: ${{ env.test_run == 'true' }}
         run: |
+          cd tests/
+          champagne init
           champagne run -profile ci_test,docker
       - name: "Upload Artifact"
         uses: actions/upload-artifact@v3
