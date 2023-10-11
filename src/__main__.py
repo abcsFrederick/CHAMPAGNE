@@ -59,11 +59,20 @@ Add NextFlow args:  champagne run ... -work-dir workDir -with-docker
         help_option_names=["-h", "--help"], ignore_unknown_options=True
     ),
 )
+@click.option(
+    "--mode",
+    "_mode",
+    help="Run mode (slurm, local)",
+    type=str,
+    default="local",
+    required=True,
+)
 @common_options
-def run(**kwargs):
+def run(_mode, **kwargs):
     """Run the workflow"""
     run_nextflow(
         nextfile_path=nek_base(os.path.join("main.nf")),  # Full path to Nextflow file
+        mode=_mode,
         **kwargs,
     )
 
@@ -73,6 +82,7 @@ def init(**kwargs):
     """Initialize the working directory by copying the system default config files"""
     paths = ("nextflow.config", "conf/", "assets/")
     copy_config(paths)
+    os.mkdir("log/")
 
 
 @click.command()
