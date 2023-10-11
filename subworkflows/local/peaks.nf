@@ -5,7 +5,6 @@ include { CALC_GENOME_FRAC
           SICER
           CONVERT_SICER
           GEM
-          MAKE_CHROM_FILTER
           FILTER_GEM
           FRACTION_IN_PEAKS
           CONCAT_FRIPS
@@ -96,9 +95,7 @@ workflow CALL_PEAKS {
         if (params.run.gem) {
             ch_gem | GEM
             GEM.out.peak
-                .combine(
-                    MAKE_CHROM_FILTER(chrom_sizes).txt
-                    ) | FILTER_GEM
+                .combine(chrom_sizes) | FILTER_GEM
             ch_peaks = ch_peaks.mix(FILTER_GEM.out.peak)
         }
 
