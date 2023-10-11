@@ -7,7 +7,7 @@ import collections.abc
 import shutil
 import stat
 from time import localtime, strftime
-
+import itertools
 import click
 
 
@@ -162,10 +162,15 @@ def run_nextflow(
         raise ValueError("mode is 'slurm' but no HPC environment was detected")
     # add any additional Nextflow commands
     if nextflow_args:
+        args_dict = {k: v for k, v in itertools.pairwise(nextflow_args)}
         if mode == "slurm":
-            # TODO make sure profile matches biowulf or frce if mode is slurm
-            pass
-        nextflow_command += list(nextflow_args)
+            # make sure profile matches biowulf or frce
+            if "-profile" in args_dict.keys():
+                profiles = set(args_dict["-profile"].split(","))
+                profiles.add(hpc_options[hpc]["profile"])
+                args_dict["-profile"] = ",".join(sorted(profiles))
+
+        nextflow_command += list(f"{k} {v}" for k, v in args_dict.items())
 
     # Print nextflow command
     nextflow_command = " ".join(str(nf) for nf in nextflow_command)
