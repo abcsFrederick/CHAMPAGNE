@@ -273,7 +273,7 @@ process FILTER_GEM {
     chrom_ends = dict()
     with open('${chrom_sizes}', 'r') as chrom_file:
         for line in chrom_file:
-            chrom, start, end = line.split()
+            chrom, end = line.split()
             chrom_ends[chrom] = int(end)
 
     count_bad_peaks = 0
