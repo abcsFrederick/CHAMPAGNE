@@ -1,7 +1,6 @@
 from time import localtime, strftime
 import click
 import collections.abc
-import itertools
 import os
 import pprint
 import shutil
@@ -161,7 +160,8 @@ def run_nextflow(
     if mode == "slurm" and not hpc:
         raise ValueError("mode is 'slurm' but no HPC environment was detected")
     # add any additional Nextflow commands
-    args_dict = {k: v for k, v in itertools.pairwise(nextflow_args)}
+    args_dict = {k: v for k, v in tuple(zip(nextflow_args[::2], nextflow_args[1::2]))}
+
     if mode == "slurm":
         # make sure profile matches biowulf or frce
         profiles = (
