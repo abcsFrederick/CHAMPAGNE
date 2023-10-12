@@ -73,7 +73,7 @@ champagne run --mode slurm -profile biowulf \
     --blacklist blacklist.fasta
 ```
 
-Champagne will create the reference files and a config file in `custom_genome/genome`.
+The reference files and a config file for the genome will be written in `custom_genome/genome`.
 
 Then you can run champagne using your custom genome:
 

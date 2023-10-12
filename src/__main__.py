@@ -46,7 +46,7 @@ Execute with slurm:
     champagne run ... --mode slurm
 Preview the processes that will run:
     champagne run ... --mode local -preview
-Add NextFlow args:
+Add nextflow args (anything supported by `nextflow run`):
     champagne run ... -work-dir path/to/workDir
 Run with a specific installation of champagne:
     champagne run --main path/to/champagne/main.nf ...
