@@ -17,7 +17,7 @@ git pull
 # install the version to a hidden path (e.g. .dev, .v1.0.0.9000) in /data/CCBR_Pipeliner/Pipelines/CHAMPAGNE
 cd ..
 pip install ./champagne-dev -t ./.dev
-# pip creates a binary file .dev/bin/champagne
-# add it to your path with:
-./add_to_path .dev
+# add it to your PATH and PYTHONPATH with:
+export PATH="$PATH:/data/CCBR_Pipeliner/Pipelines/CHAMPAGNE/.dev/bin/"
+export PYTHONPATH="$PYTHONPATH:/data/CCBR_Pipeliner/Pipelines/CHAMPAGNE/.dev/"
 ```
