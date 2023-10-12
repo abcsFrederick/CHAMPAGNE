@@ -65,7 +65,7 @@ Add NextFlow args:  champagne run ... -work-dir workDir -with-docker
     help="Run mode (slurm, local)",
     type=str,
     default="local",
-    required=True,
+    show_default=True,
 )
 @common_options
 def run(_mode, **kwargs):
