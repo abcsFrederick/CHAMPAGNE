@@ -41,15 +41,17 @@ def cli():
 
 help_msg_extra = """
 \b
-CLUSTER EXECUTION:
-champagne run ... -profile [profile],[profile],...
-For information on Nextflow config and profiles see:
-https://www.nextflow.io/docs/latest/config.html#config-profiles
-\b
-RUN EXAMPLES:
-Use singularity:    champagne run ... -profile singularity
-Specify threads:    champagne run ... --threads [threads]
-Add NextFlow args:  champagne run ... -work-dir workDir -with-docker
+EXAMPLES:
+Execute with slurm:
+    champagne run ... --mode slurm
+Preview the processes that will run:
+    champagne run ... --mode local -preview
+Add NextFlow args:
+    champagne run ... -work-dir path/to/workDir
+Run with a specific installation of champagne [MAIN_PATH=path/to/champagne/main.nf]:
+    champagne run path/to/champagne/main.nf ...
+Run with a specific version or branch from GitHub [MAIN_PATH=CCBR/CHAMPAGNE]:
+    champagne run CCBR/CHAMPAGNE -r v0.1.0 ...
 """
 
 
@@ -58,6 +60,11 @@ Add NextFlow args:  champagne run ... -work-dir workDir -with-docker
     context_settings=dict(
         help_option_names=["-h", "--help"], ignore_unknown_options=True
     ),
+)
+@click.argument(
+    "main_path",
+    type=str,
+    default=nek_base(os.path.join("main.nf")),
 )
 @click.option(
     "--mode",
@@ -68,10 +75,19 @@ Add NextFlow args:  champagne run ... -work-dir workDir -with-docker
     show_default=True,
 )
 @common_options
-def run(_mode, **kwargs):
+def run(main_path, _mode, **kwargs):
     """Run the workflow"""
+    if (  # this is the only acceptable github repo option for champagne
+        main_path != "CCBR/CHAMPAGNE"
+    ):
+        # make sure the path exists
+        if not os.path.exists(main_path):
+            raise FileNotFoundError(
+                f"Path to the champagne main.nf file not found: {main_path}"
+            )
+
     run_nextflow(
-        nextfile_path=nek_base(os.path.join("main.nf")),  # Full path to Nextflow file
+        nextfile_path=main_path,
         mode=_mode,
         **kwargs,
     )
