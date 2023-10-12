@@ -91,15 +91,11 @@ markdown_extensions:
 
 # Page Tree
 nav:
-  - Background: index.md
+  - Home: index.md
   - Usage:
-      - 1. Getting Started: user-guide/getting-started.md
-      - 2. Preparing Files: user-guide/preparing-files.md
-      - 3. Running the Pipeline: user-guide/run.md
-      - 4. Expected Output: user-guide/output.md
-      - 5. Running Test Data: user-guide/test-info.md
-      - Troubleshooting: user-guide/troubleshooting.md
-  - FAQ:
+      - Getting Started: getting-started.md
+  - Developer Guide:
       - How to contribute: contributing.md
-      - Contributors: contributors.md
+      - Release guide: release-guide.md
+  - Contributors: contributors.md
   - Changelog: changelog.md
