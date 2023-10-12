@@ -55,21 +55,33 @@ champagne run --mode slurm -profile biowulf --input samplesheet.csv --genome hg3
 ```
 
 We currently support the hg38 and mm10 genomes.
-If you'd like to use a custom genome, you'll need the following files for the genome:
+If you'd like to use a custom genome, you'll need the following files:
 
 - genome fasta
 - genome GTF
 - blacklist fasta
 
-Then run champagne with paths to your genome files:
+Prepare your custom reference genome with:
+
+```sh
+champagne run --mode slurm -profile biowulf \
+    -entry MAKE_REFERENCE \
+    --outdir custom_genome \
+    --genome custom_genome \
+    --genome_fasta genome.fasta \
+    --genes_gtf genome.gtf \
+    --blacklist blacklist.fasta
+```
+
+Champagne will create the reference files and a config file in `custom_genome/genome`.
+
+Then you can run champagne using your custom genome:
 
 ```sh
 champagne run --mode slurm -profile biowulf \
     --input samplesheet.csv \
     --genome custom_genome \
-    --genome_fasta genome.fasta \
-    --genes_gtf genome.gtf \
-    --blacklist blacklist.fasta
+    -c custom_genome/genome/custom_genome.config
 ```
 
 ## Help & Contributing
