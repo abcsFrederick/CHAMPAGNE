@@ -1,14 +1,14 @@
-import sys
+from time import localtime, strftime
+import click
+import collections.abc
+import itertools
 import os
 import pprint
-import subprocess
-import yaml
-import collections.abc
 import shutil
 import stat
-from time import localtime, strftime
-import itertools
-import click
+import subprocess
+import sys
+import yaml
 
 
 def nek_base(rel_path):
