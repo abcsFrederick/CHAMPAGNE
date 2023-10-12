@@ -7,7 +7,7 @@ Install the development version of champagne.
 ```sh
 # activate the conda env for development
 . "/data/CCBR_Pipeliner/db/PipeDB/Conda/etc/profile.d/conda.sh"
-conda activate champagne
+conda activate py311
 
 # go to the source on biowulf and update
 cd /data/CCBR_Pipeliner/Pipelines/CHAMPAGNE/champagne-dev
