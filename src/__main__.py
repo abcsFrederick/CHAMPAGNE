@@ -48,10 +48,10 @@ Preview the processes that will run:
     champagne run ... --mode local -preview
 Add NextFlow args:
     champagne run ... -work-dir path/to/workDir
-Run with a specific installation of champagne [MAIN_PATH=path/to/champagne/main.nf]:
-    champagne run path/to/champagne/main.nf ...
-Run with a specific version or branch from GitHub [MAIN_PATH=CCBR/CHAMPAGNE]:
-    champagne run CCBR/CHAMPAGNE -r v0.1.0 ...
+Run with a specific installation of champagne:
+    champagne run --main path/to/champagne/main.nf ...
+Run with a specific tag, branch, or commit from GitHub:
+    champagne run --main CCBR/CHAMPAGNE -r v0.1.0 ...
 """
 
 
@@ -61,10 +61,13 @@ Run with a specific version or branch from GitHub [MAIN_PATH=CCBR/CHAMPAGNE]:
         help_option_names=["-h", "--help"], ignore_unknown_options=True
     ),
 )
-@click.argument(
+@click.option(
+    "--main",
     "main_path",
+    help="Path to the champagne main.nf file or the GitHub repo (CCBR/CHAMPAGNE). Defaults to the version installed in the $PATH.",
     type=str,
     default=nek_base(os.path.join("main.nf")),
+    show_default=True,
 )
 @click.option(
     "--mode",
