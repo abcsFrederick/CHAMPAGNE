@@ -37,12 +37,14 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools
-          pip install .[dev,test]
+          mkdir -p tests/bin/
+          pip install .[dev,test] -t tests/bin/
       - name: Stub run
         run: |
           cd tests/
-          champagne init
-          champagne run -profile ci_stub -stub
+          which champagne
+          ./bin/champagne init
+          ./bin/champagne run -profile ci_stub -stub
       - name: Test run
         if: ${{ env.test_run == 'true' }}
         run: |
