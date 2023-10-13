@@ -160,6 +160,7 @@ def run_nextflow(
     if mode == "slurm" and not hpc:
         raise ValueError("mode is 'slurm' but no HPC environment was detected")
     # add any additional Nextflow commands
+    args_dict = dict()
     prev_arg = ""
     for arg in nextflow_args:
         if arg.startswith("-"):
