@@ -1,4 +1,4 @@
-## CHAMPAGNE development version
+## CHAMPAGNE 0.2.0
 
 ### New features
 
@@ -10,7 +10,7 @@
   - Histogram of peak widths (#92)
 - Added support for paired-end reads. (#105)
 - Added an option to use a custom reference from a genome fasta, gtf, and blacklist file. (#105)
-- Champagne CLI:
+- Champagne CLI: (#112)
   - New `--mode` option for `champagne run` to execute the workflow locally ('local') or submit it as a slurm job ('slurm').
   - Option to override the path to the champagne `main.nf` file or specify the github repo (`CCBR/CHAMPAGNE`) instead.
     ```sh
@@ -36,8 +36,7 @@
 
 - An error is thrown when a required input file doesn't exist. (#71)
   - Previously, the workflow quietly didn't run the process(es) that required the missing file.
-- The champagne CLI now requires Python >= 3.10.
-- Renamed `champagne config` to `champagne init` to avoid clashing with `nextflow init`.
+- Renamed `champagne config` to `champagne init` to avoid clashing with `nextflow init`. (#112)
 
 ## CHAMPAGNE 0.1.0
 
