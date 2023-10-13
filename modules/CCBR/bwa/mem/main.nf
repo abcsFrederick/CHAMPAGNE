@@ -31,7 +31,8 @@ process BWA_MEM {
       -@ ${task.cpus} \\
       -m 2G \\
       -T \$TMP \\
-      \$TMP/align.bam > ${prefix}.bam
+      -o ${prefix}.bam \\
+      \$TMP/align.bam
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
