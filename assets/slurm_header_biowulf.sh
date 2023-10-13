@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=500mb
+#SBATCH --mem=1g
 #SBATCH --time=1-00:00:00
 #SBATCH --parsable
 #SBATCH -J "champagne"
