@@ -160,18 +160,24 @@ def run_nextflow(
     if mode == "slurm" and not hpc:
         raise ValueError("mode is 'slurm' but no HPC environment was detected")
     # add any additional Nextflow commands
-    args_dict = {k: v for k, v in tuple(zip(nextflow_args[::2], nextflow_args[1::2]))}
-
+    prev_arg = ""
+    for arg in nextflow_args:
+        if arg.startswith("-"):
+            args_dict[arg] = ""
+        elif prev_arg.startswith("-"):
+            args_dict[prev_arg] = arg
+        prev_arg = arg
+    # make sure profile matches biowulf or frce
+    profiles = (
+        set(args_dict["-profile"].split(","))
+        if "-profile" in args_dict.keys()
+        else set()
+    )
     if mode == "slurm":
-        # make sure profile matches biowulf or frce
-        profiles = (
-            set(args_dict["-profile"].split(","))
-            if "-profile" in args_dict.keys()
-            else set()
-        )
+        profiles.add("slurm")
+    if hpc:
         profiles.add(hpc_options[hpc]["profile"])
-        args_dict["-profile"] = ",".join(sorted(profiles))
-
+    args_dict["-profile"] = ",".join(sorted(profiles))
     nextflow_command += list(f"{k} {v}" for k, v in args_dict.items())
 
     # Print nextflow command
