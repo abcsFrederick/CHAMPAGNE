@@ -11,6 +11,7 @@ conda activate py311
 
 echo "Installing CHAMPAGNE to ${install_path}"
 pip install ${repo_path} --target ${install_path}
+chmod +x ${install_path}/champagne/bin/*.*
 
 if [[ ":$PATH:" != *":${bin_path}:"* ]];then
     export PATH="${PATH}:${bin_path}"
