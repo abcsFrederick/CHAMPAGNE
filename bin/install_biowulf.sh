@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+set -euxo pipefail
 version=$1
 
 repo_path=/data/CCBR_Pipeliner/Pipelines/CHAMPAGNE/champagne-dev/
