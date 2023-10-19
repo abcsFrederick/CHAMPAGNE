@@ -14,7 +14,7 @@ process CALC_GENOME_FRAC {
 
     script:
     """
-    genome_frac=`calc_effective_genome_fraction.py ${effective_genome_size} ${chrom_sizes} ${params.deeptools.excluded_chroms}`
+    genome_frac=`calc_effective_genome_fraction.py ${effective_genome_size} ${chrom_sizes}`
     echo \$genome_frac
     """
 
