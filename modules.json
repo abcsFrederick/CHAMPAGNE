@@ -17,7 +17,7 @@
                     },
                     "cutadapt": {
                         "branch": "main",
-                        "git_sha": "7a78633cb964d61a663edf2fbff333790658bb00",
+                        "git_sha": "a3525c765b76400269695235bbf164a948604c4a",
                         "installed_by": ["modules"]
                     },
                     "khmer/uniquekmers": {
@@ -39,11 +39,6 @@
                     "bwa/index": {
                         "branch": "master",
                         "git_sha": "bfed129da5134b4439b1821c917972570d44d39c",
-                        "installed_by": ["modules"]
-                    },
-                    "khmer/uniquekmers": {
-                        "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
                         "installed_by": ["modules"]
                     }
                 }
