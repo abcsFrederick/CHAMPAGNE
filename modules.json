@@ -12,8 +12,8 @@
                     },
                     "bwa/mem": {
                         "branch": "main",
-                        "git_sha": "29ac0b1a6c6b70f8fda38cd9c11c8a2c7f0ff6cd",
-                        "installed_by": ["filter_blacklist", "modules"]
+                        "git_sha": "68b9b5df0b652f8dec90e3cd3b3a55eef31c5548",
+                        "installed_by": ["modules", "filter_blacklist"]
                     },
                     "cutadapt": {
                         "branch": "main",
@@ -52,12 +52,12 @@
                 "nf-core": {
                     "bedtools/getfasta": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "cfd937a668919d948f6fcbf4218e79de50c2f36f",
                         "installed_by": ["modules"]
                     },
                     "bwa/index": {
                         "branch": "master",
-                        "git_sha": "bfed129da5134b4439b1821c917972570d44d39c",
+                        "git_sha": "28a23ea6529caff44855c774f439a4074883027c",
                         "installed_by": ["modules"]
                     }
                 }
