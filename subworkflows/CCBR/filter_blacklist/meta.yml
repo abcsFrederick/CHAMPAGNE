@@ -1,0 +1,32 @@
+name: filter_blacklist
+description: Filter out reads that align to an index
+keywords:
+  - bwa
+  - samtools
+  - fastq
+  - bam
+  - filter
+  - blacklist
+components:
+  - bwa/mem
+  - samtools/filteraligned
+  - picard/samtofastq
+input:
+  - ch_fastq_input:
+      description: |
+        A channel containing fastq files
+  - ch_blacklist_index:
+      description: |
+        A BWA index created by running BWA/INDEX on a fasta file of blacklisted regions/
+output:
+  - reads:
+      description: |
+        Reads from the fastq files that do not align to the blacklist
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@kelly-sovacool"
+maintainers:
+  - "@kelly-sovacool"

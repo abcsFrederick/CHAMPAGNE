@@ -13,7 +13,7 @@
                     "bwa/mem": {
                         "branch": "main",
                         "git_sha": "29ac0b1a6c6b70f8fda38cd9c11c8a2c7f0ff6cd",
-                        "installed_by": ["modules"]
+                        "installed_by": ["filter_blacklist", "modules"]
                     },
                     "cutadapt": {
                         "branch": "main",
@@ -24,6 +24,25 @@
                         "branch": "khmer",
                         "git_sha": "b5b4ba5c89b8a6d5fe117183d198616352fa465a",
                         "installed_by": ["modules"]
+                    },
+                    "picard/samtofastq": {
+                        "branch": "main",
+                        "git_sha": "42811facb3dfc83b262bf9f5c0f71c4c774afa74",
+                        "installed_by": ["filter_blacklist"]
+                    },
+                    "samtools/filteraligned": {
+                        "branch": "main",
+                        "git_sha": "3453a34b7da3d6e00da2856e5015cef6937af7c7",
+                        "installed_by": ["filter_blacklist"]
+                    }
+                }
+            },
+            "subworkflows": {
+                "CCBR": {
+                    "filter_blacklist": {
+                        "branch": "main",
+                        "git_sha": "3453a34b7da3d6e00da2856e5015cef6937af7c7",
+                        "installed_by": ["subworkflows"]
                     }
                 }
             }
