@@ -2,7 +2,7 @@
 set -euxo pipefail
 version=$1
 
-repo_path=/data/CCBR_Pipeliner/Pipelines/CHAMPAGNE/champagne-dev/
+repo_path=/data/CCBR_Pipeliner/Pipelines/CHAMPAGNE/dev/
 install_path=/data/CCBR_Pipeliner/Pipelines/CHAMPAGNE/${version}
 bin_path=${install_path}/bin/
 
