@@ -14,7 +14,7 @@ workflow FILTER_BLACKLIST {
 
         BWA_MEM ( ch_fastq_input, ch_blacklist_index )
         SAMTOOLS_FILTERALIGNED( BWA_MEM.out.bam )
-        PICARD_SAMTOFASTQ( BWA_MEM.out.bam )
+        PICARD_SAMTOFASTQ( SAMTOOLS_FILTERALIGNED.out.bam )
 
         ch_versions = ch_versions.mix(
             BWA_MEM.out.versions,

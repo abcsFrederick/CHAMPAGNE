@@ -46,7 +46,7 @@
                 "CCBR": {
                     "filter_blacklist": {
                         "branch": "main",
-                        "git_sha": "3453a34b7da3d6e00da2856e5015cef6937af7c7",
+                        "git_sha": "bb7dbb42afe47d7e02b2f21e3352720ca2996e11",
                         "installed_by": ["subworkflows"]
                     }
                 }
