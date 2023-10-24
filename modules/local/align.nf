@@ -1,88 +1,38 @@
-
-process ALIGN_GENOME { // TODO refactor as subworkflow
+process FILTER_QUALITY {
     tag { meta.id }
     label 'align'
-    label 'process_higher'
+    label 'process_medium'
 
-    container = "${params.containers.base}"
+    container "${params.containers.base}"
 
     input:
-        tuple val(meta), path(fastq)
-        tuple val(meta_ref), path(reference_files)
+        tuple val(meta), path(bam), path(bai)
 
     output:
-        tuple val(meta), path("*.aligned.filtered.bam"), emit: bam
-        path("*.aligned.filtered.bam.flagstat"), emit: flagstat
+        tuple val(meta), path("*.filtered.bam"), emit: bam
 
     script:
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "${bam.baseName}.filtered"
     def filter = ''
     if (meta.single_end) {
-        filter = """samtools view \\
+        """
+        samtools view \\
             -@ ${task.cpus} \\
             -q ${params.align_min_quality} \\
             -b \\
-            ${prefix}.sorted.bam > ${prefix}.aligned.filtered.bam
+            -o ${prefix}.bam \\
+            ${bam}
         """
     } else {
-        filter = """bam_filter_by_mapq.py \\
+        """
+        bam_filter_by_mapq.py \\
             -q ${params.align_min_quality} \\
-            -i ${prefix}.sorted.bam \\
-            -o ${prefix}.aligned.filtered.bam
+            -i ${bam} \\
+            -o ${prefix}.bam
         """
     }
-    """
-    # current working directory is a tmpdir when 'scratch' is set
-    TMP=tmp/
-    mkdir \$TMP
-    trap 'rm -rf "\$TMP"' EXIT
-
-    INDEX=`find -L ./ -name "*.amb" | sed 's/\\.amb\$//'`
-
-    bwa mem -t ${task.cpus} \$INDEX ${fastq} > ${prefix}.bam
-    samtools sort \\
-      -@ ${task.cpus} \\
-      -m 2G \\
-      -T \$TMP \\
-      ${prefix}.bam > ${prefix}.sorted.bam
-    samtools index ${prefix}.sorted.bam
-    ${filter}
-    samtools flagstat ${prefix}.aligned.filtered.bam > ${prefix}.aligned.filtered.bam.flagstat
-    """
-
     stub:
     """
-    touch ${meta.id}.aligned.filtered.bam ${meta.id}.aligned.filtered.bam.flagstat
-    """
-
-}
-
-process INDEX_BAM {
-    tag { meta.id }
-    label 'align'
-    label 'process_higher'
-
-    container = "${params.containers.base}"
-
-    input:
-        tuple val(meta), path(bam)
-
-    output:
-        tuple val(meta), path("*.bam"), path("*.bai"), emit: bam
-        path("*.idxstats"), emit: idxstats
-
-    script:
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    """
-    samtools sort -@ ${task.cpus} -o ${prefix}.sorted.bam $bam
-    samtools index ${prefix}.sorted.bam   # creates ${prefix}.sorted.bam.bai
-    samtools idxstats ${prefix}.sorted.bam > ${prefix}.sorted.bam.idxstats
-    """
-
-    stub:
-    """
-    for ext in sorted.bam sorted.bam.bai sorted.bam.idxstats; do
-        touch ${meta.id}.\$ext
-    done
+    touch ${bam.baseName}.filtered.bam
     """
 }
