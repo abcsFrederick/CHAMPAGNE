@@ -252,7 +252,7 @@ process QC_STATS {
 
     input:
         tuple val(meta), path(raw_fastq)
-        path(align_flagstat)
+        tuple val(meta), path(align_flagstat)
         tuple path(dedup_flagstat), path(idxstat)
         path(preseq_nrf)
         path(ppqt_spp)
