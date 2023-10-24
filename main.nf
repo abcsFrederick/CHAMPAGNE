@@ -22,6 +22,7 @@ log.info """\
 include { INPUT_CHECK              } from './subworkflows/local/input_check.nf'
 include { PREPARE_GENOME           } from './subworkflows/local/prepare_genome.nf'
 include { FILTER_BLACKLIST         } from './subworkflows/CCBR/filter_blacklist'
+include { ALIGN_GENOME             } from "./subworkflows/local/align.nf"
 include { DEDUPLICATE              } from "./subworkflows/local/deduplicate.nf"
 include { QC                       } from './subworkflows/local/qc.nf'
 include { CALL_PEAKS               } from './subworkflows/local/peaks.nf'
@@ -29,8 +30,6 @@ include { CALL_PEAKS               } from './subworkflows/local/peaks.nf'
 
 // MODULES
 include { CUTADAPT                 } from "./modules/CCBR/cutadapt"
-include { BWA_MEM as ALIGN_BLACKLIST } from "./modules/CCBR/bwa/mem"
-include { ALIGN_GENOME             } from "./modules/local/align.nf"
 include { PHANTOM_PEAKS            } from "./modules/local/qc.nf"
 include { PPQT_PROCESS
           MULTIQC                  } from "./modules/local/qc.nf"
