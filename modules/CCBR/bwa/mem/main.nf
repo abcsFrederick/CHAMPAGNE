@@ -25,7 +25,11 @@ process BWA_MEM {
 
     INDEX=`find -L ./ -name "*.amb" | sed 's/\\.amb\$//'`
 
-    bwa mem -t ${task.cpus} \$INDEX ${fastq} -o \$TMP/align.bam
+    bwa mem \\
+      -t ${task.cpus} \\
+      -o \$TMP/align.bam \\
+      \$INDEX \\
+      ${fastq}
 
     samtools sort \\
       -@ ${task.cpus} \\

@@ -8,8 +8,9 @@ process PICARD_SAMTOFASTQ {
     tuple val(meta), path(bam)
 
     output:
-    tuple val(meta), path("*.fastq.gz"), emit: reads
-    path "versions.yml"             , emit: versions
+    tuple val(meta), path("*_?.fastq.gz"),       emit: reads
+    path "versions.yml",                         emit: versions
+    tuple val(meta), path("*unpaired.fastq.gz"), emit: unpaired, optional: true
 
     when:
     task.ext.when == null || task.ext.when
@@ -17,7 +18,7 @@ process PICARD_SAMTOFASTQ {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def output = meta.single_end ? "--FASTQ ${prefix}.fastq" : "--FASTQ ${prefix}_1.fastq --SECOND_END_FASTQ ${prefix}_2.fastq --UNPAIRED_FASTQ ${prefix}.unpaired.fastq"
+    def output = meta.single_end ? "--FASTQ ${prefix}_1.fastq" : "--FASTQ ${prefix}_1.fastq --SECOND_END_FASTQ ${prefix}_2.fastq --UNPAIRED_FASTQ ${prefix}.unpaired.fastq"
 
     if (!task.memory) {
         log.warn '[Picard SamToFastq] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this.'
@@ -43,6 +44,6 @@ process PICARD_SAMTOFASTQ {
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}.fastq.gz versions.yml
+    touch ${prefix}_1.fastq.gz versions.yml
     """
 }

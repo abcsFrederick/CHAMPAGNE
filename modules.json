@@ -12,8 +12,8 @@
                     },
                     "bwa/mem": {
                         "branch": "main",
-                        "git_sha": "68b9b5df0b652f8dec90e3cd3b3a55eef31c5548",
-                        "installed_by": ["modules", "filter_blacklist"]
+                        "git_sha": "ca4f84b4c2ca84eb0449b4ba414a8b8052f8d90a",
+                        "installed_by": ["filter_blacklist", "modules"]
                     },
                     "cutadapt": {
                         "branch": "main",
@@ -27,13 +27,18 @@
                     },
                     "picard/samtofastq": {
                         "branch": "main",
-                        "git_sha": "42811facb3dfc83b262bf9f5c0f71c4c774afa74",
+                        "git_sha": "258d0f336ea1f851ab4223d295bb18b6dc187899",
                         "installed_by": ["filter_blacklist"]
                     },
                     "samtools/filteraligned": {
                         "branch": "main",
-                        "git_sha": "3453a34b7da3d6e00da2856e5015cef6937af7c7",
+                        "git_sha": "879e969c593ab9f321301ac15722728ab30cea49",
                         "installed_by": ["filter_blacklist"]
+                    },
+                    "samtools/sort": {
+                        "branch": "main",
+                        "git_sha": "c4bb1f78e842c69dba1dd01656f211d9237a164d",
+                        "installed_by": ["modules"]
                     }
                 }
             },

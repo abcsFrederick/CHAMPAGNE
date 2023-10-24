@@ -12,8 +12,8 @@ process SAMTOOLS_FILTERALIGNED {
         tuple val(meta), path(bam), path(bai)
 
     output:
-        tuple val(meta), path("*.unaligned.bam"), path('*.unaligned.bam.bai'), emit: bam
-        path  "versions.yml"                                                 , emit: versions
+        tuple val(meta), path("*.unaligned.bam"), emit: bam
+        path("versions.yml"),                     emit: versions
 
     when:
         task.ext.when == null || task.ext.when
@@ -28,9 +28,6 @@ process SAMTOOLS_FILTERALIGNED {
       -b \\
       -o ${prefix}.unaligned.bam \\
       ${prefix}.bam
-    samtools index \\
-      -@ ${task.cpus} \\
-      ${prefix}.unaligned.bam
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -40,6 +37,6 @@ process SAMTOOLS_FILTERALIGNED {
 
     stub:
     """
-    touch ${meta.id}.unaligned.bam ${meta.id}.unaligned.bam.bai versions.yml
+    touch ${meta.id}.unaligned.bam versions.yml
     """
 }

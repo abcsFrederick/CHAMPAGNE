@@ -1,0 +1,76 @@
+{
+    "test_samtools_sort": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.sorted.bam:md5,2488c73846ea4d9cb67187af1c58c716"
+                    ]
+                ],
+                "1": [
+
+                ],
+                "2": [
+                    "versions.yml:md5,71140c760cb15f7f02cc48f3ed90149e"
+                ],
+                "bam": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.sorted.bam:md5,2488c73846ea4d9cb67187af1c58c716"
+                    ]
+                ],
+                "csi": [
+
+                ],
+                "versions": [
+                    "versions.yml:md5,71140c760cb15f7f02cc48f3ed90149e"
+                ]
+            }
+        ],
+        "timestamp": "2023-10-24T12:35:29.864751"
+    },
+    "test_samtools_sort_stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.sorted.bam:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+
+                ],
+                "2": [
+                    "versions.yml:md5,71140c760cb15f7f02cc48f3ed90149e"
+                ],
+                "bam": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.sorted.bam:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "csi": [
+
+                ],
+                "versions": [
+                    "versions.yml:md5,71140c760cb15f7f02cc48f3ed90149e"
+                ]
+            }
+        ],
+        "timestamp": "2023-10-24T12:32:18.504111"
+    }
+}
