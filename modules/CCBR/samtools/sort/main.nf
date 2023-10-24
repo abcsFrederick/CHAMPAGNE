@@ -8,9 +8,9 @@ process SAMTOOLS_SORT {
     tuple val(meta), path(bam)
 
     output:
-    tuple val(meta), path("*.bam"), emit: bam
-    tuple val(meta), path("*.csi"), emit: csi, optional: true
-    path("versions.yml")          , emit: versions
+    tuple val(meta), path("*.bam"), path("*.bai"), emit: bam
+    tuple val(meta), path("*.csi"),                emit: csi, optional: true
+    path("versions.yml"),                          emit: versions
 
     when:
     task.ext.when == null || task.ext.when

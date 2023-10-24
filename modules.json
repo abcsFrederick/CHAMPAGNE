@@ -37,7 +37,7 @@
                     },
                     "samtools/sort": {
                         "branch": "main",
-                        "git_sha": "c4bb1f78e842c69dba1dd01656f211d9237a164d",
+                        "git_sha": "d55ab2580b69a81aa0534a3018cc6e6ea3b28640",
                         "installed_by": ["modules"]
                     }
                 }

@@ -8,7 +8,8 @@
                             "id": "test",
                             "single_end": false
                         },
-                        "test.sorted.bam:md5,2488c73846ea4d9cb67187af1c58c716"
+                        "test.sorted.bam:md5,2488c73846ea4d9cb67187af1c58c716",
+                        "test.sorted.bam.bai:md5,be2757b9479e364588d855a77a251940"
                     ]
                 ],
                 "1": [
@@ -23,7 +24,8 @@
                             "id": "test",
                             "single_end": false
                         },
-                        "test.sorted.bam:md5,2488c73846ea4d9cb67187af1c58c716"
+                        "test.sorted.bam:md5,2488c73846ea4d9cb67187af1c58c716",
+                        "test.sorted.bam.bai:md5,be2757b9479e364588d855a77a251940"
                     ]
                 ],
                 "csi": [
@@ -34,7 +36,7 @@
                 ]
             }
         ],
-        "timestamp": "2023-10-24T12:35:29.864751"
+        "timestamp": "2023-10-24T13:53:20.473892"
     },
     "test_samtools_sort_stub": {
         "content": [
@@ -45,7 +47,8 @@
                             "id": "test",
                             "single_end": false
                         },
-                        "test.sorted.bam:md5,d41d8cd98f00b204e9800998ecf8427e"
+                        "test.sorted.bam:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "test.sorted.bam.bai:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
                 ],
                 "1": [
@@ -60,7 +63,8 @@
                             "id": "test",
                             "single_end": false
                         },
-                        "test.sorted.bam:md5,d41d8cd98f00b204e9800998ecf8427e"
+                        "test.sorted.bam:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "test.sorted.bam.bai:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
                 ],
                 "csi": [
@@ -71,6 +75,6 @@
                 ]
             }
         ],
-        "timestamp": "2023-10-24T12:32:18.504111"
+        "timestamp": "2023-10-24T13:53:25.129302"
     }
 }
