@@ -36,4 +36,4 @@ peak_widths_hist <- peak_dat %>%
   theme_bw() +
   theme(legend.position = "top")
 
-ggsave(filename = "peak_widths_histogram.png", plot = peak_widths_hist, device = "png")
+ggsave(filename = "peak_widths_histogram.png", plot = peak_widths_hist, device = "png", dpi = 300, height = 4, width = 5)
