@@ -59,9 +59,9 @@ hist_narrow <- peak_dat %>%
 
 ggsave(
   filename = "peak_widths_broad_histogram.png", plot = hist_broad,
-  device = "png", dpi = 300, height = 4, width = 5
+  device = "png", dpi = 300, height = 4, width = 6
 )
 ggsave(
   filename = "peak_widths_narrow_histogram.png", plot = hist_narrow,
-  device = "png", dpi = 300, height = 4, width = 5
+  device = "png", dpi = 300, height = 4, width = 6
 )
