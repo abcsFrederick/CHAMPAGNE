@@ -35,10 +35,6 @@ plot_hist <- function(peak_dat) {
   peak_dat %>%
     ggplot(aes(peak_width, fill = tool)) +
     geom_histogram(alpha = 0.7, position = "identity") +
-    scale_x_log10(
-      limits = c(xmin - 10^2, xmax + 10^2),
-      labels = label_log(digits = 2)
-    ) +
     scale_fill_manual(
       values = tool_colors,
       breaks = names(tool_colors)
@@ -56,12 +52,10 @@ plot_hist <- function(peak_dat) {
 
 hist_broad <- peak_dat %>%
   filter(peak_type == "broad") %>%
-  plot_hist() +
-  scale_y_log10(labels = label_log(digits = 2))
+  plot_hist()
 hist_narrow <- peak_dat %>%
   filter(peak_type == "narrow") %>%
-  plot_hist() +
-  scale_y_log10(labels = label_log(digits = 2))
+  plot_hist()
 
 ggsave(
   filename = "peak_widths_broad_histogram.png", plot = hist_broad,
