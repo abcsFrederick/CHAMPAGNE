@@ -41,6 +41,10 @@ workflow MAKE_REFERENCE {
 
 // MAIN WORKFLOW
 workflow {
+    CHIPSEQ()
+}
+
+workflow CHIPSEQ {
     INPUT_CHECK(file(params.input), params.seq_center)
     INPUT_CHECK.out.reads.set { raw_fastqs }
     raw_fastqs | CUTADAPT

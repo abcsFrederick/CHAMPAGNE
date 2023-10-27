@@ -14,6 +14,7 @@ workflow DEEPTOOLS {
         deduped_bam
         frag_lengths
         effective_genome_size
+        gene_info
 
     main:
 
@@ -50,11 +51,12 @@ workflow DEEPTOOLS {
                     meta1.control == meta2.id ? [ meta1, bw1, bw2 ] : null
             }
             .set { ch_ip_ctrl_bigwig }
+
     emit:
         bigwig              = ch_ip_ctrl_bigwig
-        fingerprint_matrix  = PLOT_FINGERPRINT.out.matrix,
-        fingerprint_metrics = PLOT_FINGERPRINT.out.metrics,
-        corr                = PLOT_CORRELATION.out.tab,
-        pca                 = PLOT_PCA.out.tab,
+        fingerprint_matrix  = PLOT_FINGERPRINT.out.matrix
+        fingerprint_metrics = PLOT_FINGERPRINT.out.metrics
+        corr                = PLOT_CORRELATION.out.tab
+        pca                 = PLOT_PCA.out.tab
         profile             = PLOT_PROFILE.out.tab
 }

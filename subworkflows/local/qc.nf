@@ -88,7 +88,8 @@ workflow QC {
         if (params.run.deeptools) {
             DEEPTOOLS( deduped_bam,
                        frag_lengths,
-                       effective_genome_size
+                       effective_genome_size,
+                       gene_info
                      )
             ch_ip_ctrl_bigwig = DEEPTOOLS.out.bigwig
             ch_multiqc = ch_multiqc.mix(
