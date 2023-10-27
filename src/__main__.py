@@ -20,21 +20,6 @@ from .util import (
 def common_options(func):
     """Common options decorator for use with click commands."""
     options = [
-        click.option(
-            "--configfile",
-            default="nextflow.config",
-            help="Custom config file",
-            show_default=True,
-        ),
-        click.option(
-            "--paramsfile", default=None, help="Custom params file", show_default=True
-        ),
-        click.option(  # when threads=None, uses max available
-            "--threads",
-            help="Number of threads to use",
-            default=None,
-            show_default=True,
-        ),
         click.argument("nextflow_args", nargs=-1),
     ]
     for option in reversed(options):
@@ -56,15 +41,17 @@ def cli():
 
 help_msg_extra = """
 \b
-CLUSTER EXECUTION:
-champagne run ... -profile [profile],[profile],...
-For information on Nextflow config and profiles see:
-https://www.nextflow.io/docs/latest/config.html#config-profiles
-\b
-RUN EXAMPLES:
-Use singularity:    champagne run ... -profile singularity
-Specify threads:    champagne run ... --threads [threads]
-Add NextFlow args:  champagne run ... -work-dir workDir -with-docker
+EXAMPLES:
+Execute with slurm:
+    champagne run ... --mode slurm
+Preview the processes that will run:
+    champagne run ... --mode local -preview
+Add nextflow args (anything supported by `nextflow run`):
+    champagne run ... -work-dir path/to/workDir
+Run with a specific installation of champagne:
+    champagne run --main path/to/champagne/main.nf ...
+Run with a specific tag, branch, or commit from GitHub:
+    champagne run --main CCBR/CHAMPAGNE -r v0.1.0 ...
 """
 
 
@@ -74,32 +61,47 @@ Add NextFlow args:  champagne run ... -work-dir workDir -with-docker
         help_option_names=["-h", "--help"], ignore_unknown_options=True
     ),
 )
+@click.option(
+    "--main",
+    "main_path",
+    help="Path to the champagne main.nf file or the GitHub repo (CCBR/CHAMPAGNE). Defaults to the version installed in the $PATH.",
+    type=str,
+    default=nek_base(os.path.join("main.nf")),
+    show_default=True,
+)
+@click.option(
+    "--mode",
+    "_mode",
+    help="Run mode (slurm, local)",
+    type=str,
+    default="local",
+    show_default=True,
+)
 @common_options
-def run(**kwargs):
+def run(main_path, _mode, **kwargs):
     """Run the workflow"""
-    # optional: merge config from CLI with nf config
-    # run!
+    if (  # this is the only acceptable github repo option for champagne
+        main_path != "CCBR/CHAMPAGNE"
+    ):
+        # make sure the path exists
+        if not os.path.exists(main_path):
+            raise FileNotFoundError(
+                f"Path to the champagne main.nf file not found: {main_path}"
+            )
+
     run_nextflow(
-        nextfile_path=nek_base(os.path.join("main.nf")),  # Full path to Nextflow file
+        nextfile_path=main_path,
+        mode=_mode,
         **kwargs,
     )
 
 
 @click.command()
-@click.option(
-    "--configfile",
-    default="nextflow.config",
-    help="Copy template config to file",
-    show_default=True,
-)
-def config(configfile, **kwargs):
-    """Copy the system default config files"""
-    for filename in ("nextflow.config", "params.yml"):
-        if os.path.exists(nek_base(filename)):
-            copy_config(
-                local_config=configfile,
-                system_config=nek_base(filename),
-            )
+def init(**kwargs):
+    """Initialize the working directory by copying the system default config files"""
+    paths = ("nextflow.config", "conf/", "assets/")
+    copy_config(paths)
+    os.mkdir("log/")
 
 
 @click.command()
@@ -109,7 +111,7 @@ def citation(**kwargs):
 
 
 cli.add_command(run)
-cli.add_command(config)
+cli.add_command(init)
 # cli.add_command(citation) # TODO uncomment if champagne is published in a journal or Zenodo
 
 

@@ -1,6 +1,7 @@
 
 process CALC_GENOME_FRAC {
     label 'peaks'
+    label 'process_single'
 
     container = "${params.containers.base}"
 
@@ -13,7 +14,7 @@ process CALC_GENOME_FRAC {
 
     script:
     """
-    genome_frac=`calc_effective_genome_fraction.py ${effective_genome_size} ${chrom_sizes} ${params.deeptools.excluded_chroms}`
+    genome_frac=`calc_effective_genome_fraction.py ${effective_genome_size} ${chrom_sizes}`
     echo \$genome_frac
     """
 
@@ -28,6 +29,7 @@ process CALC_GENOME_FRAC {
 process MACS_BROAD {
     tag { meta.id }
     label 'peaks'
+    label 'process_high'
 
     container = "${params.containers.macs2}"
 
@@ -67,6 +69,7 @@ process MACS_BROAD {
 process MACS_NARROW {
     tag { meta.id }
     label 'peaks'
+    label 'process_high'
 
     container = "${params.containers.macs2}"
 

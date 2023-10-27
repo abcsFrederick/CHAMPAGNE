@@ -47,3 +47,5 @@ replay_pid*
 *.Rproj
 .Rproj.user
 .Rhistory
+
+/submit_slurm.sh

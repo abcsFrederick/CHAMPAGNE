@@ -54,12 +54,12 @@ jaccard_heatmap <- jaccard_dat %>%
     axis.title.x = element_blank(),
     axis.title.y = element_blank()
   )
-ggsave(plot = jaccard_heatmap, filename = "jaccard_heatmap_all.png", device = "png")
+ggsave(plot = jaccard_heatmap, filename = "jaccard_heatmap_all.png", device = "png", dpi = 300, height = 6, width = 7)
 
 # one PCA with all tools & samples
 jaccard_dat %>%
   plot_jaccard_pca() %>%
-  ggsave(plot = ., filename = "jaccard_pca_all.png", device = "png")
+  ggsave(plot = ., filename = "jaccard_pca_all.png", device = "png", dpi = 300, height = 4, width = 6)
 
 # plot PCA per peak-calling tool
 peak_callers <- c(
@@ -88,4 +88,4 @@ pca_per_tool <- peak_callers %>%
   facet_wrap("tool") +
   labs(x = "PC1", y = "PC2") +
   theme_bw()
-ggsave(plot = pca_per_tool, filename = "jaccard_pca_tool.png", device = "png")
+ggsave(plot = pca_per_tool, filename = "jaccard_pca_tool.png", device = "png", dpi = 300, height = 4, width = 7)

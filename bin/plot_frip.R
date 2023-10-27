@@ -11,7 +11,12 @@ if (length(args) < 1) {
 }
 
 frip_filename <- args[1]
-frip_dat <- read_tsv(frip_filename)
+frip_dat <- read_tsv(frip_filename) %>%
+  mutate(peak_type = case_when(
+    bedtool == "sicer" | bedtool == "macs_broad" ~ "broad",
+    bedtool == "gem" | bedtool == "macs_narrow" ~ "narrow",
+    TRUE ~ NA_character_
+  ))
 
 sample_frip_plot <- frip_dat %>%
   mutate(n_overlap_reads_mil = n_overlap_reads / 10^6) %>%
@@ -23,7 +28,7 @@ sample_frip_plot <- frip_dat %>%
     names_to = "metric"
   ) %>%
   ggplot(aes(value, bedsample, color = bedtool)) +
-  facet_wrap("metric", nrow = 1, scales = "free_x", strip.position = "bottom") +
+  facet_wrap(peak_type ~ metric, scales = "free_x", strip.position = "bottom") +
   geom_jitter(alpha = 0.8, height = 0.1) +
   geom_hline(
     yintercept = seq(1.5, length(unique(frip_dat %>% pull(bedsample))) - 0.5, 1),
@@ -42,15 +47,16 @@ sample_frip_plot <- frip_dat %>%
     strip.background = element_blank(),
     legend.position = "top"
   )
-ggsave(filename = "FRiP_samples.png", plot = sample_frip_plot, device = "png")
+ggsave(filename = "FRiP_samples.png", plot = sample_frip_plot, device = "png", dpi = 300, height = 4.5, width = 6.5)
 
 nbasesM_frip_plot <- frip_dat %>%
   ggplot(aes(n_basesM, FRiP, color = bedsample, shape = bedtool)) +
   geom_point(alpha = 0.8) +
+  facet_wrap(~peak_type, scales = "free") +
   guides(
     color = guide_legend(title = "Sample"),
     shape = guide_legend(title = "Peak caller")
   ) +
   labs(x = "Number of Bases (millions) in Peaks", y = "Fraction of Reads in Peaks") +
   theme_bw()
-ggsave(filename = "FRiP_nbasesM.png", plot = nbasesM_frip_plot, device = "png")
+ggsave(filename = "FRiP_nbasesM.png", plot = nbasesM_frip_plot, device = "png", dpi = 300, height = 4, width = 6)

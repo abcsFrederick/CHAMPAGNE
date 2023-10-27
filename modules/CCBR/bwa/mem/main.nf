@@ -9,8 +9,8 @@ process BWA_MEM {
         tuple val(meta_idx), path(index_files)
 
     output:
-        tuple val(meta), path("*.bam"), emit: bam
-        path  "versions.yml"          , emit: versions
+        tuple val(meta), path("*.bam"), path("*.bai"), emit: bam
+        path  "versions.yml"                         , emit: versions
 
     when:
         task.ext.when == null || task.ext.when
@@ -25,13 +25,19 @@ process BWA_MEM {
 
     INDEX=`find -L ./ -name "*.amb" | sed 's/\\.amb\$//'`
 
-    bwa mem -t ${task.cpus} \$INDEX ${fastq} -o \$TMP/align.bam
+    bwa mem \\
+      -t ${task.cpus} \\
+      -o \$TMP/align.bam \\
+      \$INDEX \\
+      ${fastq}
 
     samtools sort \\
       -@ ${task.cpus} \\
       -m 2G \\
       -T \$TMP \\
-      \$TMP/align.bam > ${prefix}.bam
+      --write-index \\
+      -o ${prefix}.bam##idx##${prefix}.bam.bai \\
+      \$TMP/align.bam
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -39,8 +45,9 @@ process BWA_MEM {
         samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
     END_VERSIONS
     """
+
     stub:
     """
-    touch ${meta.id}.bam versions.yml
+    touch ${meta.id}.bam ${meta.id}.bam.bai versions.yml
     """
 }

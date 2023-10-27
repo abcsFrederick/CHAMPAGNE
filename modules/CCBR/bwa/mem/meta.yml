@@ -37,6 +37,10 @@ output:
       type: file
       description: Output BAM file containing read alignments
       pattern: "*.{bam}"
+  - bai:
+      type: file
+      description: Output BAI index file
+      pattern: "*.{bai}"
   - versions:
       type: file
       description: File containing software versions

@@ -31,9 +31,8 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 dependencies = [
-    "nextflow >= 0.4.0",
     "pyyaml >= 6.0",
     "Click >= 8.1.3",
 ]
@@ -61,8 +60,8 @@ Changelog = "https://github.com/CCBR/CHAMPAGNE/blob/main/docs/CHANGELOG.md"
 champagne = "."
 
 [tool.setuptools.package-data]
-"*" = ["CITATION.cff", "LICENSE", "VERSION", "main.nf", "nextflow.conf", "assets/", "bin/", "conf/", "modules/*/*", "subworkflows/*/*", "tests/*/*"]
+"*" = ["CITATION.cff", "LICENSE", "VERSION", "main.nf", "nextflow.config", "assets/**", "bin/**", "conf/**", "modules/**", "subworkflows/**", "tests/**"]
 
 [tool.setuptools.dynamic]
-version = {file = "src/VERSION"}
+version = {file = "VERSION"}
 readme = {file = "README.md"}

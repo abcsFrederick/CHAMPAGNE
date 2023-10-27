@@ -21,6 +21,8 @@ log.info """\
 
 include { INPUT_CHECK              } from './subworkflows/local/input_check.nf'
 include { PREPARE_GENOME           } from './subworkflows/local/prepare_genome.nf'
+include { FILTER_BLACKLIST         } from './subworkflows/CCBR/filter_blacklist'
+include { ALIGN_GENOME             } from "./subworkflows/local/align.nf"
 include { DEDUPLICATE              } from "./subworkflows/local/deduplicate.nf"
 include { QC                       } from './subworkflows/local/qc.nf'
 include { CALL_PEAKS               } from './subworkflows/local/peaks.nf'
@@ -28,10 +30,6 @@ include { CALL_PEAKS               } from './subworkflows/local/peaks.nf'
 
 // MODULES
 include { CUTADAPT                 } from "./modules/CCBR/cutadapt"
-include { BWA_MEM as ALIGN_BLACKLIST } from "./modules/CCBR/bwa/mem"
-include { FILTER_BLACKLIST
-          BAM_TO_FASTQ
-          ALIGN_GENOME             } from "./modules/local/align.nf"
 include { PHANTOM_PEAKS            } from "./modules/local/qc.nf"
 include { PPQT_PROCESS
           MULTIQC                  } from "./modules/local/qc.nf"
@@ -52,9 +50,8 @@ workflow {
     chrom_sizes = PREPARE_GENOME.out.chrom_sizes
 
     effective_genome_size = PREPARE_GENOME.out.effective_genome_size
-    ALIGN_BLACKLIST(trimmed_fastqs, PREPARE_GENOME.out.blacklist_index)
-    ALIGN_BLACKLIST.out.bam | FILTER_BLACKLIST | BAM_TO_FASTQ
-    ALIGN_GENOME(BAM_TO_FASTQ.out.reads, PREPARE_GENOME.out.reference_index)
+    FILTER_BLACKLIST(trimmed_fastqs, PREPARE_GENOME.out.blacklist_index)
+    ALIGN_GENOME(FILTER_BLACKLIST.out.reads, PREPARE_GENOME.out.reference_index)
     ALIGN_GENOME.out.bam.set{ aligned_bam }
 
     DEDUPLICATE(aligned_bam, chrom_sizes, effective_genome_size)
