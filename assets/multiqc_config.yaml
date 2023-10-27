@@ -78,13 +78,19 @@ custom_data:
       NReads:
         description: "The number of reads sequenced"
         format: "{:,.0f}"
-        hidden: True
+      N_reads_surviving_blacklist:
+        description: "The number of reads surviving after filtering blacklisted regions"
+        format: "{:,.0f}"
+        hidden: true
       NMappedReads:
         description: "The number of reads mapped"
         format: "{:,.0f}"
-        hidden: True
+      N_mapped_reads_surviving_filter:
+        description: "The number of mapped reads surviving after filtering by alignment quality"
+        format: "{:,.0f}"
+        hidden: true
       NUniqMappedReads:
-        description: "The number of reads remaining after deduplication"
+        description: "The number of mapped & filtered reads remaining after deduplication"
         format: "{:,.0f}"
       NRF:
         description: "Non-Redundant fraction"

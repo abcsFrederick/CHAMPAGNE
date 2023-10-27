@@ -1,4 +1,3 @@
-
 include { FASTQC as FASTQC_RAW     } from "../../modules/local/qc.nf"
 include { FASTQC as FASTQC_TRIMMED } from "../../modules/local/qc.nf"
 include { FASTQ_SCREEN             } from "../../modules/local/qc.nf"
@@ -23,8 +22,10 @@ workflow QC {
     take:
         raw_fastqs
         trimmed_fastqs
-        aligned_bam
+        n_reads_surviving_blacklist
+        aligned_filtered_bam
         aligned_flagstat
+        filtered_flagstat
         deduped_bam
         deduped_flagstat
         ppqt_spp
@@ -43,10 +44,10 @@ workflow QC {
                                         type: 'dir', checkIfExists: true)) | FASTQ_SCREEN
             ch_multiqc = ch_multiqc.mix(FASTQ_SCREEN.out.screen)
         }
-        PRESEQ(aligned_bam)
+        PRESEQ(aligned_filtered_bam)
         // when preseq fails, write NAs for the stats that are calculated from its log
         PRESEQ.out.log
-            .join(aligned_bam, remainder: true)
+            .join(aligned_filtered_bam, remainder: true)
             .branch { meta, preseq_log, bam_tuple ->
             failed: preseq_log == null
                 return (tuple(meta, "nopresqlog"))
@@ -59,15 +60,17 @@ workflow QC {
             .concat(HANDLE_PRESEQ_ERROR.out.nrf)
             .set{ preseq_nrf }
 
-        QC_STATS(
-            raw_fastqs,
-            aligned_flagstat,
-            deduped_flagstat,
-            preseq_nrf,
-            ppqt_spp,
-            frag_lengths
-        )
-        QC_TABLE(QC_STATS.out.collect())
+        // TODO: order of items in channel is not guaranteed. Need to create single channel with all files for QC stats with same metadata
+        qc_stats_input = raw_fastqs
+            .join(n_reads_surviving_blacklist)
+            .join(aligned_flagstat)
+            .join(filtered_flagstat)
+            .join(deduped_flagstat)
+            .join(preseq_nrf)
+            .join(ppqt_spp)
+            .join(frag_lengths)
+        QC_STATS( qc_stats_input )
+        QC_TABLE( QC_STATS.out.collect() )
 
         // Deeptools
 
@@ -105,12 +108,23 @@ workflow QC {
             }
             .set { ch_ip_ctrl_bigwig }
 
+        deduped_flagstat
+            .map { meta, flagstat, idxstat ->
+                [ flagstat, idxstat ]
+            }
+            .set{ dedup_flagstat_files }
+        ppqt_spp
+            .map { meta, spp ->
+                [ spp ]
+            }
+            .set{ ppqt_spp_files }
+
         ch_multiqc = ch_multiqc.mix(
             FASTQC_RAW.out.zip,
             FASTQC_TRIMMED.out.zip,
-            deduped_flagstat,
-            ppqt_spp,
-            QC_TABLE.out,
+            dedup_flagstat_files,
+            ppqt_spp_files,
+            QC_TABLE.out.txt,
             PLOT_FINGERPRINT.out.matrix,
             PLOT_FINGERPRINT.out.metrics,
             PLOT_CORRELATION.out.tab,

@@ -1,0 +1,39 @@
+name: custom_countfastq
+description: |
+  Count reads in a fastq file
+
+keywords:
+  - fastq
+tools:
+  - grep:
+    description: |
+      a command-line utility for searching plain-text data sets for lines that match a regular expression
+  - wc:
+    description: |
+      a command-line utility for counting newlines, words, and bytes in plain-text data
+  - zcat:
+    description: |
+      a command-line utility for viewing compressed file content as plain text
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [ id:'test', single_end:false ]
+  - fastq:
+      type: file
+      description: fastq file
+      pattern: "*.{fastq.gz}"
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [ id:'test', single_end:false ]
+  - count:
+      type: env
+      description: Number of reads in the fastq files
+authors:
+  - "@kelly-sovacool"
+maintainers:
+  - "@kelly-sovacool"
