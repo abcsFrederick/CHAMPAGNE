@@ -41,16 +41,16 @@ jobs:
           pip install .[dev,test]
       - name: Stub run
         run: |
-          cd tests/
+          cd tests/cli
           which champagne
           champagne init
-          champagne run -profile ci_stub -stub
+          champagne run -stub -c ci_stub
       - name: Test run
         if: ${{ env.test_run == 'true' }}
         run: |
-          cd tests/
+          cd tests/cli
           champagne init
-          champagne run -profile ci_test,docker
+          champagne run -profile docker -c ci_test.config
       - name: "Upload Artifact"
         uses: actions/upload-artifact@v3
         if: always() # run even if previous steps fail

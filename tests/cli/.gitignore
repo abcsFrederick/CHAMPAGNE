@@ -1,0 +1,4 @@
+/assets/
+/conf/
+/nextflow.config
+/submit_slurm.sh
