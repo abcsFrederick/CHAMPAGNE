@@ -1,3 +1,8 @@
+## CHAMPAGNE 0.2.1
+
+- Fixed a bug in QC stats that mixed up the statistics for different samples. (#125)
+- Report read counts between blacklist & filtering steps in the QC table. (#125)
+
 ## CHAMPAGNE 0.2.0
 
 ### New features
