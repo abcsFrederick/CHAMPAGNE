@@ -3,7 +3,7 @@ process BAM_COVERAGE {
     tag { meta.id }
     label 'qc'
     label 'deeptools'
-    label 'process_higher'
+    label 'process_high'
 
     container = "${params.containers.deeptools}"
 
@@ -125,7 +125,7 @@ process PLOT_PCA {
 process PLOT_FINGERPRINT {
   label 'qc'
   label 'deeptools'
-  label 'process_higher'
+  label 'process_high'
 
   container = "${params.containers.deeptools}"
 
@@ -187,7 +187,7 @@ process BED_PROTEIN_CODING {
 process COMPUTE_MATRIX {
   label 'qc'
   label 'deeptools'
-  label 'process_higher'
+  label 'process_high'
 
   container = "${params.containers.deeptools}"
 
@@ -303,7 +303,7 @@ process PLOT_PROFILE {
 process NORMALIZE_INPUT {
   label 'qc'
   label 'deeptools'
-  label 'process_higher'
+  label 'process_high'
 
   container = "${params.containers.deeptools}"
 

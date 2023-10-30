@@ -44,7 +44,7 @@ process MACS2_DEDUP {
 process PICARD_DEDUP {
     tag { meta.id }
     label 'dedup'
-    label 'process_higher'
+    label 'process_high'
 
     container "${params.containers.picard}"
 

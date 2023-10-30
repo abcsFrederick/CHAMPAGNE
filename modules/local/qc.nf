@@ -2,7 +2,7 @@
 process FASTQC {
     tag { meta.id }
     label 'qc'
-    label 'process_higher'
+    label 'process_high'
     publishDir "${params.outdir}/qc/fastqc_${fqtype}/${meta.id}", mode: "${params.publish_dir_mode}"
 
     container = "${params.containers.fastqc}"
@@ -258,7 +258,6 @@ process QC_STATS {
         path("${meta.id}.qc_stats.txt")
 
     script:
-    // TODO: handle paired reads
     def outfile = "${meta.id}.qc_stats.txt"
     """
     touch ${outfile}
