@@ -1,5 +1,5 @@
 class Utils {
-    // Run spooker and direct output to a log file
+    // adapted from https://groovy-lang.gitlab.io/101-scripts/basico/command_local-en.html
     public static String run(command_string) {
         def message = ""
         def out_str = new StringBuilder()
