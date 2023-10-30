@@ -43,24 +43,6 @@ workflow.onComplete {
     }
 }
 
-
-process YEET {
-    input:
-    val text
-
-    output:
-    stdout
-
-    script:
-    """
-    echo $text
-    """
-
-}
-workflow debug {
-    println "hello world!"
-}
-
 workflow MAKE_REFERENCE {
     PREPARE_GENOME()
 }
