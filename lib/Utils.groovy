@@ -1,4 +1,5 @@
 class Utils {
+    // run a shell command and capture the output
     // adapted from https://groovy-lang.gitlab.io/101-scripts/basico/command_local-en.html
     public static String run(command_string) {
         def message = ""
@@ -18,6 +19,13 @@ class Utils {
         } catch(IOException e) {
             message = e
         }
+        return message
+    }
+
+    // run spooker for the workflow
+    public static String spooker(workflow) {
+        def pipeline_name = "${workflow.manifest.name.tokenize('/')[-1]}"
+        def message = this.run("spooker ${workflow.launchDir} ${pipeline_name} | tee ${workflow.launchDir}/log/spooker.log")
         return message
     }
 }
