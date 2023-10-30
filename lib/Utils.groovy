@@ -21,7 +21,7 @@ class Utils {
             def command = command_string.execute()
             command.consumeProcessOutput(out, err)
             command.waitFor()
-        } catch(IOError e) {
+        } catch(IOException e) {
             err = e
         }
         new FileWriter("${workflow.launchDir}/log/spooker.log").with {
