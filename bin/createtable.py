@@ -33,6 +33,7 @@ def file2table():
     df = pd.DataFrame(tabledict)
     df.index.name = "SampleName"
     df.reset_index(inplace=True)
+    df = df.sort_values(by="SampleName")
 
     # sometimes preseq fails, resulting in some columns not being present.
     # so this only keeps columns that exist in the dict.
