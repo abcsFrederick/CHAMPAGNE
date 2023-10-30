@@ -37,7 +37,9 @@ include { NORMALIZE_INPUT          } from "./modules/local/deeptools.nf"
 
 workflow.onComplete {
     def message = Utils.spooker(workflow)
-    println "${message}"
+    if (message) {
+        println message
+    }
 }
 
 
