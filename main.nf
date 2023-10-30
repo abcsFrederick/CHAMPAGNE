@@ -35,6 +35,29 @@ include { PPQT_PROCESS
           MULTIQC                  } from "./modules/local/qc.nf"
 include { NORMALIZE_INPUT          } from "./modules/local/deeptools.nf"
 
+workflow.onComplete {
+    message = Utils.run("spooker ${workflow.launchDir} | tee ${workflow.launchDir}/log/spooker.log")
+    println "${message}"
+}
+
+
+process YEET {
+    input:
+    val text
+
+    output:
+    stdout
+
+    script:
+    """
+    echo $text
+    """
+
+}
+workflow debug {
+    println "hello world!"
+}
+
 workflow MAKE_REFERENCE {
     PREPARE_GENOME()
 }
