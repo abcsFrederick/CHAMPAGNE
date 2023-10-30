@@ -1,3 +1,7 @@
+## development version
+
+- Run spooker on workflow completion (#126).
+
 ## CHAMPAGNE 0.2.0
 
 ### New features
