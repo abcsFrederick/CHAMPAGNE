@@ -1,6 +1,7 @@
 recursive-include assets
 recursive-include bin
 recursive-include conf
+recursive-include lib
 recursive-include modules
 recursive-include src
 recursive-include submodules

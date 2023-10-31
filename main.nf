@@ -35,6 +35,14 @@ include { PPQT_PROCESS
           MULTIQC                  } from "./modules/local/qc.nf"
 include { NORMALIZE_INPUT          } from "./modules/local/deeptools.nf"
 
+workflow.onComplete {
+    println "Running spooker"
+    def message = Utils.spooker(workflow)
+    if (message) {
+        println message
+    }
+}
+
 workflow MAKE_REFERENCE {
     PREPARE_GENOME()
 }
