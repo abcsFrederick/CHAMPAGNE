@@ -251,7 +251,7 @@ process QC_STATS {
     container = "${params.containers.base}"
 
     input:
-        tuple val(meta), path(raw_fastq), val(n_reads_after_blacklist), path(aligned_flagstat), path(filtered_flagstat), path(dedup_flagstat), path(idxstat), path(preseq_nrf), path(ppqt_spp), val(fraglen)
+        tuple val(meta), path(raw_fastq), path(count_file_blacklist), path(aligned_flagstat), path(filtered_flagstat), path(dedup_flagstat), path(idxstat), path(preseq_nrf), path(ppqt_spp), val(fraglen)
 
 
     output:
@@ -266,7 +266,8 @@ process QC_STATS {
     zcat ${raw_fastq} | wc -l | filterMetrics.py ${meta.id} tnreads >> ${outfile}
 
     # Number of reads after blacklist filter
-    echo -e "${meta.id}\\tN_reads_surviving_blacklist\\t${n_reads_after_blacklist}" >> ${outfile}
+    n_reads_after_blacklist=`cat ${count_file_blacklist}`
+    echo -e "${meta.id}\\tN_reads_surviving_blacklist\\t\${n_reads_after_blacklist}" >> ${outfile}
 
     # Number of mapped reads
     grep 'mapped (' ${aligned_flagstat} | awk '{{print \$1,\$3}}' | filterMetrics.py ${meta.id} mnreads >> ${outfile}

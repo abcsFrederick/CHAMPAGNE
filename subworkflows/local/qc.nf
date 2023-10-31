@@ -54,7 +54,6 @@ workflow QC {
             .concat(HANDLE_PRESEQ_ERROR.out.nrf)
             .set{ preseq_nrf }
 
-        // TODO: order of items in channel is not guaranteed. Need to create single channel with all files for QC stats with same metadata
         qc_stats_input = raw_fastqs
             .join(n_reads_surviving_blacklist)
             .join(aligned_flagstat)

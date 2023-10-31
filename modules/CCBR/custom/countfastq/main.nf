@@ -3,19 +3,17 @@ process CUSTOM_COUNTFASTQ {
     tag { meta.id }
     label 'process_single'
 
-    container 'nciccbr/ccbr_ubuntu_base_20.04:v5'
+    container 'nciccbr/ccbr_ubuntu_base_20.04:v6.1'
 
     input:
         tuple val(meta), path(fastq)
 
     output:
-        tuple val(meta), env(count), emit: count
+        tuple val(meta), path("*.txt"), emit: count
 
     script:
-    """
-    count=`zcat ${fastq} | grep "^@" | wc -l`
-    echo \$count
-    """
+    def txt_filename = "${meta.baseName}.txt"
+    template 'count-fastq.py'
 
     stub:
     """
