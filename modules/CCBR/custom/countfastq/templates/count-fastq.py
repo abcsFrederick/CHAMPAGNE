@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import Bio.SeqIO
 import gzip
-import os
+import platform
 
 
 def main():
@@ -15,5 +15,13 @@ def main():
     return count
 
 
+def write_versions():
+    with open("versions.yml", "w") as outfile:
+        outfile.write('"${task.process}":\\n')
+        outfile.write(f'  Python: "{platform.python_version()}"\\n')
+        outfile.write(f'  Biopython: "{Bio.__version__}"\\n')
+
+
 if __name__ == "__main__":
-    print(main())
+    write_versions()
+    main()
