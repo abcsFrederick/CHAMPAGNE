@@ -1,6 +1,6 @@
 process SAMTOOLS_INDEX { // TODO create/use flagstat & idxstat module in nf-modules
     tag { meta.id }
-    label 'process_medium'
+    label 'process_high'
 
     container = "${params.containers.base}"
 

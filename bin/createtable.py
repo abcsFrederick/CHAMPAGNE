@@ -57,8 +57,8 @@ def file2table():
         ]
         if col in df_columns
     ]
-
-    print(df[column_order].to_string(index=False, justify="left"))
+    df = df[column_order]
+    df.to_csv("qc_table.tsv", sep="\t", index=False)
 
 
 if __name__ == "__main__":
