@@ -44,7 +44,7 @@ jobs:
           cd tests/cli
           which champagne
           champagne init
-          champagne run -stub -c ci_stub
+          champagne run -stub -c ci_stub.config
       - name: Test run
         if: ${{ env.test_run == 'true' }}
         run: |
