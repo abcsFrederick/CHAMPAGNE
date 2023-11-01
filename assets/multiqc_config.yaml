@@ -169,7 +169,7 @@ custom_data:
 
 sp:
   QC_Table:
-    fn: "qc_table.txt"
+    fn: "qc_table.tsv"
   NGSQC_data:
     fn: "*NGSQC.txt"
   frip_samples:
