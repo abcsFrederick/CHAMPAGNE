@@ -178,7 +178,8 @@ def run_nextflow(
         profiles.add("slurm")
     if hpc:
         profiles.add(hpc_options[hpc]["profile"])
-    args_dict["-profile"] = ",".join(sorted(profiles))
+    if profiles:
+        args_dict["-profile"] = ",".join(sorted(profiles))
     nextflow_command += list(f"{k} {v}" for k, v in args_dict.items())
 
     # Print nextflow command
