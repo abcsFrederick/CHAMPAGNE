@@ -304,11 +304,11 @@ process QC_TABLE {
         path(qc_stats)
 
     output:
-        path("qc_table.txt"), emit: txt
+        path("qc_table.tsv"), emit: txt
 
     script:
     """
-    cat ${qc_stats.join(' ')} | createtable.py > qc_table.txt
+    cat ${qc_stats.join(' ')} | createtable.py
     """
 
     stub:
