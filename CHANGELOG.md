@@ -1,7 +1,9 @@
-## CHAMPAGNE 0.2.1
+## development version
 
 - Fixed a bug in QC stats that mixed up the statistics for different samples. (#125)
+- Fixed a bug in the CLI that added the `-profile` to the nextflow command even if it wasn't needed (#125).
 - Report read counts between blacklist & filtering steps in the QC table. (#125)
+- Run spooker on workflow completion (#126).
 
 ## CHAMPAGNE 0.2.0
 

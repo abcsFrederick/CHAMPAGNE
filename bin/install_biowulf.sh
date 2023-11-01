@@ -9,6 +9,12 @@ bin_path=${install_path}/bin/
 . "/data/CCBR_Pipeliner/db/PipeDB/Conda/etc/profile.d/conda.sh"
 conda activate py311
 
+
+# remove artifacts from prior builds
+pushd ${repo_path}
+rm -rf build/ *.egg-info
+popd
+
 echo "Installing CHAMPAGNE to ${install_path}"
 pip install ${repo_path} --target ${install_path}
 chmod +x ${install_path}/champagne/bin/*.*

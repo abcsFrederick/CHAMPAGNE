@@ -44,8 +44,8 @@ champagne run --mode slurm -profile test,biowulf
 To run champagne on your own data, you'll need to create a sample sheet.
 Take a look at these examples:
 
-- [assets/samplesheet_test.csv] - mix of single and paired end reads downloaded from github.
-- [assets/samplesheet_mm10.csv] - single end reads on biowulf.
+- [assets/samplesheet_test.csv](/assets/samplesheet_test.csv) - mix of single and paired end reads downloaded from github.
+- [assets/samplesheet_mm10.csv](/assets/samplesheet_test.csv) - single end reads on biowulf.
 
 Once you've created a samplesheet with paths to your fastq files,
 run champagne with the `--input` option to specify the path to your sample sheet:
