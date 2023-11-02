@@ -7,19 +7,19 @@ include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check.nf'
 
 workflow INPUT_CHECK {
     take:
-    samplesheet // file: /path/to/samplesheet.csv
-    seq_center  // string: sequencing center for read group
+        samplesheet // file: /path/to/samplesheet.csv
+        seq_center  // string: sequencing center for read group
 
     main:
-    SAMPLESHEET_CHECK ( samplesheet )
-        .csv
-        .splitCsv ( header:true, sep:',' )
-        .map { create_fastq_channel(it, seq_center) }
-        .set { reads }
+        SAMPLESHEET_CHECK ( samplesheet )
+            .csv
+            .splitCsv ( header:true, sep:',' )
+            .map { create_fastq_channel(it, seq_center) }
+            .set { reads }
 
     emit:
-    reads                                     // channel: [ val(meta), [ reads ] ]
-    versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
+        reads                                     // channel: [ val(meta), [ reads ] ]
+        versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 
 // Function to get list of [ meta, [ fastq_1, fastq_2 ] ]
