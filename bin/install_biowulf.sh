@@ -17,7 +17,7 @@ popd
 
 echo "Installing CHAMPAGNE to ${install_path}"
 pip install ${repo_path} --target ${install_path}
-chmod +rx ${install_path}/champagne/bin/*.*
+chmod a+rx ${install_path}/champagne/bin/*.*
 chmod -R a+r ${install_path}
 
 if [[ ":$PATH:" != *":${bin_path}:"* ]];then
