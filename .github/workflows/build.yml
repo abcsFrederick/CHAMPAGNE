@@ -44,7 +44,7 @@ jobs:
           cd tests/cli
           which champagne
           champagne init
-          champagne run -stub -c ci_stub.config --max_cpus 2
+          champagne run -stub -c ci_stub.config --max_cpus 2 --max_memory 6.GB
       - name: Test run
         if: ${{ env.test_run == 'true' }}
         run: |
