@@ -11,7 +11,7 @@
 
 Champagne is installed on the [Biowulf HPC](#biowulf).
 For installation in other execution environments,
-refer to the [docs](https://ccbr.github.io/champagne).
+refer to the [docs](https://ccbr.github.io/CHAMPAGNE/).
 
 ### Biowulf
 
