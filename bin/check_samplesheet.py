@@ -8,6 +8,7 @@ import os
 import sys
 import errno
 import argparse
+import pprint
 
 
 def parse_args(args=None):
@@ -85,8 +86,10 @@ def check_samplesheet(file_in, file_out):
                 )
 
             ## Check sample name entries
-            sample, rep, fastq_1, fastq_2, antibody, control = lspl[:]
-            print(lspl)
+            sample_basename, rep, fastq_1, fastq_2, antibody, control = lspl[:]
+            print('lspl')
+            pprint.pprint(lspl)
+            sample = f"{sample_basename}_{rep}" if rep else sample_basename
             if sample.find(" ") != -1:
                 print(
                     f"WARNING: Spaces have been replaced by underscores for sample: {sample}"
@@ -138,8 +141,8 @@ def check_samplesheet(file_in, file_out):
                 print_error("Invalid combination of columns provided!", "Line", line)
             is_single = str(int(bool(fastq_1 and not fastq_2)))
             # prepare sample info
-            sample_basename = sample.rstrip(rep)
             sample_info = [
+                sample,
                 sample_basename,
                 rep,
                 is_single,
@@ -148,17 +151,19 @@ def check_samplesheet(file_in, file_out):
                 antibody,
                 control,
             ]
-            print(sample_info)
+            print('sample_info')
+            pprint.pprint(sample_info)
 
             ## Create sample mapping dictionary = {sample: [[ single_end, fastq_1, fastq_2, antibody, control ]]}
-            if sample not in sample_mapping_dict:
+            if sample not in sample_mapping_dict.keys():
                 sample_mapping_dict[sample] = [sample_info]
             else:
+                print(f"{sample} in keys")
                 if sample_info in sample_mapping_dict[sample]:
                     print_error("Samplesheet contains duplicate rows!", "Line", line)
                 else:
                     sample_mapping_dict[sample].append(sample_info)
-
+    #pprint.pprint(sample_mapping_dict)
     ## Write validated samplesheet with appropriate columns
     if len(sample_mapping_dict) > 0:
         out_dir = os.path.dirname(file_out)
@@ -195,14 +200,11 @@ def check_samplesheet(file_in, file_out):
                     control = val[-1]
                     if control and control not in sample_mapping_dict.keys():
                         print_error(
-                            f"Control identifier has to match does a provided sample identifier!",
+                            f"Control identifier has to match a provided sample identifier!",
                             "Control",
                             control,
                         )
-                    plus_T = (
-                        f"_T{idx+1}" if len(sample_mapping_dict[sample]) > 1 else ""
-                    )  # do not append _T{idx} if not needed
-                    fout.write(",".join([f"{sample}{plus_T}"] + val) + "\n")
+                    fout.write(",".join(val) + "\n")
     else:
         print_error(f"No entries to process!", "Samplesheet: {file_in}")
 
