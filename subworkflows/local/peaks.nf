@@ -29,9 +29,6 @@ workflow CALL_PEAKS {
         effective_genome_size
 
     main:
-        // peak calling
-
-
         genome_frac = CALC_GENOME_FRAC(chrom_sizes, effective_genome_size)
 
         // create channel with [ meta, chip_tag, input_tag, format ]
@@ -133,10 +130,12 @@ workflow CALL_PEAKS {
             .map{ meta, bed, tool ->
                 [ "${meta.sample_basename}_${tool}", meta, bed ]
             }
-            .groupTuple(by: 0) // TODO `by` must be a numerical key based on sample_basename and the peak-calling tool
+            .groupTuple(by: 0) // group by the sample_basename and peak-calling tool
             .set{ peak_reps }
-        // TODO: assert that sample_basenames match.
-        // TODO: only run consensus caller on samples with >1 replicate.
+        // assert that sample_basenames match
+        peak_reps.subscribe { basename_tool, metas, beds ->
+            assert metas.collect{ it.sample_basename }.toSet().size() == 1
+        }
         peak_reps | CONSENSUS_PEAKS
 
     emit:
