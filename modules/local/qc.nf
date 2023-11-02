@@ -313,7 +313,7 @@ process QC_TABLE {
 
     stub:
     """
-    touch qc_table.txt
+    touch qc_table.tsv
     """
 
 }
