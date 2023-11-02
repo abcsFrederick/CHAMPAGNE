@@ -1,4 +1,4 @@
-## development version
+## CHAMPAGNE 0.2.1
 
 - Fixed a bug in QC stats that mixed up the statistics for different samples. (#125)
 - Fixed a bug in the CLI that added the `-profile` to the nextflow command even if it wasn't needed (#125).
