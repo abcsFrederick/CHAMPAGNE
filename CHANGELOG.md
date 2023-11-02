@@ -43,7 +43,7 @@
 
 - An error is thrown when a required input file doesn't exist. (#71)
   - Previously, the workflow quietly didn't run the process(es) that required the missing file.
-- Renamed `champagne config` to `champagne init` to avoid clashing with `nextflow init`. (#112)
+- Renamed `champagne config` to `champagne init` to avoid clashing with `nextflow config`. (#112)
 
 ## CHAMPAGNE 0.1.0
 
