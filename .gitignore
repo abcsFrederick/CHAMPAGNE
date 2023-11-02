@@ -28,6 +28,7 @@ replay_pid*
 /work*/
 /data/
 /results/
+/output/
 /params.yaml
 
 # python packaging

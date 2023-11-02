@@ -1,0 +1,41 @@
+name: custom_countfastq
+description: |
+  Count reads in a fastq file
+keywords:
+  - fastq
+  - biopython
+  - python
+tools:
+  - Biopython:
+      description: |
+        Python tools for computational molecular biology
+      homepage: https://biopython.org/
+      tool_dev_url: https://github.com/biopython/biopython
+      doi: 10.1093/bioinformatics/btp163
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [ id:'test', single_end:false ]
+  - fastq:
+      type: file
+      description: fastq file
+      pattern: "*.{fastq.gz}"
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [ id:'test', single_end:false ]
+  - count:
+      type: file
+      description: Plain text file containing the number of reads in the fastq files
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@kelly-sovacool"
+maintainers:
+  - "@kelly-sovacool"

@@ -1,6 +1,6 @@
 process SAMTOOLS_SORT {
     tag { meta.id }
-    label 'process_medium'
+    label 'process_high'
 
     container 'nciccbr/ccbr_ubuntu_base_20.04:v6'
 

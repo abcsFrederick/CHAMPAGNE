@@ -33,10 +33,7 @@ def file2table():
     df = pd.DataFrame(tabledict)
     df.index.name = "SampleName"
     df.reset_index(inplace=True)
-    # print(df[['NSC', 'FRiP', 'PCB1', 'PCB2', 'RSC']])  #re-order columns
-    # cols = df.columns.tolist() # view df columns names
-    # orderedcols = ordercolumns(cols)
-    # print(df.to_string())
+    df = df.sort_values(by="SampleName")
 
     # sometimes preseq fails, resulting in some columns not being present.
     # so this only keeps columns that exist in the dict.
@@ -46,7 +43,9 @@ def file2table():
         for col in [
             "SampleName",
             "NReads",
+            "N_reads_surviving_blacklist",
             "NMappedReads",
+            "N_mapped_reads_surviving_filter",
             "NUniqMappedReads",
             "NRF",
             "PBC1",
@@ -58,8 +57,8 @@ def file2table():
         ]
         if col in df_columns
     ]
-
-    print(df[column_order].to_string(index=False, justify="left"))
+    df = df[column_order]
+    df.to_csv("qc_table.tsv", sep="\t", index=False)
 
 
 if __name__ == "__main__":

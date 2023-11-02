@@ -2,7 +2,7 @@
 process FASTQC {
     tag { meta.id }
     label 'qc'
-    label 'process_higher'
+    label 'process_high'
     publishDir "${params.outdir}/qc/fastqc_${fqtype}/${meta.id}", mode: "${params.publish_dir_mode}"
 
     container = "${params.containers.fastqc}"
@@ -100,7 +100,7 @@ process HANDLE_PRESEQ_ERROR {
         tuple val(meta), val(log)
 
     output:
-        path("*nrf.txt"), emit: nrf
+        tuple val(meta), path("*nrf.txt"), emit: nrf
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
@@ -123,7 +123,7 @@ process PARSE_PRESEQ_LOG {
         tuple val(meta), path(log)
 
     output:
-        path("*nrf.txt"), emit: nrf
+        tuple val(meta), path("*nrf.txt"), emit: nrf
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
@@ -150,7 +150,7 @@ process PHANTOM_PEAKS {
 
     output:
         path("${meta.id}.ppqt.pdf")                    , emit: pdf
-        path("${meta.id}.spp.out")                     , emit: spp
+        tuple val(meta), path("${meta.id}.spp.out")    , emit: spp
         tuple val(meta), path("${meta.id}.fraglen.txt"), emit: fraglen
         path  "versions.yml"                           , emit: versions
 
@@ -251,32 +251,39 @@ process QC_STATS {
     container = "${params.containers.base}"
 
     input:
-        tuple val(meta), path(raw_fastq)
-        tuple val(meta), path(align_flagstat)
-        tuple path(dedup_flagstat), path(idxstat)
-        path(preseq_nrf)
-        path(ppqt_spp)
-        tuple val(meta), val(fraglen)
+        tuple val(meta), path(raw_fastq), path(count_file_blacklist), path(aligned_flagstat), path(filtered_flagstat), path(dedup_flagstat), path(idxstat), path(preseq_nrf), path(ppqt_spp), val(fraglen)
 
 
     output:
         path("${meta.id}.qc_stats.txt")
 
     script:
-    // TODO: handle paired reads
     def outfile = "${meta.id}.qc_stats.txt"
     """
     touch ${outfile}
+
     # Number of reads
     zcat ${raw_fastq} | wc -l | filterMetrics.py ${meta.id} tnreads >> ${outfile}
+
+    # Number of reads after blacklist filter
+    n_reads_after_blacklist=`cat ${count_file_blacklist}`
+    echo -e "${meta.id}\\tN_reads_surviving_blacklist\\t\${n_reads_after_blacklist}" >> ${outfile}
+
     # Number of mapped reads
-    grep 'mapped (' ${align_flagstat} | awk '{{print \$1,\$3}}' | filterMetrics.py ${meta.id} mnreads >> ${outfile}
+    grep 'mapped (' ${aligned_flagstat} | awk '{{print \$1,\$3}}' | filterMetrics.py ${meta.id} mnreads >> ${outfile}
+
+    # Number of mapped reads surviving filter
+    grep 'mapped (' ${filtered_flagstat} | awk '{{print \$1,\$3}}' | filterMetrics.py ${meta.id} N_mapped_reads_surviving_filter >> ${outfile}
+
     # Number of uniquely mapped reads
     grep 'mapped (' ${dedup_flagstat} | awk '{{print \$1,\$3}}' | filterMetrics.py ${meta.id} unreads >> ${outfile}
+
     # NRF, PCB1, PCB2
     cat ${preseq_nrf} | filterMetrics.py ${meta.id} nrf >> ${outfile}
+
     # NSC, RSC, Qtag
     awk '{{print \$(NF-2),\$(NF-1),\$NF}}' ${ppqt_spp} | filterMetrics.py ${meta.id} ppqt >> ${outfile}
+
     # Fragment Length
     echo "${meta.id}\tFragmentLength\t${fraglen}" >> ${outfile}
     """
@@ -297,16 +304,16 @@ process QC_TABLE {
         path(qc_stats)
 
     output:
-        path("qc_table.txt"), emit: txt
+        path("qc_table.tsv"), emit: txt
 
     script:
     """
-    cat ${qc_stats.join(' ')} | createtable.py > qc_table.txt
+    cat ${qc_stats.join(' ')} | createtable.py
     """
 
     stub:
     """
-    touch qc_table.txt
+    touch qc_table.tsv
     """
 
 }

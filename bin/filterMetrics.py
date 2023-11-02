@@ -64,6 +64,8 @@ def getmetadata(type):
         metadata = "NReads"
     elif type == "mnreads":
         metadata = "NMappedReads"
+    elif type == "N_mapped_reads_surviving_filter":
+        metadata = type
     elif type == "unreads":
         metadata = "NUniqMappedReads"
     elif type == "fragLen":

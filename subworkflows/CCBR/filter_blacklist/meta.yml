@@ -11,15 +11,19 @@ components:
   - bwa/mem
   - samtools/filteraligned
   - picard/samtofastq
+  - custom/countfastq
 input:
   - ch_fastq_input:
+      type: map
       description: |
         A channel containing fastq files
   - ch_blacklist_index:
+      type: file
       description: |
         A BWA index created by running BWA/INDEX on a fasta file of blacklisted regions/
 output:
   - reads:
+      type: map
       description: |
         Reads from the fastq files that do not align to the blacklist
   - versions:

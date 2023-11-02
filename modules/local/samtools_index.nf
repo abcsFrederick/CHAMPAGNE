@@ -1,6 +1,6 @@
-process SAMTOOLS_INDEX {
+process SAMTOOLS_INDEX { // TODO create/use flagstat & idxstat module in nf-modules
     tag { meta.id }
-    label 'process_medium'
+    label 'process_high'
 
     container = "${params.containers.base}"
 
@@ -9,7 +9,7 @@ process SAMTOOLS_INDEX {
 
     output:
         tuple val(meta), path("${bam.baseName}.sort.bam"), path("${bam.baseName}.sort.bam.bai"), emit: bam
-        tuple path("${bam.baseName}.sort.bam.flagstat"), path("${bam.baseName}.sort.bam.idxstat"), emit: flagstat
+        tuple val(meta), path("${bam.baseName}.sort.bam.flagstat"), path("${bam.baseName}.sort.bam.idxstat"), emit: flagstat
 
     script:
     """

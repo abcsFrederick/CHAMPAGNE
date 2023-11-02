@@ -12,8 +12,13 @@
                     },
                     "bwa/mem": {
                         "branch": "main",
-                        "git_sha": "ca4f84b4c2ca84eb0449b4ba414a8b8052f8d90a",
-                        "installed_by": ["filter_blacklist", "modules"]
+                        "git_sha": "7887b0e0dc5a0320d8ba84c2763ef8692c358087",
+                        "installed_by": ["modules", "filter_blacklist"]
+                    },
+                    "custom/countfastq": {
+                        "branch": "main",
+                        "git_sha": "2ccd43e3734de30fe61ed0ff80e6e3252929505e",
+                        "installed_by": ["filter_blacklist"]
                     },
                     "cutadapt": {
                         "branch": "main",
@@ -27,7 +32,7 @@
                     },
                     "picard/samtofastq": {
                         "branch": "main",
-                        "git_sha": "258d0f336ea1f851ab4223d295bb18b6dc187899",
+                        "git_sha": "25e6e67a4ec172db1bbb0ef995c4a470d847143a",
                         "installed_by": ["filter_blacklist"]
                     },
                     "samtools/filteraligned": {
@@ -35,9 +40,14 @@
                         "git_sha": "879e969c593ab9f321301ac15722728ab30cea49",
                         "installed_by": ["filter_blacklist"]
                     },
+                    "samtools/flagstat": {
+                        "branch": "main",
+                        "git_sha": "25e6e67a4ec172db1bbb0ef995c4a470d847143a",
+                        "installed_by": ["modules"]
+                    },
                     "samtools/sort": {
                         "branch": "main",
-                        "git_sha": "d55ab2580b69a81aa0534a3018cc6e6ea3b28640",
+                        "git_sha": "5b39869abfc740c6243d18a3cd84aa7d78787125",
                         "installed_by": ["modules"]
                     }
                 }
@@ -46,7 +56,7 @@
                 "CCBR": {
                     "filter_blacklist": {
                         "branch": "main",
-                        "git_sha": "bb7dbb42afe47d7e02b2f21e3352720ca2996e11",
+                        "git_sha": "b7764378fac18bea8c84f9dd39cb595241b6e796",
                         "installed_by": ["subworkflows"]
                     }
                 }
@@ -57,17 +67,7 @@
                 "nf-core": {
                     "bedtools/getfasta": {
                         "branch": "master",
-                        "git_sha": "cfd937a668919d948f6fcbf4218e79de50c2f36f",
-                        "installed_by": ["modules"]
-                    },
-                    "bwa/index": {
-                        "branch": "master",
-                        "git_sha": "28a23ea6529caff44855c774f439a4074883027c",
-                        "installed_by": ["modules"]
-                    },
-                    "samtools/flagstat": {
-                        "branch": "master",
-                        "git_sha": "cfd937a668919d948f6fcbf4218e79de50c2f36f",
+                        "git_sha": "8fc1d24c710ebe1d5de0f2447ec9439fd3d9d66a",
                         "installed_by": ["modules"]
                     }
                 }

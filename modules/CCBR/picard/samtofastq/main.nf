@@ -8,9 +8,10 @@ process PICARD_SAMTOFASTQ {
     tuple val(meta), path(bam)
 
     output:
-    tuple val(meta), path("*_?.fastq.gz"),       emit: reads
-    path "versions.yml",                         emit: versions
+    tuple val(meta), path("*.fastq.gz"),         emit: reads
+    tuple val(meta), path("*_?.fastq.gz"),       emit: paired, optional: true
     tuple val(meta), path("*unpaired.fastq.gz"), emit: unpaired, optional: true
+    path "versions.yml",                         emit: versions
 
     when:
     task.ext.when == null || task.ext.when

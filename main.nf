@@ -49,6 +49,10 @@ workflow MAKE_REFERENCE {
 
 // MAIN WORKFLOW
 workflow {
+    CHIPSEQ()
+}
+
+workflow CHIPSEQ {
     INPUT_CHECK(file(params.input), params.seq_center)
     INPUT_CHECK.out.reads.set { raw_fastqs }
     raw_fastqs | CUTADAPT
@@ -72,8 +76,8 @@ workflow {
 
     ch_multiqc = Channel.of()
     if (params.run.qc) {
-        QC(raw_fastqs, trimmed_fastqs,
-           aligned_bam, ALIGN_GENOME.out.flagstat,
+        QC(raw_fastqs, trimmed_fastqs, FILTER_BLACKLIST.out.n_surviving_reads,
+           aligned_bam, ALIGN_GENOME.out.aligned_flagstat, ALIGN_GENOME.out.filtered_flagstat,
            deduped_bam, DEDUPLICATE.out.flagstat,
            PHANTOM_PEAKS.out.spp, frag_lengths,
            PREPARE_GENOME.out.gene_info,

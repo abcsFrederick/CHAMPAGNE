@@ -1,6 +1,6 @@
 process BWA_MEM {
     tag { meta.id }
-    label 'process_higher'
+    label 'process_high'
 
     container 'nciccbr/ccbr_ubuntu_base_20.04:v5'
 
