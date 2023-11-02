@@ -16,6 +16,7 @@ include { CALC_GENOME_FRAC
           CONCAT_PEAK_META
           PLOT_PEAK_WIDTHS   } from "../../modules/local/peaks.nf"
 include { BAM_TO_BED    } from "../../modules/local/bedtools.nf"
+include { CONSENSUS_PEAKS } from "../../modules/local/consensus_peaks"
 
 
 workflow CALL_PEAKS {
@@ -126,6 +127,17 @@ workflow CALL_PEAKS {
         ch_plots = PLOT_FRIP.out
             .mix(PLOT_JACCARD.out)
             .mix(PLOT_PEAK_WIDTHS.out)
+
+        // consensus peak calling on replicates
+        ch_peaks
+            .map{ meta, bed, tool ->
+                [ "${meta.sample_basename}_${tool}", meta, bed ]
+            }
+            .groupTuple(by: 0) // TODO `by` must be a numerical key based on sample_basename and the peak-calling tool
+            .set{ peak_reps }
+        // TODO: assert that sample_basenames match.
+        // TODO: only run consensus caller on samples with >1 replicate.
+        peak_reps | CONSENSUS_PEAKS
 
     emit:
         peaks = ch_bam_peaks

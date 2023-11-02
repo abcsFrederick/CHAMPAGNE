@@ -55,7 +55,7 @@ def check_samplesheet(file_in, file_out):
     with open(file_in, "r", encoding="utf-8-sig") as fin:
         ## Check header
         MIN_COLS = 2
-        HEADER = ["sample", "fastq_1", "fastq_2", "antibody", "control"]
+        HEADER = ["sample", "rep", "fastq_1", "fastq_2", "antibody", "control"]
         header = [x.strip('"') for x in fin.readline().strip().split(",")]
         if header[: len(HEADER)] != HEADER:
             print(
@@ -85,7 +85,7 @@ def check_samplesheet(file_in, file_out):
                 )
 
             ## Check sample name entries
-            sample, fastq_1, fastq_2, antibody, control = lspl[: len(HEADER)]
+            sample, rep, fastq_1, fastq_2, antibody, control = lspl[: len(HEADER)]
             if sample.find(" ") != -1:
                 print(
                     f"WARNING: Spaces have been replaced by underscores for sample: {sample}"
@@ -133,13 +133,20 @@ def check_samplesheet(file_in, file_out):
                     )
 
             ## Auto-detect paired-end/single-end
-            sample_info = []  ## [single_end, fastq_1, fastq_2, antibody, control]
-            if sample and fastq_1 and fastq_2:  ## Paired-end short reads
-                sample_info = ["0", fastq_1, fastq_2, antibody, control]
-            elif sample and fastq_1 and not fastq_2:  ## Single-end short reads
-                sample_info = ["1", fastq_1, fastq_2, antibody, control]
-            else:
+            if not sample or not fastq_1:
                 print_error("Invalid combination of columns provided!", "Line", line)
+            is_single = str(fastq_1 and fastq_2)
+            # prepare sample info
+            sample_basename = sample.rstrip(rep)
+            sample_info = [
+                is_single,
+                sample_basename,
+                rep,
+                fastq_1,
+                fastq_2,
+                antibody,
+                control,
+            ]
 
             ## Create sample mapping dictionary = {sample: [[ single_end, fastq_1, fastq_2, antibody, control ]]}
             if sample not in sample_mapping_dict:
@@ -159,6 +166,8 @@ def check_samplesheet(file_in, file_out):
                 ",".join(
                     [
                         "sample",
+                        "sample_basename",
+                        "rep",
                         "single_end",
                         "fastq_1",
                         "fastq_2",
