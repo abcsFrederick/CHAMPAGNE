@@ -42,11 +42,11 @@ def print_error(error, context="Line", context_str=""):
 def check_samplesheet(file_in, file_out):
     """
     This function checks that the samplesheet follows the following structure:
-    sample,fastq_1,fastq_2,antibody,control
-    SPT5_T0_REP1,SRR1822153_1.fastq.gz,SRR1822153_2.fastq.gz,SPT5,SPT5_INPUT_REP1
-    SPT5_T0_REP2,SRR1822154_1.fastq.gz,SRR1822154_2.fastq.gz,SPT5,SPT5_INPUT_REP2
-    SPT5_INPUT_REP1,SRR5204809_Spt5-ChIP_Input1_SacCer_ChIP-Seq_ss100k_R1.fastq.gz,SRR5204809_Spt5-ChIP_Input1_SacCer_ChIP-Seq_ss100k_R2.fastq.gz,,
-    SPT5_INPUT_REP2,SRR5204810_Spt5-ChIP_Input2_SacCer_ChIP-Seq_ss100k_R1.fastq.gz,SRR5204810_Spt5-ChIP_Input2_SacCer_ChIP-Seq_ss100k_R2.fastq.gz,,
+    sample,rep,fastq_1,fastq_2,antibody,control
+    SPT5_T0_REP1,1,SRR1822153_1.fastq.gz,SRR1822153_2.fastq.gz,SPT5,SPT5_INPUT_REP1
+    SPT5_T0_REP2,2,SRR1822154_1.fastq.gz,SRR1822154_2.fastq.gz,SPT5,SPT5_INPUT_REP2
+    SPT5_INPUT_REP1,1,SRR5204809_Spt5-ChIP_Input1_SacCer_ChIP-Seq_ss100k_R1.fastq.gz,SRR5204809_Spt5-ChIP_Input1_SacCer_ChIP-Seq_ss100k_R2.fastq.gz,,
+    SPT5_INPUT_REP2,2,SRR5204810_Spt5-ChIP_Input2_SacCer_ChIP-Seq_ss100k_R1.fastq.gz,SRR5204810_Spt5-ChIP_Input2_SacCer_ChIP-Seq_ss100k_R2.fastq.gz,,
     For an example see:
     https://raw.githubusercontent.com/nf-core/test-datasets/chipseq/samplesheet/v2.0/samplesheet_test.csv
     """
@@ -85,7 +85,8 @@ def check_samplesheet(file_in, file_out):
                 )
 
             ## Check sample name entries
-            sample, rep, fastq_1, fastq_2, antibody, control = lspl[: len(HEADER)]
+            sample, rep, fastq_1, fastq_2, antibody, control = lspl[:]
+            print(lspl)
             if sample.find(" ") != -1:
                 print(
                     f"WARNING: Spaces have been replaced by underscores for sample: {sample}"
@@ -135,18 +136,19 @@ def check_samplesheet(file_in, file_out):
             ## Auto-detect paired-end/single-end
             if not sample or not fastq_1:
                 print_error("Invalid combination of columns provided!", "Line", line)
-            is_single = str(fastq_1 and fastq_2)
+            is_single = str(int(bool(fastq_1 and not fastq_2)))
             # prepare sample info
             sample_basename = sample.rstrip(rep)
             sample_info = [
-                is_single,
                 sample_basename,
                 rep,
+                is_single,
                 fastq_1,
                 fastq_2,
                 antibody,
                 control,
             ]
+            print(sample_info)
 
             ## Create sample mapping dictionary = {sample: [[ single_end, fastq_1, fastq_2, antibody, control ]]}
             if sample not in sample_mapping_dict:
