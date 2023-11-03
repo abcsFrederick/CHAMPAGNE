@@ -148,7 +148,9 @@ workflow CALL_PEAKS {
             }
         peaks_grouped | CONSENSUS_PEAKS
 
-        HOMER_MOTIFS( CONSENSUS_PEAKS.out.peaks.combine(genome_fasta), false )
+        HOMER_MOTIFS( CONSENSUS_PEAKS.out.peaks.combine(genome_fasta),
+                      params.homer.de_novo
+                    )
 
     emit:
         peaks = ch_bam_peaks

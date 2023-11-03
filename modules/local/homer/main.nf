@@ -1,5 +1,5 @@
 process HOMER_MOTIFS {
-    tag "${sample}_${tool}"
+    tag "${sample}.${tool}"
     label 'peaks'
     label 'process_medium'
 
