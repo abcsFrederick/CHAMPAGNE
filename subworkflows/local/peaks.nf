@@ -129,17 +129,25 @@ workflow CALL_PEAKS {
         // consensus peak calling on replicates
         ch_peaks
             .map{ meta, bed, tool ->
-                [ "${meta.sample_basename}_${tool}", meta, bed ]
+                [ "${meta.sample_basename}_${tool}", meta, bed, tool,]
             }
             .groupTuple(by: 0) // group by the sample_basename and peak-calling tool
             .set{ peak_reps }
-        // assert that sample_basenames match
-        peak_reps.subscribe { basename_tool, metas, beds ->
+        // assert that sample_basenames & tools match
+        peak_reps.subscribe { basename_tool, metas, beds, tools ->
             assert metas.collect{ it.sample_basename }.toSet().size() == 1
+            assert tools.toSet().size() == 1
         }
-        peak_reps | CONSENSUS_PEAKS
+        peak_reps
+            .map { basename_tool, metas, beds, tools ->
+                [ metas[0].sample_basename, tools[0], metas, beds ]
+            }
+            .set{
+                peaks_groupped
+            }
+        peaks_groupped | CONSENSUS_PEAKS
 
-        CONSENSUS_PEAKS | HOMER_MOTIFS
+        HOMER_MOTIFS(CONSENSUS_PEAKS.out.peaks, false)
 
     emit:
         peaks = ch_bam_peaks

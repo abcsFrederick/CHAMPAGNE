@@ -22,6 +22,7 @@ process HOMER_MOTIFS {
         -size given \\
         -p ${task.cpus} \\
         -len 8,10 \\
+        -dumpFasta \\
         -preparsedDir preparsed \\
         ${args}
     """
