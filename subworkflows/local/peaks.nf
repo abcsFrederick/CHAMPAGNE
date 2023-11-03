@@ -16,6 +16,7 @@ include { CALC_GENOME_FRAC
           CONCAT_PEAK_META
           PLOT_PEAK_WIDTHS   } from "../../modules/local/peaks.nf"
 include { BAM_TO_BED    } from "../../modules/local/bedtools.nf"
+include { CONSENSUS_PEAKS } from "../../modules/local/consensus_peaks"
 
 
 workflow CALL_PEAKS {
@@ -28,9 +29,6 @@ workflow CALL_PEAKS {
         effective_genome_size
 
     main:
-        // peak calling
-
-
         genome_frac = CALC_GENOME_FRAC(chrom_sizes, effective_genome_size)
 
         // create channel with [ meta, chip_tag, input_tag, format ]
@@ -126,6 +124,19 @@ workflow CALL_PEAKS {
         ch_plots = PLOT_FRIP.out
             .mix(PLOT_JACCARD.out)
             .mix(PLOT_PEAK_WIDTHS.out)
+
+        // consensus peak calling on replicates
+        ch_peaks
+            .map{ meta, bed, tool ->
+                [ "${meta.sample_basename}_${tool}", meta, bed ]
+            }
+            .groupTuple(by: 0) // group by the sample_basename and peak-calling tool
+            .set{ peak_reps }
+        // assert that sample_basenames match
+        peak_reps.subscribe { basename_tool, metas, beds ->
+            assert metas.collect{ it.sample_basename }.toSet().size() == 1
+        }
+        peak_reps | CONSENSUS_PEAKS
 
     emit:
         peaks = ch_bam_peaks

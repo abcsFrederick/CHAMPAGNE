@@ -1,3 +1,7 @@
+## development version
+
+- Support multiple replicates per sample and call consensus peaks. (#129)
+
 ## CHAMPAGNE 0.2.1
 
 - Fixed a bug in QC stats that mixed up the statistics for different samples. (#125)
