@@ -17,6 +17,7 @@ include { CALC_GENOME_FRAC
           PLOT_PEAK_WIDTHS   } from "../../modules/local/peaks.nf"
 include { BAM_TO_BED    } from "../../modules/local/bedtools.nf"
 include { CONSENSUS_PEAKS } from "../../modules/local/consensus_peaks"
+include { HOMER_MOTIFS } from "../../modules/local/homer"
 
 
 workflow CALL_PEAKS {
@@ -137,6 +138,8 @@ workflow CALL_PEAKS {
             assert metas.collect{ it.sample_basename }.toSet().size() == 1
         }
         peak_reps | CONSENSUS_PEAKS
+
+        CONSENSUS_PEAKS | HOMER_MOTIFS
 
     emit:
         peaks = ch_bam_peaks

@@ -8,11 +8,12 @@ process CONSENSUS_PEAKS {
     input:
         tuple val(sample_tool), val(metas), val(peaks)
     output:
-        tuple val(sample_tool), val(metas), path("*.consensus_peaks.bed")
+        tuple val(sample_tool), val(sample_basename), path("*.consensus_peaks.bed")
 
     script:
     // assert that meta sample_basename is the same for all
     assert metas.collect{ it.sample_basename }.toSet().size() == 1
+    def sample_basename = metas.collect{ it.sample_basename }[0]
     if (metas.size() > 1) {
         """
         get_consensus_peaks.py --peakfiles ${peaks.join(' ')} --outbed ${sample_tool}.consensus_peaks.bed
