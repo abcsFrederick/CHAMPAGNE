@@ -132,6 +132,7 @@ process WRITE_GENOME_CONFIG {
     ]
     input:
         path(fasta)
+        path(gtf)
         tuple val(meta_ref), path(reference_index)
         tuple val(meta_bl), path(blacklist_index)
         path(chrom_sizes)
@@ -157,10 +158,11 @@ process WRITE_GENOME_CONFIG {
         for file in filelist.split():
             shutil.copy(file, dirpath)
     shutil.copytree("${chrom_dir}", '${genome_name}/chroms/')
-    for file in ("${fasta}", "${chrom_sizes}", "${gene_info}"):
+    for file in ("${fasta}", "${gtf}", "${chrom_sizes}", "${gene_info}"):
         shutil.copy(file, "${genome_name}/")
 
-    genome = dict(reference_index = '"\${params.index_dir}/${genome_name}/reference/*"',
+    genome = dict(genes_gtf = '"\${params.index_dir}/${genome_name}/${gtf}"',
+                  reference_index = '"\${params.index_dir}/${genome_name}/reference/*"',
                   blacklist_index = '"\${params.index_dir}/${genome_name}/blacklist/*"',
                   chromosomes_dir = '"\${params.index_dir}/${genome_name}/chroms/"',
                   chrom_sizes = '"\${params.index_dir}/${genome_name}/${chrom_sizes}"',
