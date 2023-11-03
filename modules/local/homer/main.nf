@@ -3,7 +3,7 @@ process HOMER_MOTIFS {
     label 'peaks'
     label 'process_medium'
 
-    container 'biocontainers/homer:4.11--pl526hc9558a2_3'
+    container 'nciccbr/ccbr_homer_4.11:v1'
 
     input:
         tuple val(sample_tool), val(sample_basename), path(bed)
