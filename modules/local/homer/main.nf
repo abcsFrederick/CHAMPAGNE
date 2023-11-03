@@ -13,7 +13,7 @@ process HOMER_MOTIFS {
         tuple val(sample_tool), path("${sample_tool}/*")
 
     script:
-    def args = de_novo ? "" : " -nomotifs "
+    def args = de_novo ? "" : " -nomotif "
     """
     findMotifsGenome.pl \\
         ${bed} \\
