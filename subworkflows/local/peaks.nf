@@ -28,6 +28,7 @@ workflow CALL_PEAKS {
         deduped_bam
         frag_lengths
         effective_genome_size
+        genome_fasta
 
     main:
         genome_frac = CALC_GENOME_FRAC(chrom_sizes, effective_genome_size)
@@ -143,11 +144,11 @@ workflow CALL_PEAKS {
                 [ metas[0].sample_basename, tools[0], metas, beds ]
             }
             .set{
-                peaks_groupped
+                peaks_grouped
             }
-        peaks_groupped | CONSENSUS_PEAKS
+        peaks_grouped | CONSENSUS_PEAKS
 
-        HOMER_MOTIFS(CONSENSUS_PEAKS.out.peaks, false)
+        HOMER_MOTIFS( CONSENSUS_PEAKS.out.peaks.combine(genome_fasta), false )
 
     emit:
         peaks = ch_bam_peaks

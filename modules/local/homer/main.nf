@@ -1,24 +1,24 @@
 process HOMER_MOTIFS {
-    tag { sample_tool }
+    tag "${sample}_${tool}"
     label 'peaks'
     label 'process_medium'
 
     container 'nciccbr/ccbr_homer_4.11:v1'
 
     input:
-        tuple val(sample_tool), val(sample_basename), path(bed)
+        tuple val(sample), val(tool), path(bed), path(genome_fasta)
         val(de_novo) // true or false
 
     output:
-        tuple val(sample_tool), path("${sample_tool}/*")
+        tuple val(sample), val(tool), path("${sample}.${tool}/*")
 
     script:
     def args = de_novo ? "" : " -nomotif "
     """
     findMotifsGenome.pl \\
         ${bed} \\
-        ${params.genome} \\
-        ${sample_tool} \\
+        ${genome_fasta} \\
+        ${sample}.${tool}/ \\
         -size given \\
         -p ${task.cpus} \\
         -len 8,10 \\
@@ -29,7 +29,7 @@ process HOMER_MOTIFS {
 
     stub:
     """
-    mkdir ${sample_tool}/
-    touch ${sample_tool}/${sample_tool}.txt
+    mkdir ${sample}.${tool}/
+    touch ${sample}.${tool}/${sample}.${tool}
     """
 }

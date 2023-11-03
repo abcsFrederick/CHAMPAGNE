@@ -161,7 +161,8 @@ process WRITE_GENOME_CONFIG {
     for file in ("${fasta}", "${gtf}", "${chrom_sizes}", "${gene_info}"):
         shutil.copy(file, "${genome_name}/")
 
-    genome = dict(genes_gtf = '"\${params.index_dir}/${genome_name}/${gtf}"',
+    genome = dict(fasta = '"\${params.index_dir}/${genome_name}/${fasta}"',
+                  genes_gtf = '"\${params.index_dir}/${genome_name}/${gtf}"',
                   reference_index = '"\${params.index_dir}/${genome_name}/reference/*"',
                   blacklist_index = '"\${params.index_dir}/${genome_name}/blacklist/*"',
                   chromosomes_dir = '"\${params.index_dir}/${genome_name}/chroms/"',
