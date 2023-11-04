@@ -18,7 +18,7 @@ include { CALC_GENOME_FRAC
 include { BAM_TO_BED       } from "../../modules/local/bedtools.nf"
 include { CONSENSUS_PEAKS  } from "../../modules/local/consensus_peaks"
 include { HOMER_MOTIFS     } from "../../modules/local/homer"
-
+include { MEME_AME         } from "../../modules/local/meme"
 
 workflow CALL_PEAKS {
     take:
@@ -152,6 +152,11 @@ workflow CALL_PEAKS {
                       params.homer.de_novo,
                       file(params.homer.jaspar_db, checkIfExists: true)
                     )
+        if (params.genomes[ params.genome ].meme_motifs) {
+            MEME_AME( peaks_groupped,
+                      file(params.genomes[ params.genome ].meme_motifs, checkIfExists: true)
+                    )
+        }
 
     emit:
         peaks = ch_bam_peaks
