@@ -8,9 +8,10 @@ process HOMER_MOTIFS {
     input:
         tuple val(sample), val(tool), path(bed), path(genome_fasta)
         val(de_novo) // true or false
+        path(motif_db)
 
     output:
-        tuple val(sample), val(tool), path("${sample}.${tool}/*")
+        tuple val(sample), val(tool), path("${sample}.${tool}/*"), emit: motifs
 
     script:
     def args = de_novo ? "" : " -nomotif "
@@ -19,6 +20,7 @@ process HOMER_MOTIFS {
         ${bed} \\
         ${genome_fasta} \\
         ${sample}.${tool}/ \\
+        -mknown ${motif_db} \\
         -size given \\
         -p ${task.cpus} \\
         -len 8,10 \\
