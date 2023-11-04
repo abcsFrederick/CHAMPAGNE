@@ -141,7 +141,7 @@ workflow CALL_PEAKS {
         }
         peak_reps
             .map { basename_tool, metas, beds, tools ->
-                [ metas[0].sample_basename, tools[0], metas, beds ]
+                [ [id: metas[0].sample_basename, group: tools[0]], beds ]
             }
             .set{
                 peaks_grouped

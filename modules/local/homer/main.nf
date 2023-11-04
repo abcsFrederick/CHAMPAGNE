@@ -1,17 +1,17 @@
 process HOMER_MOTIFS {
-    tag "${sample}.${tool}"
+    tag "${meta.id}.${meta.group}"
     label 'peaks'
     label 'process_medium'
 
     container 'nciccbr/ccbr_homer_4.11:v1'
 
     input:
-        tuple val(sample), val(tool), path(bed), path(genome_fasta)
+        tuple val(meta), path(bed), path(genome_fasta)
         val(de_novo) // true or false
         path(motif_db)
 
     output:
-        tuple val(sample), val(tool), path("${sample}.${tool}/*"), emit: motifs
+        tuple val(meta), path("${meta.id}.${meta.group}_homer/*"), emit: motifs
 
     script:
     def args = de_novo ? "" : " -nomotif "
@@ -19,7 +19,7 @@ process HOMER_MOTIFS {
     findMotifsGenome.pl \\
         ${bed} \\
         ${genome_fasta} \\
-        ${sample}.${tool}/ \\
+        ${meta.id}.${meta.group}_homer/ \\
         -mknown ${motif_db} \\
         -size given \\
         -p ${task.cpus} \\
@@ -31,7 +31,7 @@ process HOMER_MOTIFS {
 
     stub:
     """
-    mkdir ${sample}.${tool}/
-    touch ${sample}.${tool}/${sample}.${tool}
+    mkdir ${meta.id}.${meta.group}_homer/
+    touch ${meta.id}.${meta.group}_homer/${meta.id}.${meta.group}.blank.txt
     """
 }
