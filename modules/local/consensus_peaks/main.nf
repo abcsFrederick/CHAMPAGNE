@@ -19,7 +19,7 @@ process CONSENSUS_PEAKS {
     // just copy the input if there's only one peak file
     else {
         """
-        cp ${peaks} ${meta.id}.${meta.group}.consensus_peaks.bed
+        cp ${peaks.join(' ')} ${meta.id}.${meta.group}.consensus_peaks.bed
         """
     }
 
