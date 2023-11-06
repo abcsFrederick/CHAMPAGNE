@@ -3,7 +3,7 @@ process MEME_AME {
     label 'peaks'
     label 'process_medium'
 
-    container 'nciccbr:ccbr_meme_5.5.4:v1'
+    container 'nciccbr/ccbr_meme_5.5.4:v1'
 
     input:
         tuple val(meta), path(homer_outdir)
