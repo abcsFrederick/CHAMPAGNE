@@ -12,6 +12,7 @@ process HOMER_MOTIFS {
 
     output:
         tuple val(meta), path("${meta.id}.${meta.group}_homer/*"), emit: motifs
+        tuple val(meta), path("${meta.id}.${meta.group}_homer/background.fa"), path("${meta.id}.${meta.group}_homer/target.fa"), emit: ame
 
     script:
     def args = de_novo ? "" : " -nomotif "

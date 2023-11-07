@@ -153,7 +153,7 @@ workflow CALL_PEAKS {
                       file(params.homer.jaspar_db, checkIfExists: true)
                     )
         if (params.genomes[ params.genome ].meme_motifs) {
-            MEME_AME( peaks_grouped,
+            MEME_AME( HOMER_MOTIFS.out.ame,
                       file(params.genomes[ params.genome ].meme_motifs, checkIfExists: true)
                     )
         }
