@@ -14,11 +14,12 @@ include { CALC_GENOME_FRAC
           PLOT_JACCARD
           GET_PEAK_META
           CONCAT_PEAK_META
-          PLOT_PEAK_WIDTHS } from "../../modules/local/peaks.nf"
-include { BAM_TO_BED       } from "../../modules/local/bedtools.nf"
-include { CONSENSUS_PEAKS  } from "../../modules/local/consensus_peaks"
-include { HOMER_MOTIFS     } from "../../modules/local/homer"
-include { MEME_AME         } from "../../modules/local/meme"
+          PLOT_PEAK_WIDTHS    } from "../../modules/local/peaks.nf"
+include { BAM_TO_BED          } from "../../modules/local/bedtools.nf"
+include { CONSENSUS_PEAKS     } from "../../modules/local/consensus_peaks"
+include { HOMER_MOTIFS        } from "../../modules/local/homer"
+include { MEME_AME            } from "../../modules/local/meme"
+include { CHIPSEEKER_ANNOTATE } from "../../modules/local/chipseeker"
 
 workflow CALL_PEAKS {
     take:
@@ -147,6 +148,8 @@ workflow CALL_PEAKS {
                 peaks_grouped
             }
         peaks_grouped | CONSENSUS_PEAKS
+
+        CHIPSEEKER_ANNOTATE( CONSENSUS_PEAKS.out.peaks )
 
         HOMER_MOTIFS( CONSENSUS_PEAKS.out.peaks.combine(genome_fasta),
                       params.homer.de_novo,
