@@ -14,10 +14,12 @@ include { CALC_GENOME_FRAC
           PLOT_JACCARD
           GET_PEAK_META
           CONCAT_PEAK_META
-          PLOT_PEAK_WIDTHS   } from "../../modules/local/peaks.nf"
-include { BAM_TO_BED    } from "../../modules/local/bedtools.nf"
-include { CONSENSUS_PEAKS } from "../../modules/local/consensus_peaks"
-
+          PLOT_PEAK_WIDTHS    } from "../../modules/local/peaks.nf"
+include { BAM_TO_BED          } from "../../modules/local/bedtools.nf"
+include { CONSENSUS_PEAKS     } from "../../modules/local/consensus_peaks"
+include { HOMER_MOTIFS        } from "../../modules/local/homer"
+include { MEME_AME            } from "../../modules/local/meme"
+include { CHIPSEEKER_ANNOTATE } from "../../modules/local/chipseeker"
 
 workflow CALL_PEAKS {
     take:
@@ -27,6 +29,7 @@ workflow CALL_PEAKS {
         deduped_bam
         frag_lengths
         effective_genome_size
+        genome_fasta
 
     main:
         genome_frac = CALC_GENOME_FRAC(chrom_sizes, effective_genome_size)
@@ -128,15 +131,37 @@ workflow CALL_PEAKS {
         // consensus peak calling on replicates
         ch_peaks
             .map{ meta, bed, tool ->
-                [ "${meta.sample_basename}_${tool}", meta, bed ]
+                [ "${meta.sample_basename}_${tool}", meta, bed, tool,]
             }
             .groupTuple(by: 0) // group by the sample_basename and peak-calling tool
             .set{ peak_reps }
-        // assert that sample_basenames match
-        peak_reps.subscribe { basename_tool, metas, beds ->
+        // assert that sample_basenames & tools match
+        peak_reps.subscribe { basename_tool, metas, beds, tools ->
             assert metas.collect{ it.sample_basename }.toSet().size() == 1
+            assert tools.toSet().size() == 1
         }
-        peak_reps | CONSENSUS_PEAKS
+        peak_reps
+            .map { basename_tool, metas, beds, tools ->
+                [ [id: metas[0].sample_basename, group: tools[0]], beds ]
+            }
+            .set{
+                peaks_grouped
+            }
+        peaks_grouped | CONSENSUS_PEAKS
+
+        if (params.run.chipseeker) {
+            CONSENSUS_PEAKS.out.peaks | CHIPSEEKER_ANNOTATE
+        }
+
+        HOMER_MOTIFS( CONSENSUS_PEAKS.out.peaks.combine(genome_fasta),
+                      params.homer.de_novo,
+                      file(params.homer.jaspar_db, checkIfExists: true)
+                    )
+        if (params.genomes[ params.genome ].meme_motifs) {
+            MEME_AME( HOMER_MOTIFS.out.ame,
+                      file(params.genomes[ params.genome ].meme_motifs, checkIfExists: true)
+                    )
+        }
 
     emit:
         peaks = ch_bam_peaks

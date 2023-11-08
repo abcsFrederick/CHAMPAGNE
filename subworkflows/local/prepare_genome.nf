@@ -14,6 +14,9 @@ workflow PREPARE_GENOME {
         if (params.genomes[ params.genome ]) {
             println "Using ${params.genome} as the reference"
 
+            ch_fasta = Channel.fromPath(params.genomes[ params.genome ].fasta, checkIfExists: true)
+            ch_genes_gtf = Channel.fromPath(params.genomes[ params.genome ].genes_gtf, checkIfExists: true)
+
             ch_blacklist_index = Channel.fromPath(params.genomes[ params.genome ].blacklist_index, checkIfExists: true)
                 .collect()
                 .map{ file ->
@@ -58,6 +61,7 @@ workflow PREPARE_GENOME {
             blacklist_meta = ch_blacklist_fasta.map{ it -> [it.baseName, it]}
             fasta_meta = ch_fasta.map{ it -> [it.baseName, it]}
 
+            ch_genes_gtf = Channel.fromPath(gtf_file)
             ch_blacklist_index =  BWA_INDEX_BL(blacklist_meta).index.collect()
             ch_reference_index = BWA_INDEX_REF(fasta_meta).index.collect()
             KHMER_UNIQUEKMERS(ch_fasta, params.read_length)
@@ -69,6 +73,7 @@ workflow PREPARE_GENOME {
 
             WRITE_GENOME_CONFIG(
                 ch_fasta,
+                ch_genes_gtf,
                 ch_reference_index,
                 ch_blacklist_index,
                 ch_chrom_sizes,
@@ -83,6 +88,7 @@ workflow PREPARE_GENOME {
         }
 
     emit:
+        fasta = ch_fasta
         blacklist_index = ch_blacklist_index
         reference_index = ch_reference_index
         chrom_sizes = ch_chrom_sizes

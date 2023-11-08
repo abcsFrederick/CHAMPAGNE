@@ -456,7 +456,7 @@ process PLOT_JACCARD {
 }
 
 process GET_PEAK_META {
-    tag "${meta.id}_${peak_tool}"
+    tag "${meta.id}.${peak_tool}"
     label 'peaks'
     label 'process_single'
 
