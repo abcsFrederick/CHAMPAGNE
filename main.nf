@@ -36,10 +36,12 @@ include { PPQT_PROCESS
 include { NORMALIZE_INPUT          } from "./modules/local/deeptools.nf"
 
 workflow.onComplete {
-    println "Running spooker"
-    def message = Utils.spooker(workflow)
-    if (message) {
-        println message
+    if (!workflow.stubRun && !workflow.commandLine.contains('-preview')) {
+        println "Running spooker"
+        def message = Utils.spooker(workflow)
+        if (message) {
+            println message
+        }
     }
 }
 
