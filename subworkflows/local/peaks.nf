@@ -150,10 +150,7 @@ workflow CALL_PEAKS {
         peaks_grouped | CONSENSUS_PEAKS
 
         if (params.run.chipseeker) {
-            CONSENSUS_PEAKS.out.peaks
-                .map{ meta, bed ->
-                    meta.group.contains('narrow') || meta.group.contains('gem') ? [ meta, bed ] : null
-                } | CHIPSEEKER_ANNOTATE
+            CONSENSUS_PEAKS.out.peaks | CHIPSEEKER_ANNOTATE
         }
 
         HOMER_MOTIFS( CONSENSUS_PEAKS.out.peaks.combine(genome_fasta),

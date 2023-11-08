@@ -1,27 +1,11 @@
 #!/usr/bin/env Rscript
-# source: https://github.com/CCBR/ASPEN/blob/55f909d76500c3502c1c397ef3000908649b0284/workflow/scripts/ccbr_annotate_peaks.R
-suppressPackageStartupMessages(library("argparse"))
-suppressPackageStartupMessages(library("dplyr"))
-suppressPackageStartupMessages(library("ChIPseeker"))
+# adapted from: https://github.com/CCBR/ASPEN/blob/55f909d76500c3502c1c397ef3000908649b0284/workflow/scripts/ccbr_annotate_peaks.R
+load_package <- function(x) {
+    suppressPackageStartupMessages(library(x, character.only = TRUE))
+}
+lapply(c('dplyr', 'ChIPseeker'), load_package)
 
-suppressPackageStartupMessages(library("TxDb.Hsapiens.UCSC.hg19.knownGene"))
-suppressPackageStartupMessages(library("TxDb.Hsapiens.UCSC.hg38.knownGene"))
-suppressPackageStartupMessages(library("TxDb.Mmusculus.UCSC.mm9.knownGene"))
-suppressPackageStartupMessages(library("TxDb.Mmusculus.UCSC.mm10.knownGene"))
-
-suppressPackageStartupMessages(library("org.Hs.eg.db"))
-suppressPackageStartupMessages(library("org.Mm.eg.db"))
-
-suppressPackageStartupMessages(library("TxDb.Btaurus.UCSC.bosTau9.refGene"))
-suppressPackageStartupMessages(library("TxDb.Mmulatta.UCSC.rheMac10.refGene"))
-suppressPackageStartupMessages(library("org.Mmu.eg.db"))
-suppressPackageStartupMessages(library("org.Bt.eg.db"))
-
-parser <- ArgumentParser()
-
-# specify our desired options
-# by default ArgumentParser will add an help option
-
+parser <- argparse::ArgumentParser()
 parser$add_argument("-n", "--narrowpeak",
   required = TRUE,
   dest = "narrowpeak", help = "narrowpeak file"
@@ -36,7 +20,7 @@ parser$add_argument("-t", "--toppromoterpeaks", required = FALSE, type = "intege
 parser$add_argument("-l", "--genelist", required = TRUE, help = "list of genes with peaks in promoter regions")
 parser$add_argument("-f", "--atypefreq", required = TRUE, help = "frequency of different annotation types")
 parser$add_argument("-g", "--genome",
-  required = TRUE, dest = "genome",
+  required = TRUE, type = "character", dest = "genome",
   help = "hg38/hg19/mm10/mm9/mmul10/bosTau9"
 )
 
@@ -44,44 +28,23 @@ parser$add_argument("-g", "--genome",
 # otherwise if options not found on command line then set defaults,
 args <- parser$parse_args()
 
-if (args$genome == "mm9" | args$genome == "mm10") {
-  adb <- "org.Mm.eg.db"
-}
-if (args$genome == "hg19" | args$genome == "hg38") {
-  adb <- "org.Hs.eg.db"
-}
-
-if (args$genome == "mmul10") {
-  adb <- "org.Mmu.eg.db"
-}
-
-if (args$genome == "bosTau9") {
-  adb <- "org.Bt.eg.db"
-}
-
-if (args$genome == "hg19") {
-  tdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
-}
-if (args$genome == "hg38") {
-  tdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
-}
-if (args$genome == "mm9") {
-  tdb <- TxDb.Mmusculus.UCSC.mm9.knownGene
-}
-if (args$genome == "mm10") {
-  tdb <- TxDb.Mmusculus.UCSC.mm10.knownGene
-}
-if (args$genome == "mmul10") {
-  tdb <- TxDb.Mmulatta.UCSC.rheMac10.refGene
-}
-if (args$genome == "bosTau9") {
-  tdb <- TxDb.Btaurus.UCSC.bosTau9.refGene
-}
-
+genomes <- tibble::tribble(
+  ~ref_genome,            ~adb,                                  ~tdb,
+        "mm9",  "org.Mm.eg.db",   "TxDb.Mmusculus.UCSC.mm9.knownGene",
+       "mm10",  "org.Mm.eg.db",  "TxDb.Mmusculus.UCSC.mm10.knownGene",
+       "hg19",  "org.Hs.eg.db",   "TxDb.Hsapiens.UCSC.hg19.knownGene",
+       "hg38",  "org.Hs.eg.db",   "TxDb.Hsapiens.UCSC.hg38.knownGene",
+     "mmul10", "org.Mmu.eg.db", "TxDb.Mmulatta.UCSC.rheMac10.refGene",
+    "bosTau9",  "org.Bt.eg.db",   "TxDb.Btaurus.UCSC.bosTau9.refGene"
+)
+adb <- genomes %>% filter(ref_genome == args$genome) %>% pull(adb)
+load_package(adb)
+tdb_str <- genomes %>% filter(ref_genome == args$genome) %>% pull(tdb)
+load_package(tdb_str)
+tdb <- tdb_str %>% rlang::sym() %>% eval()
 
 np <- read.table(args$narrowpeak, sep = "\t")
-np <- np[, seq(1, 10)]
-colnames(np) <- c(
+peak_colnames  <- c(
   "chrom",
   "chromStart",
   "chromEnd",
@@ -90,9 +53,17 @@ colnames(np) <- c(
   "strand",
   "signalValue",
   "pValue",
-  "qValue",
-  "peak"
+  "qValue"
 )
+num_columns  <- ncol(np)
+if (num_columns == 9) {
+    colnames(np) <- peak_colnames
+    np <- np %>% mutate(peak = NA)
+} else if (num_columns == 10) {
+    colnames(np) <- c(peak_colnames, "peak")
+} else {
+    stop(paste("Expected 9 or 10 columns in peak file, but", num_columns, "given"))
+}
 np <- np[order(-np$qValue), ]
 np$peakID <- paste(np$chrom, ":", np$chromStart, "-", np$chromEnd, sep = "")
 
