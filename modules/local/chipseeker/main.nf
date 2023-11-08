@@ -9,15 +9,15 @@ process CHIPSEEKER_ANNOTATE {
         tuple val(meta), path(bed)
 
     output:
-        tuple val(meta), path("*_annotated.txt"), path("*_summary.txt"), path("*_genelist.txt"), emit: annot
+        tuple val(meta), path("*.annotated.txt"), path("*.summary.txt"), path("*.genelist.txt"), emit: annot
 
     script:
     """
     annotate_peaks.R \\
         --narrowpeak ${bed} \\
-        --annotated ${meta.id}.${meta.group}_annotated.txt \\
-        --atypefreq ${meta.id}.${meta.group}_summary.txt \\
-        --genelist ${meta.id}.${meta.group}_genelist.txt \\
+        --annotated ${meta.id}.${meta.group}.annotated.txt \\
+        --atypefreq ${meta.id}.${meta.group}.summary.txt \\
+        --genelist ${meta.id}.${meta.group}.genelist.txt \\
         --genome ${params.genome} \\
         --uptss 2000 \\
         --downtss 2000 \\
@@ -28,7 +28,7 @@ process CHIPSEEKER_ANNOTATE {
     """
     for ftype in annotated summary genelist
     do
-        touch ${meta.id}.${meta.group}_\${ftype}.txt
+        touch ${meta.id}.${meta.group}.\${ftype}.txt
     done
     """
 }

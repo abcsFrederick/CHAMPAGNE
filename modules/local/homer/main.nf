@@ -33,6 +33,6 @@ process HOMER_MOTIFS {
     stub:
     """
     mkdir ${meta.id}.${meta.group}_homer/
-    touch ${meta.id}.${meta.group}_homer/${meta.id}.${meta.group}.blank.txt
+    touch ${meta.id}.${meta.group}_homer/background.fa ${meta.id}.${meta.group}_homer/target.fa
     """
 }
