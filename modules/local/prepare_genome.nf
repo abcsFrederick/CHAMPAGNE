@@ -168,7 +168,8 @@ process WRITE_GENOME_CONFIG {
                   chromosomes_dir = '"\${params.index_dir}/${genome_name}/chroms/"',
                   chrom_sizes = '"\${params.index_dir}/${genome_name}/${chrom_sizes}"',
                   gene_info = '"\${params.index_dir}/${genome_name}/${gene_info}"',
-                  effective_genome_size = "${effective_genome_size}"
+                  effective_genome_size = "${effective_genome_size}",
+                  meme_motifs = "null"
     )
     pprint.pprint(genome)
     with open('${genome_name}.config', 'w') as conf_file:
