@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript
 # source: https://github.com/CCBR/ASPEN/blob/55f909d76500c3502c1c397ef3000908649b0284/workflow/scripts/ccbr_annotate_peaks.R
 suppressPackageStartupMessages(library("argparse"))
 suppressPackageStartupMessages(library("dplyr"))
