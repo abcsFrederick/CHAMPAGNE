@@ -149,7 +149,9 @@ workflow CALL_PEAKS {
             }
         peaks_grouped | CONSENSUS_PEAKS
 
-        CHIPSEEKER_ANNOTATE( CONSENSUS_PEAKS.out.peaks )
+        if (params.run.chipseeker) {
+            CHIPSEEKER_ANNOTATE( CONSENSUS_PEAKS.out.peaks )
+        }
 
         HOMER_MOTIFS( CONSENSUS_PEAKS.out.peaks.combine(genome_fasta),
                       params.homer.de_novo,
