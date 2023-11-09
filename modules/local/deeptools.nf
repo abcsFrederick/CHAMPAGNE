@@ -11,8 +11,7 @@ process BAM_COVERAGE {
         tuple val(meta), path(bam), path(bai), val(fraglen), val(effective_genome_size)
 
     output:
-        val(meta), emit: meta
-        path("${meta.id}.bw"), emit: bigwig
+        tuple val(meta), path("${meta.id}.bw"), emit: bigwig
 
     script:
     def args = meta.single_end ? "--extendReads ${fraglen}" : '--centerReads'
@@ -35,6 +34,39 @@ process BAM_COVERAGE {
     """
 
 }
+
+process NORMALIZE_INPUT {
+  label 'qc'
+  label 'deeptools'
+  label 'process_high'
+
+  container = "${params.containers.deeptools}"
+
+  input:
+    tuple val(meta), path(chip), path(input)
+
+  output:
+    tuple val(meta), path("*.inputnorm.bw"), emit: bigwig
+
+  script:
+  """
+  bigwigCompare \\
+  --binSize ${params.deeptools.bin_size} \\
+  --outFileName ${meta.id}.inputnorm.bw \\
+  --outFileFormat 'bigwig' \\
+  --bigwig1 ${chip} \\
+  --bigwig2 ${input} \\
+  --operation 'subtract' \\
+  --skipNonCoveredRegions \\
+  --numberOfProcessors ${task.cpus}
+  """
+
+  stub:
+  """
+  touch ${meta.id}.inputnorm.bw
+  """
+}
+
 process BIGWIG_SUM {
     label 'qc'
     label 'deeptools'
@@ -297,37 +329,5 @@ process PLOT_PROFILE {
   stub:
   """
   touch ${mat.baseName}.lineplot.pdf ${mat.baseName}.plotProfile.tab
-  """
-}
-
-process NORMALIZE_INPUT {
-  label 'qc'
-  label 'deeptools'
-  label 'process_high'
-
-  container = "${params.containers.deeptools}"
-
-  input:
-    tuple val(meta), path(chip), path(input)
-
-  output:
-    tuple val(meta), path("*.norm.bw"), emit: bigwig
-
-  script:
-  """
-  bigwigCompare \\
-  --binSize ${params.deeptools.bin_size} \\
-  --outFileName ${meta.id}.norm.bw \\
-  --outFileFormat 'bigwig' \\
-  --bigwig1 ${chip} \\
-  --bigwig2 ${input} \\
-  --operation 'subtract' \\
-  --skipNonCoveredRegions \\
-  --numberOfProcessors ${task.cpus}
-  """
-
-  stub:
-  """
-  touch ${meta.id}.norm.bw
   """
 }

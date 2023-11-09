@@ -10,7 +10,7 @@ include { QC_TABLE                 } from "../../modules/local/qc.nf"
 include { MULTIQC                  } from "../../modules/local/qc.nf"
 
 // subworkflows
-include { DEEPTOOLS                } from "../../subworkflows/local/deeptools.nf"
+include { DEEPTOOLS                } from "../../subworkflows/local/deeptools"
 
 workflow QC {
     take:

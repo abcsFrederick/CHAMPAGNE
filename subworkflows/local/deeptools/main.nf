@@ -1,13 +1,13 @@
-
-include { BAM_COVERAGE             } from "../../modules/local/deeptools.nf"
-include { BIGWIG_SUM               } from "../../modules/local/deeptools.nf"
-include { BED_PROTEIN_CODING       } from "../../modules/local/deeptools.nf"
-include { COMPUTE_MATRIX           } from "../../modules/local/deeptools.nf"
-include { PLOT_FINGERPRINT         } from "../../modules/local/deeptools.nf"
-include { PLOT_CORRELATION         } from "../../modules/local/deeptools.nf"
-include { PLOT_PCA                 } from "../../modules/local/deeptools.nf"
-include { PLOT_HEATMAP             } from "../../modules/local/deeptools.nf"
-include { PLOT_PROFILE             } from "../../modules/local/deeptools.nf"
+include { BAM_COVERAGE
+          NORMALIZE_INPUT
+          BIGWIG_SUM
+          BED_PROTEIN_CODING
+          COMPUTE_MATRIX
+          PLOT_FINGERPRINT
+          PLOT_CORRELATION
+          PLOT_PCA
+          PLOT_HEATMAP
+          PLOT_PROFILE        } from "../../../modules/local/deeptools.nf"
 
 workflow DEEPTOOLS {
     take:
@@ -19,7 +19,20 @@ workflow DEEPTOOLS {
     main:
 
         deduped_bam.join(frag_lengths).combine(effective_genome_size) | BAM_COVERAGE
-        BAM_COVERAGE.out.bigwig.collect().set{ bigwig_list }
+        BAM_COVERAGE.out.bigwig
+            .set { bigwigs }
+        bigwigs.map{meta, bigwig -> bigwig}.collect().set{ bigwig_list }
+        // Create channel: [ meta, ip_bw, control_bw ]
+        bigwigs
+            .combine(bigwigs)
+            .map {
+                meta1, bw1, meta2, bw2 ->
+                    meta1.control == meta2.id ? [ meta1, bw1, bw2 ] : null
+            }
+            .set { ch_ip_ctrl_bigwig }
+        ch_ip_ctrl_bigwig | NORMALIZE_INPUT
+        NORMALIZE_INPUT.out.bigwig.map{ meta, bigwig -> bigwig }.collect().set{ bigwigs_norm }
+
         BIGWIG_SUM(bigwig_list)
         BIGWIG_SUM.out.array.combine(Channel.from('heatmap', 'scatterplot')) | PLOT_CORRELATION
         BIGWIG_SUM.out.array | PLOT_PCA
@@ -34,23 +47,11 @@ workflow DEEPTOOLS {
             .set { ch_ip_ctrl_bam_bai }
         ch_ip_ctrl_bam_bai | PLOT_FINGERPRINT
         gene_info | BED_PROTEIN_CODING
-        COMPUTE_MATRIX(bigwig_list,
+        COMPUTE_MATRIX(bigwigs_norm,
                        BED_PROTEIN_CODING.out.bed.combine(Channel.from('metagene','TSS'))
         )
         PLOT_HEATMAP(COMPUTE_MATRIX.out.mat)
         PLOT_PROFILE(COMPUTE_MATRIX.out.mat)
-
-        // Create channel: [ meta, ip_bw, control_bw ]
-        BAM_COVERAGE.out.meta
-            .merge(BAM_COVERAGE.out.bigwig)
-            .set { bigwigs }
-        bigwigs
-            .combine(bigwigs)
-            .map {
-                meta1, bw1, meta2, bw2 ->
-                    meta1.control == meta2.id ? [ meta1, bw1, bw2 ] : null
-            }
-            .set { ch_ip_ctrl_bigwig }
 
     emit:
         bigwig              = ch_ip_ctrl_bigwig
