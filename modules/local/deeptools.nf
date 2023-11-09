@@ -235,18 +235,17 @@ process COMPUTE_MATRIX {
   def args = null
   if (mattype == 'TSS') {
     cmd = 'reference-point'
-    args = { ['--referencePoint TSS',
-              '--upstream 3000',
-              '--downstream 3000'
-              ].join(' ').trim()
-            }
+    args = ['--referencePoint TSS',
+            '--upstream 3000',
+            '--downstream 3000'
+            ].join(' ').trim()
+
   } else if (mattype == 'metagene') {
     cmd = 'scale-regions'
-    args = { ['--upstream 1000',
-              '--regionBodyLength 2000',
-              '--downstream 1000'
-              ].join(' ').trim()
-            }
+    args = ['--upstream 1000',
+            '--regionBodyLength 2000',
+            '--downstream 1000'
+            ].join(' ').trim()
   } else {
     error "Invalid matrix type: ${mattype}"
   }
