@@ -5,7 +5,7 @@ process BAM_COVERAGE {
     label 'deeptools'
     label 'process_high'
 
-    container = "${params.containers.deeptools}"
+    container "${params.containers.deeptools}"
 
     input:
         tuple val(meta), path(bam), path(bai), val(fraglen), val(effective_genome_size)
@@ -40,7 +40,7 @@ process NORMALIZE_INPUT {
   label 'deeptools'
   label 'process_high'
 
-  container = "${params.containers.deeptools}"
+  container "${params.containers.deeptools}"
 
   input:
     tuple val(meta), path(chip), path(input)
@@ -72,7 +72,7 @@ process BIGWIG_SUM {
     label 'deeptools'
     label 'process_high'
 
-    container = "${params.containers.deeptools}"
+    container "${params.containers.deeptools}"
 
     input:
         path(bigwigs)
@@ -98,7 +98,7 @@ process PLOT_CORRELATION {
     label 'qc'
     label 'deeptools'
 
-    container = "${params.containers.deeptools}"
+    container "${params.containers.deeptools}"
 
     input:
         tuple path(array), val(plottype)
@@ -131,7 +131,7 @@ process PLOT_PCA {
     label 'qc'
     label 'deeptools'
 
-    container = "${params.containers.deeptools}"
+    container "${params.containers.deeptools}"
 
     input:
         path(array)
@@ -159,7 +159,7 @@ process PLOT_FINGERPRINT {
   label 'deeptools'
   label 'process_high'
 
-  container = "${params.containers.deeptools}"
+  container "${params.containers.deeptools}"
 
   input:
     tuple val(meta), path(bams), path(bais)
@@ -196,36 +196,39 @@ process PLOT_FINGERPRINT {
 
 process BED_PROTEIN_CODING {
     label 'qc'
+    label 'process_single'
 
-    container = "${params.containers.base}"
+    container "${params.containers.base}"
 
     input:
       path(bed)
 
     output:
-      path("*.bed"), emit: bed
+      path("*.protein_coding.bed"), emit: bed_prot
+      path("*.all_genes.bed"),      emit: bed_all
 
     script:
     """
-    grep --line-buffered 'protein_coding' ${bed} | awk -v OFS='\t' -F'\t' '{{print \$1, \$2, \$3, \$5, \".\", \$4}}' > ${params.genome}.protein_coding.bed
+    grep --line-buffered 'protein_coding' ${bed} | awk -v OFS='\t' -F'\t' '{{print \$1, \$2, \$3, \$5, \".\", \$4}}' > ${bed.baseName}.protein_coding.bed
+    cp ${bed} ${bed.baseName}.all_genes.bed
     """
 
     stub:
     """
-    touch ${params.genome}.protein_coding.bed
+    touch ${bed.baseName}.protein_coding.bed ${bed.baseName}.all_genes.bed
     """
 }
 
 process COMPUTE_MATRIX {
+  tag { meta }
   label 'qc'
   label 'deeptools'
   label 'process_high'
 
-  container = "${params.containers.deeptools}"
+  container "${params.containers.deeptools}"
 
   input:
-    path(bigwigs)
-    tuple path(bed), val(mattype)
+    tuple val(meta), path(bigwigs), path(bed), val(mattype)
 
   output:
     path("*.mat.gz"), emit: mat
@@ -255,7 +258,7 @@ process COMPUTE_MATRIX {
     -S ${bigwigs.join(' ')} \\
     -R ${bed} \\
     -p ${task.cpus} \\
-    -o ${mattype}.mat.gz \\
+    -o ${bed.baseName}.${mattype}.mat.gz \\
     --skipZeros \\
     --smartLabels \\
     ${args}
@@ -270,7 +273,7 @@ process PLOT_HEATMAP {
   label 'qc'
   label 'deeptools'
 
-  container = "${params.containers.deeptools}"
+  container "${params.containers.deeptools}"
 
   input:
     path(mat)
@@ -301,7 +304,7 @@ process PLOT_PROFILE {
   label 'qc'
   label 'deeptools'
 
-  container = "${params.containers.deeptools}"
+  container "${params.containers.deeptools}"
 
   input:
     path(mat)
