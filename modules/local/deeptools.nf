@@ -220,7 +220,7 @@ process BED_PROTEIN_CODING {
 }
 
 process COMPUTE_MATRIX {
-  tag { meta }
+  tag { meta.id }
   label 'qc'
   label 'deeptools'
   label 'process_high'
@@ -255,7 +255,7 @@ process COMPUTE_MATRIX {
   """
   echo "$mattype" > file.txt
   computeMatrix ${cmd} \\
-    -S ${bigwigs.join(' ')} \\
+    -S ${bigwigs.sort().join(' ')} \\
     -R ${bed} \\
     -p ${task.cpus} \\
     -o ${meta.id}.${bed.baseName}.${mattype}.mat.gz \\
