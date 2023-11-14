@@ -268,7 +268,7 @@ process COMPUTE_MATRIX {
 
   stub:
   """
-  touch ${mattype}.mat.gz
+  touch ${meta.id}.${bed.baseName}.${mattype}.mat.gz
   """
 }
 process PLOT_HEATMAP {
