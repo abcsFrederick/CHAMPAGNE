@@ -39,11 +39,11 @@ workflow DEEPTOOLS {
         // group raw bigwigs by sample basename to group replicates & inputs together
         bigwigs_raw = ch_ip_ctrl_bigwig
             .map{ meta, sample_bw, control_bw ->
-                [ meta.sample_basename, sample_bw ]
+                [ [ id: meta.sample_basename ], sample_bw ]
             }
             .concat(ch_ip_ctrl_bigwig
                 .map{ meta, sample_bw, control_bw ->
-                    [ meta.sample_basename, control_bw ]
+                    [ [ id: meta.sample_basename], control_bw ]
                 }
             )
         gene_info | BED_PROTEIN_CODING
@@ -53,7 +53,7 @@ workflow DEEPTOOLS {
         //    - raw and normalized bigwigs,
         //    - protein coding and all genes
         //    - metagene or TSS
-        ch_all_bigwigs = Channel.value('norm')
+        ch_all_bigwigs = Channel.value([ id: 'norm' ])
             .combine(bigwigs_norm)
             .mix(bigwigs_raw)
             .groupTuple()
@@ -78,7 +78,6 @@ workflow DEEPTOOLS {
         ch_controls.mix(ch_samples)
             .groupTuple()
             .set { ch_ip_ctrl_bam_bai }
-        ch_ip_ctrl_bam_bai | view
         ch_ip_ctrl_bam_bai | PLOT_FINGERPRINT
 
     emit:

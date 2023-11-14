@@ -258,7 +258,7 @@ process COMPUTE_MATRIX {
     -S ${bigwigs.join(' ')} \\
     -R ${bed} \\
     -p ${task.cpus} \\
-    -o ${bed.baseName}.${mattype}.mat.gz \\
+    -o ${meta.id}.${bed.baseName}.${mattype}.mat.gz \\
     --skipZeros \\
     --smartLabels \\
     ${args}
