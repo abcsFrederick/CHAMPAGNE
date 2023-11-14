@@ -36,7 +36,7 @@ workflow DEEPTOOLS {
         BIGWIG_SUM_NORM.out.array.combine(Channel.of('heatmap', 'scatterplot')) | PLOT_CORRELATION
         BIGWIG_SUM_NORM.out.array | PLOT_PCA
 
-        // group raw bigwigs by sample basename to group replicates & inputs together
+        // group raw bigwigs by sample basename to group replicates & sample/input pairs together
         bigwigs_raw = ch_ip_ctrl_bigwig
             .map{ meta, sample_bw, control_bw ->
                 [ [ id: meta.sample_basename ], sample_bw ]
@@ -50,10 +50,10 @@ workflow DEEPTOOLS {
         beds = BED_PROTEIN_CODING.out.bed_prot.mix(BED_PROTEIN_CODING.out.bed_all)
 
         // create plots with:
-        //    - raw and normalized bigwigs,
-        //    - protein coding and all genes
+        //    - raw or normalized bigwigs
+        //    - protein coding or all genes
         //    - metagene or TSS
-        ch_all_bigwigs = Channel.value([ id: 'norm' ])
+        ch_all_bigwigs = Channel.value([ id: 'inputnorm' ])
             .combine(bigwigs_norm)
             .mix(bigwigs_raw)
             .groupTuple()
@@ -86,4 +86,5 @@ workflow DEEPTOOLS {
         corr                = PLOT_CORRELATION.out.tab
         pca                 = PLOT_PCA.out.tab
         profile             = PLOT_PROFILE.out.tab
+        heatmap             = PLOT_HEATMAP.out.png
 }

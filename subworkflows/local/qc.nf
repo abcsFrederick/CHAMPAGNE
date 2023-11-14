@@ -94,7 +94,8 @@ workflow QC {
                 DEEPTOOLS.out.fingerprint_metrics,
                 DEEPTOOLS.out.corr,
                 DEEPTOOLS.out.pca,
-                DEEPTOOLS.out.profile
+                DEEPTOOLS.out.profile,
+                DEEPTOOLS.out.heatmap
             )
         }
 

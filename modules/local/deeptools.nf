@@ -83,7 +83,7 @@ process BIGWIG_SUM {
     script:
     """
     multiBigwigSummary bins \\
-      -b ${bigwigs.join(' ')} \\
+      -b ${bigwigs.sort().join(' ')} \\
       --smartLabels \\
       -o bigWigSum.npz
     """
@@ -279,7 +279,7 @@ process PLOT_HEATMAP {
     path(mat)
 
   output:
-    path("*.pdf"), emit: pdf
+    path("*.png"), emit: png
 
   script:
   // sets colorMap to "BuGn" if "metagene" in matrix filename, otherwise use "BuPu"
@@ -287,7 +287,7 @@ process PLOT_HEATMAP {
   """
   plotHeatmap \\
     -m ${mat} \\
-    -out ${mat.baseName}.heatmap.pdf \\
+    -out ${mat.baseName}.heatmap_mqc.png \\
     --colorMap ${color_map} \\
     --yAxisLabel 'average RPGC' \\
     --regionsLabel 'genes' \\
@@ -296,7 +296,7 @@ process PLOT_HEATMAP {
 
   stub:
   """
-  touch ${mat.baseName}.heatmap.pdf
+  touch ${mat.baseName}.heatmap_mqc.png
   """
 }
 
