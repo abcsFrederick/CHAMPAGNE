@@ -97,6 +97,7 @@ process BIGWIG_SUM {
 process PLOT_CORRELATION {
     label 'qc'
     label 'deeptools'
+    label 'process_single'
 
     container "${params.containers.deeptools}"
 
@@ -130,6 +131,7 @@ process PLOT_CORRELATION {
 process PLOT_PCA {
     label 'qc'
     label 'deeptools'
+    label 'process_single'
 
     container "${params.containers.deeptools}"
 
@@ -272,6 +274,7 @@ process COMPUTE_MATRIX {
 process PLOT_HEATMAP {
   label 'qc'
   label 'deeptools'
+  label 'process_single'
 
   container "${params.containers.deeptools}"
 
@@ -303,6 +306,7 @@ process PLOT_HEATMAP {
 process PLOT_PROFILE {
   label 'qc'
   label 'deeptools'
+  label 'process_single'
 
   container "${params.containers.deeptools}"
 
