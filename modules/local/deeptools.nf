@@ -83,7 +83,7 @@ process BIGWIG_SUM {
     script:
     """
     multiBigwigSummary bins \\
-      -b ${bigwigs.sort().join(' ')} \\
+      -b ${bigwigs.join(' ')} \\
       --smartLabels \\
       -o bigWigSum.npz
     """
@@ -110,12 +110,11 @@ process PLOT_CORRELATION {
 
     script:
     def args = (plottype == 'heatmap')? '--plotNumbers': ''
-    def outpng = plottype == 'heatmap' ? "${array.baseName}.spearman_${plottype}_mqc.png" : "${array.baseName}.spearman_${plottype}.png"
     // TODO throw error if plottype != either'heatmap' or 'scatterplot'
     """
     plotCorrelation \\
       -in ${array} \\
-      -o ${outpng} \\
+      -o ${array.baseName}.spearman_${plottype}.png \\
       --outFileCorMatrix ${array.baseName}.spearman_${plottype}.tab \\
       -c 'spearman' \\
       -p '${plottype}' \\

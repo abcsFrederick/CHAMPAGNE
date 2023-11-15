@@ -175,7 +175,7 @@ sp:
   NGSQC_data:
     fn: "*NGSQC.txt"
   deeptools_corr_heatmap:
-    fn: "bigWigSum.spearman_heatmap_mqc.png"
+    fn: "*spearman_heatmap.png"
   frip_samples:
     fn: "FRiP_samples*.png"
   frip_nbases:
