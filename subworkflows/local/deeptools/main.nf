@@ -22,6 +22,13 @@ workflow DEEPTOOLS {
         BAM_COVERAGE.out.bigwig
             .set { bigwigs }
 
+        bigwigs
+            .map{ meta, bigwig -> bigwig } // sort files on basenames, otherwise uses full file path
+            .toSortedList( { a, b -> a.baseName <=> b.baseName } ) | BIGWIG_SUM
+        bw_array = BIGWIG_SUM.out.array
+        bw_array.combine(Channel.of('heatmap', 'scatterplot')) | PLOT_CORRELATION
+        bw_array | PLOT_PCA
+
         // Create channel: [ meta, ip_bw, control_bw ]
         bigwigs
             .combine(bigwigs)
@@ -30,12 +37,14 @@ workflow DEEPTOOLS {
                     meta1.control == meta2.id ? [ meta1, bw1, bw2 ] : null
             }
             .set { ch_ip_ctrl_bigwig }
+
+        // get normalized bigwigs
         ch_ip_ctrl_bigwig | NORMALIZE_INPUT
         NORMALIZE_INPUT.out.bigwig.map{ meta, bigwig -> bigwig }.set{ bigwigs_norm }
-        bigwigs_norm.collect() | BIGWIG_SUM
-        bw_norm_array = BIGWIG_SUM.out.array
-        bw_norm_array.combine(Channel.of('heatmap', 'scatterplot')) | PLOT_CORRELATION
-        bw_norm_array | PLOT_PCA
+
+        // get bed file of only protein-coding genes
+        gene_info | BED_PROTEIN_CODING
+        beds = BED_PROTEIN_CODING.out.bed_prot.mix(BED_PROTEIN_CODING.out.bed_all)
 
         // group raw bigwigs by sample basename to group replicates & sample/input pairs together
         bigwigs_raw = ch_ip_ctrl_bigwig
@@ -47,9 +56,6 @@ workflow DEEPTOOLS {
                     [ [ id: meta.sample_basename], control_bw ]
                 }
             )
-        gene_info | BED_PROTEIN_CODING
-        beds = BED_PROTEIN_CODING.out.bed_prot.mix(BED_PROTEIN_CODING.out.bed_all)
-
         // create plots with:
         //    - raw or normalized bigwigs
         //    - protein coding or all genes
