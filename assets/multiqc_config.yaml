@@ -20,6 +20,7 @@ top_modules:
 
 run_modules:
   - custom_content
+  - fastq_screen
   - fastqc
   - cutadapt
   - samtools
