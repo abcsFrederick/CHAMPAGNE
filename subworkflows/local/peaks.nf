@@ -19,7 +19,7 @@ include { BAM_TO_BED          } from "../../modules/local/bedtools.nf"
 include { CONSENSUS_PEAKS     } from "../../modules/local/consensus_peaks"
 include { HOMER_MOTIFS        } from "../../modules/local/homer"
 include { MEME_AME            } from "../../modules/local/meme"
-include { CHIPSEEKER_ANNOTATE } from "../../modules/local/chipseeker"
+include { CHIPSEEKER_ANNOTATE } from "../../modules/local/chipseeker/annotate"
 
 workflow CALL_PEAKS {
     take:
@@ -152,11 +152,12 @@ workflow CALL_PEAKS {
         if (params.run.chipseeker) {
             CONSENSUS_PEAKS.out.peaks | CHIPSEEKER_ANNOTATE
         }
-
-        HOMER_MOTIFS( CONSENSUS_PEAKS.out.peaks.combine(genome_fasta),
-                      params.homer.de_novo,
-                      file(params.homer.jaspar_db, checkIfExists: true)
-                    )
+        if (params.run.homer) {
+            HOMER_MOTIFS( CONSENSUS_PEAKS.out.peaks.combine(genome_fasta),
+                        params.homer.de_novo,
+                        file(params.homer.jaspar_db, checkIfExists: true)
+                        )
+        }
         if (params.genomes[ params.genome ].meme_motifs) {
             MEME_AME( HOMER_MOTIFS.out.ame,
                       file(params.genomes[ params.genome ].meme_motifs, checkIfExists: true)
