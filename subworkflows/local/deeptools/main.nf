@@ -1,6 +1,6 @@
 include { BAM_COVERAGE
           NORMALIZE_INPUT
-          BIGWIG_SUM as BIGWIG_SUM_NORM
+          BIGWIG_SUM
           BED_PROTEIN_CODING
           COMPUTE_MATRIX
           PLOT_FINGERPRINT
@@ -32,9 +32,10 @@ workflow DEEPTOOLS {
             .set { ch_ip_ctrl_bigwig }
         ch_ip_ctrl_bigwig | NORMALIZE_INPUT
         NORMALIZE_INPUT.out.bigwig.map{ meta, bigwig -> bigwig }.set{ bigwigs_norm }
-        BIGWIG_SUM_NORM(bigwigs_norm.collect())
-        BIGWIG_SUM_NORM.out.array.combine(Channel.of('heatmap', 'scatterplot')) | PLOT_CORRELATION
-        BIGWIG_SUM_NORM.out.array | PLOT_PCA
+        bigwigs_norm.collect() | BIGWIG_SUM
+        bw_norm_array = BIGWIG_SUM.out.array
+        bw_norm_array.combine(Channel.of('heatmap', 'scatterplot')) | PLOT_CORRELATION
+        bw_norm_array | PLOT_PCA
 
         // group raw bigwigs by sample basename to group replicates & sample/input pairs together
         bigwigs_raw = ch_ip_ctrl_bigwig
@@ -86,5 +87,5 @@ workflow DEEPTOOLS {
         corr                = PLOT_CORRELATION.out.tab
         pca                 = PLOT_PCA.out.tab
         profile             = PLOT_PROFILE.out.tab
-        heatmap             = PLOT_HEATMAP.out.png
+        heatmap             = PLOT_CORRELATION.out.png
 }

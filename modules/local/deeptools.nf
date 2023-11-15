@@ -105,16 +105,17 @@ process PLOT_CORRELATION {
         tuple path(array), val(plottype)
 
     output:
-        path("*.pdf"), emit: pdf
+        path("*.png"), emit: png
         path("*.tab"), emit: tab
 
     script:
     def args = (plottype == 'heatmap')? '--plotNumbers': ''
+    def outpng = plottype == 'heatmap' ? "${array.baseName}.spearman_${plottype}_mqc.png" : "${array.baseName}.spearman_${plottype}.png"
     // TODO throw error if plottype != either'heatmap' or 'scatterplot'
     """
     plotCorrelation \\
       -in ${array} \\
-      -o ${array.baseName}.spearman_${plottype}.pdf \\
+      -o ${outpng} \\
       --outFileCorMatrix ${array.baseName}.spearman_${plottype}.tab \\
       -c 'spearman' \\
       -p '${plottype}' \\
@@ -124,7 +125,7 @@ process PLOT_CORRELATION {
 
     stub:
     """
-    touch ${array.baseName}.spearman_${plottype}.pdf ${array.baseName}.spearman_${plottype}.tab
+    touch ${array.baseName}.spearman_${plottype}.png ${array.baseName}.spearman_${plottype}.tab
     """
 }
 
@@ -274,7 +275,7 @@ process COMPUTE_MATRIX {
 process PLOT_HEATMAP {
   label 'qc'
   label 'deeptools'
-  label 'process_single'
+  label 'process_medium'
 
   container "${params.containers.deeptools}"
 
@@ -288,9 +289,10 @@ process PLOT_HEATMAP {
   // sets colorMap to "BuGn" if "metagene" in matrix filename, otherwise use "BuPu"
   def color_map = mat.baseName.contains('metagene') ? 'BuGn' : 'BuPu'
   """
+  export MPLCONFIGDIR=./tmp
   plotHeatmap \\
     -m ${mat} \\
-    -out ${mat.baseName}.heatmap_mqc.png \\
+    -out ${mat.baseName}.heatmap.png \\
     --colorMap ${color_map} \\
     --yAxisLabel 'average RPGC' \\
     --regionsLabel 'genes' \\
@@ -299,7 +301,7 @@ process PLOT_HEATMAP {
 
   stub:
   """
-  touch ${mat.baseName}.heatmap_mqc.png
+  touch ${mat.baseName}.heatmap.png
   """
 }
 
