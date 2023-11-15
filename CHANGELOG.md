@@ -8,6 +8,7 @@
   - Per sample fingerprint plots instead of per replicate
   - Input normalized profile plots
   - Protein-coding-only versions of plots
+  - Ensure sample IDs are sorted (#150)
 
 ## CHAMPAGNE 0.2.1
 
