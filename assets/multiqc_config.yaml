@@ -31,12 +31,13 @@ run_modules:
   - phantompeakqualtools
 
 module_order:
+  - custom_content
+  - deeptools
   - fastq_screen
   - fastqc
   - cutadapt
   - samtools
   - preseq
-  - deeptools
   - phantompeakqualtools
 
 custom_data:
@@ -174,8 +175,6 @@ sp:
     fn: "qc_table.tsv"
   NGSQC_data:
     fn: "*NGSQC.txt"
-  deeptools_corr_heatmap:
-    fn: "*spearman_heatmap.png"
   frip_samples:
     fn: "FRiP_samples*.png"
   frip_nbases:
@@ -190,4 +189,6 @@ sp:
     fn: "jaccard_pca_all*.png"
   jaccard_pca_tools:
     fn: "jaccard_pca_tool*.png"
+  deeptools_corr_heatmap:
+    fn: "*spearman_heatmap.png"
 ignore_images: false
