@@ -10,7 +10,7 @@ include { QC_TABLE                 } from "../../modules/local/qc.nf"
 include { MULTIQC                  } from "../../modules/local/qc.nf"
 
 // subworkflows
-include { DEEPTOOLS                } from "../../subworkflows/local/deeptools.nf"
+include { DEEPTOOLS                } from "../../subworkflows/local/deeptools"
 
 workflow QC {
     take:
@@ -83,25 +83,23 @@ workflow QC {
             QC_TABLE.out.txt
         )
 
-        ch_ip_ctrl_bigwig = Channel.empty()
         if (params.run.deeptools) {
             DEEPTOOLS( deduped_bam,
                        frag_lengths,
                        effective_genome_size,
                        gene_info
                      )
-            ch_ip_ctrl_bigwig = DEEPTOOLS.out.bigwig
             ch_multiqc = ch_multiqc.mix(
                 DEEPTOOLS.out.fingerprint_matrix,
                 DEEPTOOLS.out.fingerprint_metrics,
                 DEEPTOOLS.out.corr,
                 DEEPTOOLS.out.pca,
-                DEEPTOOLS.out.profile
+                DEEPTOOLS.out.profile,
+                DEEPTOOLS.out.heatmap
             )
         }
 
     emit:
-        bigwigs       = ch_ip_ctrl_bigwig
         multiqc_input = ch_multiqc
 
 }

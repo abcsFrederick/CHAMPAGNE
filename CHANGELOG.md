@@ -4,6 +4,10 @@
 - Find motifs in the genome with Homer. (#142)
 - Run motif enrichment analysis with MEME. (#142)
 - Annotate peaks with chipseeker. (#142)
+- Fix deepTools plots (#144):
+  - Per sample fingerprint plots instead of per replicate
+  - Input normalized profile plots
+  - Protein-coding-only versions of plots
 
 ## CHAMPAGNE 0.2.1
 

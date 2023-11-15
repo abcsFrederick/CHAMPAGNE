@@ -85,12 +85,6 @@ workflow CHIPSEQ {
            PREPARE_GENOME.out.gene_info,
            effective_genome_size
            )
-        QC.out.bigwigs.set{ ch_ip_ctrl_bigwig }
-
-        if (params.run.normalize_input) {
-            ch_ip_ctrl_bigwig | NORMALIZE_INPUT
-        }
-
         ch_multiqc = ch_multiqc.mix(QC.out.multiqc_input)
     }
     if (params.run.call_peaks && [params.run.macs_broad, params.run.macs_narrow, params.run.gem, params.run.sicer].any()) {

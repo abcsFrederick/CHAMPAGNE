@@ -31,14 +31,14 @@ run_modules:
   - phantompeakqualtools
 
 module_order:
+  - custom_content
+  - deeptools
   - fastq_screen
   - fastqc
   - cutadapt
   - samtools
   - preseq
-  - deeptools
   - phantompeakqualtools
-  - NGSQC_data
 
 custom_data:
   QC_Table:
@@ -134,6 +134,9 @@ custom_data:
       ylab: "Similarity QCi (s90/s50)"
       ymax: 100
       ymin: 1
+  deeptools_corr_heatmap:
+    id: "deeptools_corr_heatmap"
+    section_name: "deepTools Correlation Heatmap"
   frip_samples:
     parent_id: peak_qc
     parent_name: "Peak QC"
@@ -186,4 +189,6 @@ sp:
     fn: "jaccard_pca_all*.png"
   jaccard_pca_tools:
     fn: "jaccard_pca_tool*.png"
+  deeptools_corr_heatmap:
+    fn: "*spearman_heatmap.png"
 ignore_images: false
