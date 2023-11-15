@@ -15,9 +15,6 @@ fastqscreen_simpleplot: true
 fn_clean_sample_names: false
 log_filesize_limit: 100000000
 
-fn_ignore_files:
-  - "*.preseq.dat"
-
 top_modules:
   - "QC_Table"
 
