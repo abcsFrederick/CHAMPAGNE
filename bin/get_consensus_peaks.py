@@ -9,16 +9,8 @@ import pandas
 
 parser = argparse.ArgumentParser(
     description="""
-
 Get consensus peaks from multiple narrowPeak files
 This is similar to the consensus MAX peaks from https://dx.doi.org/10.5936%2Fcsbj.201401002
-
-On Biowulf the following modules need to be pre-loaded
-
-module load bedops
-module load bedtools
-module load ucsc
-
 """,
     formatter_class=argparse.RawTextHelpFormatter,
 )
@@ -137,7 +129,7 @@ for index, row in df.iterrows():
     start, end = coords.split("-")
     if args.nofilter == True:
         out.write(
-            "%s\t%s\t%s\t%s\t%.3f\t.\n"
+            "%s\t%s\t%s\t%s\t%.3f\t.\tNA\tNA\tNA\n"
             % (chrom, start, end, row["peakid"], float(row["score"]))
         )
     elif float(row["score"]) > filter:
