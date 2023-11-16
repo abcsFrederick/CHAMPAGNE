@@ -23,8 +23,8 @@ workflow DEEPTOOLS {
             .set { bigwigs }
 
         bigwigs
-            .map{ meta, bigwig -> bigwig } // sort files on basenames, otherwise uses full file path
-            .toSortedList( { a, b -> a.baseName <=> b.baseName } ) | BIGWIG_SUM
+            .map{ meta, bigwig -> bigwig }
+            .collect() | BIGWIG_SUM
         bw_array = BIGWIG_SUM.out.array
         bw_array.combine(Channel.of('heatmap', 'scatterplot')) | PLOT_CORRELATION
         bw_array | PLOT_PCA
@@ -63,7 +63,7 @@ workflow DEEPTOOLS {
         ch_all_bigwigs = Channel.value([ id: 'inputnorm' ])
             .combine(bigwigs_norm)
             .mix(bigwigs_raw)
-            .groupTuple()
+            .groupTuple() // sort files on basenames, otherwise uses full file path
             .combine(beds)
             .combine(Channel.of('metagene','TSS'))
         COMPUTE_MATRIX(ch_all_bigwigs)
