@@ -54,7 +54,7 @@ champagne = "champagne.src.__main__:main"
 Homepage = "https://ccbr.github.io/CHAMPAGNE"
 Documentation = "https://ccbr.github.io/CHAMPAGNE"
 Repository = "https://github.com/CCBR/CHAMPAGNE"
-Changelog = "https://github.com/CCBR/CHAMPAGNE/blob/main/docs/CHANGELOG.md"
+Changelog = "https://github.com/CCBR/CHAMPAGNE/blob/main/CHANGELOG.md"
 
 [tool.setuptools.package-dir]
 champagne = "."
