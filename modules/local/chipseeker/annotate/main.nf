@@ -3,21 +3,21 @@ process CHIPSEEKER_ANNOTATE {
     label 'peaks'
     label 'process_medium'
 
-    container 'nciccbr/ccbr_atacseq:v1.10'
+    container 'nciccbr/ccbr_chipseeker:v1.0.1'
 
     input:
         tuple val(meta), path(bed)
 
     output:
-        tuple val(meta), path("*.annotated.txt"), path("*.summary.txt"), path("*.genelist.txt"), emit: annot
+        tuple val(meta), path("*.annotated.txt"), path("*.summary.txt"), path("*.genelist.txt"), emit: txt
+        path("*.annotation.Rds"),                                                                emit: annot
+        path("*.png"),                                                                           emit: plots
 
     script:
     """
     annotate_peaks.R \\
-        --narrowpeak ${bed} \\
-        --annotated ${meta.id}.${meta.group}.annotated.txt \\
-        --atypefreq ${meta.id}.${meta.group}.summary.txt \\
-        --genelist ${meta.id}.${meta.group}.genelist.txt \\
+        --peak ${bed} \\
+        --outfile-prefix ${meta.id}.${meta.group} \\
         --genome ${params.genome} \\
         --uptss 2000 \\
         --downtss 2000 \\
@@ -26,9 +26,9 @@ process CHIPSEEKER_ANNOTATE {
 
     stub:
     """
-    for ftype in annotated summary genelist
+    for ftype in annotated.txt summary.txt genelist.txt annotation.Rds .png
     do
-        touch ${meta.id}.${meta.group}.\${ftype}.txt
+        touch ${meta.id}.${meta.group}.\${ftype}
     done
     """
 }
