@@ -102,7 +102,8 @@ def init(**kwargs):
     """Initialize the working directory by copying the system default config files"""
     paths = ("nextflow.config", "conf/", "assets/")
     copy_config(paths)
-    os.mkdir("log/")
+    if not os.path.exists("log/"):
+        os.mkdir("log/")
 
 
 cli.add_command(run)
