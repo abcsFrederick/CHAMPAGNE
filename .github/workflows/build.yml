@@ -40,10 +40,14 @@ jobs:
           mkdir -p tests/bin/
           pip install .[dev,test]
           python -c 'from champagne.src.util import chmod_bins_exec; chmod_bins_exec()'
+      - name: Check CLI basics
+        run: |
+          which champagne
+          champagne --version
+          champagne --citation
       - name: Stub run
         run: |
           cd tests/cli
-          which champagne
           champagne init
           champagne run -stub -c ci_stub.config --max_cpus 2 --max_memory 6.GB
       - name: Test run
