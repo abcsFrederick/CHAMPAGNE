@@ -8,6 +8,7 @@ class Utils {
         def spooker_in_path = check_command_in_path("spooker")
         if (spooker_in_path) {
             try {
+                println "Running spooker"
                 def command = command_string.execute()
                 command.consumeProcessOutput(out, err)
                 command.waitFor()
@@ -19,7 +20,7 @@ class Utils {
                 flush()
             }
         } else {
-            err = "spooker not found"
+            err = "spooker not found, skipping"
         }
         return err
     }
