@@ -1,5 +1,6 @@
 ## development version
 
+- Print the recommended citation in bibtex format with `champagne --citation`. (#153)
 - Support multiple replicates per sample and call consensus peaks. (#129)
 - Find motifs in the genome with Homer. (#142)
 - Run motif enrichment analysis with MEME. (#142)
