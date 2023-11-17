@@ -31,6 +31,7 @@ def common_options(func):
     cls=OrderedCommands, context_settings=dict(help_option_names=["-h", "--help"])
 )
 @click.version_option(get_version(), "-v", "--version", is_flag=True)
+@click.option("--citation", is_flag=True, callback=print_citation, expose_value=False)
 def cli():
     """CHromAtin iMmuno PrecipitAtion sequencinG aNalysis pipEline
 
@@ -101,19 +102,12 @@ def init(**kwargs):
     """Initialize the working directory by copying the system default config files"""
     paths = ("nextflow.config", "conf/", "assets/")
     copy_config(paths)
-    if not os.path.exists('log/'):
+    if not os.path.exists("log/"):
         os.mkdir("log/")
-
-
-@click.command()
-def citation(**kwargs):
-    """Print the citation"""
-    print_citation()
 
 
 cli.add_command(run)
 cli.add_command(init)
-# cli.add_command(citation) # TODO uncomment if champagne is published in a journal or Zenodo
 
 
 def main():
