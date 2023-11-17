@@ -256,7 +256,6 @@ process COMPUTE_MATRIX {
     error "Invalid matrix type: ${mattype}"
   }
   """
-  echo "$mattype" > file.txt
   computeMatrix ${cmd} \\
     -S ${bigwigs.sort({ a, b -> a.baseName <=> b.baseName }).join(' ')} \\
     -R ${bed} \\
