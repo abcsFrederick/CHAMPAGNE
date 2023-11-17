@@ -9,5 +9,5 @@ authors:
     orcid: https://orcid.org/0000-0001-8978-8495
 title: "CHAMPAGNE: CHromAtin iMmuno PrecipitAtion sequencinG aNalysis pipEline"
 url: https://ccbr.github.io/CHAMPAGNE/
-repository-code: https://github.com/CCBR/champagne
+repository-code: https://github.com/CCBR/CHAMPAGNE
 license: MIT
