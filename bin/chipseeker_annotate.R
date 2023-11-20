@@ -20,7 +20,7 @@ args <- parser$parse_args()
 outfile_prefix <- args$outfile_prefix
 
 genomes <- tibble::tribble(
-  ~ref_genome, ~adb, ~tdb,
+  ~ref_genome, ~adb, ~txdb,
   "mm9", "org.Mm.eg.db", "TxDb.Mmusculus.UCSC.mm9.knownGene",
   "mm10", "org.Mm.eg.db", "TxDb.Mmusculus.UCSC.mm10.knownGene",
   "hg19", "org.Hs.eg.db", "TxDb.Hsapiens.UCSC.hg19.knownGene",
@@ -33,11 +33,11 @@ adb <- genomes %>%
   filter(ref_genome == args$genome) %>%
   pull(adb)
 load_package(adb)
-tdb_str <- genomes %>%
+txdb_str <- genomes %>%
   filter(ref_genome == args$genome) %>%
-  pull(tdb)
-load_package(tdb_str)
-tdb <- tdb_str %>%
+  pull(txdb)
+load_package(txdb_str)
+txdb <- txdb_str %>%
   rlang::sym() %>%
   eval()
 
@@ -71,10 +71,10 @@ peaks <- GenomicRanges::GRanges(
 )
 
 # using annotatePeak from ChIPseeker
-pa <- annotatePeak(
+annot <- annotatePeak(
   peak = peaks,
   tssRegion = c(-2000, 2000),
-  TxDb = tdb,
+  TxDb = txdb,
   level = "transcript",
   genomicAnnotationPriority = c("Promoter", "5UTR", "3UTR", "Exon", "Intron", "Downstream", "Intergenic"),
   annoDb = adb,
@@ -84,9 +84,9 @@ pa <- annotatePeak(
   ignoreDownstream = FALSE,
   overlap = "TSS"
 )
-saveRDS(pa, file = glue("{outfile_prefix}.annotation.Rds"))
+saveRDS(annot, file = glue("{outfile_prefix}.annotation.Rds"))
 
-padf <- as.data.frame(pa)
+padf <- as.data.frame(annot)
 padf$peakID <- paste(padf$seqnames, ":", padf$start, "-", padf$end, sep = "")
 merged <- dplyr::full_join(padf, np, by = "peakID") %>%
   dplyr::select(all_of(c(
