@@ -12,7 +12,7 @@ parser$add_argument("-u", "--uptss", required = FALSE, type = "integer", default
 parser$add_argument("-d", "--downtss", required = FALSE, type = "integer", default = 2000, help = "upstream bases from TSS")
 parser$add_argument("-t", "--toppromoterpeaks", required = FALSE, type = "integer", default = 1000, help = "filter top N peaks in promoters for genelist output")
 parser$add_argument("-o", "--outfile-prefix", required = TRUE, type = "character", dest = "outfile_prefix", help = "prefix for output filenames")
-parser$add_argument("-g", "--genome", required = TRUE, help = "hg38/hg19/mm10/mm9/mmul10/bosTau9")
+parser$add_argument("-g", "--genome", required = TRUE, help = "hg38/hg19/mm10/mm9/mmul10/bosTau9/sacCer3")
 
 # get command line options, if help option encountered print help and exit,
 # otherwise if options not found on command line then set defaults,
@@ -26,7 +26,8 @@ genomes <- tibble::tribble(
   "hg19", "org.Hs.eg.db", "TxDb.Hsapiens.UCSC.hg19.knownGene",
   "hg38", "org.Hs.eg.db", "TxDb.Hsapiens.UCSC.hg38.knownGene",
   "mmul10", "org.Mmu.eg.db", "TxDb.Mmulatta.UCSC.rheMac10.refGene",
-  "bosTau9", "org.Bt.eg.db", "TxDb.Btaurus.UCSC.bosTau9.refGene"
+  "bosTau9", "org.Bt.eg.db", "TxDb.Btaurus.UCSC.bosTau9.refGene",
+  "sacCer3", "org.Sc.sgd.db", "TxDb.Scerevisiae.UCSC.sacCer3.sgdGene"
 )
 adb <- genomes %>%
   filter(ref_genome == args$genome) %>%

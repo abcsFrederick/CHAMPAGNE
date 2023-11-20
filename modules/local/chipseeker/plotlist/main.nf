@@ -3,7 +3,7 @@ process CHIPSEEKER_PLOTLIST {
     label 'peaks'
     label 'process_medium'
 
-    container 'nciccbr/ccbr_chipseeker:v1.0.1'
+    container 'nciccbr/ccbr_chipseeker:1.1.0'
 
     input:
         path(rds)
