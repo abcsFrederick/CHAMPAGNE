@@ -81,9 +81,10 @@ process BIGWIG_SUM {
         path("bigWigSum.npz"), emit: array
 
     script:
+    // sort files on basenames, otherwise uses full file path
     """
     multiBigwigSummary bins \\
-      -b ${bigwigs.join(' ')} \\
+      -b ${bigwigs.sort({ a, b -> a.baseName <=> b.baseName }).join(' ')} \\
       --smartLabels \\
       -o bigWigSum.npz
     """
@@ -255,9 +256,8 @@ process COMPUTE_MATRIX {
     error "Invalid matrix type: ${mattype}"
   }
   """
-  echo "$mattype" > file.txt
   computeMatrix ${cmd} \\
-    -S ${bigwigs.sort().join(' ')} \\
+    -S ${bigwigs.sort({ a, b -> a.baseName <=> b.baseName }).join(' ')} \\
     -R ${bed} \\
     -p ${task.cpus} \\
     -o ${meta.id}.${bed.baseName}.${mattype}.mat.gz \\

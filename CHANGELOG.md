@@ -1,5 +1,6 @@
 ## development version
 
+- Print the recommended citation in bibtex format with `champagne --citation`. (#153)
 - Support multiple replicates per sample and call consensus peaks. (#129)
 - Find motifs in the genome with Homer. (#142)
 - Run motif enrichment analysis with MEME. (#142)
@@ -9,6 +10,7 @@
   - Per sample fingerprint plots instead of per replicate
   - Input normalized profile plots
   - Protein-coding-only versions of plots
+  - Ensure sample IDs are sorted (#150)
 
 ## CHAMPAGNE 0.2.1
 

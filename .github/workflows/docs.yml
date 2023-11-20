@@ -1,10 +1,11 @@
-name: mkdocs
-
+name: mkdocs_build
 on:
   workflow_dispatch:
   push:
     branches:
       - main
+    paths:
+      - "docs/**"
 
 env:
   actor: "41898282+github-actions[bot]"
