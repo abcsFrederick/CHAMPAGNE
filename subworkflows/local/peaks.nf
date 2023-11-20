@@ -151,10 +151,10 @@ workflow CALL_PEAKS {
         peaks_grouped | CONSENSUS_PEAKS
 
         if (params.run.chipseeker) {
-            CONSENSUS_PEAKS.out.peaks | CHIPSEEKER_ANNOTATE
+            // TODO: change consensus peak method to keep p-value, q-value, etc for use in chipseeker
+            ch_peaks | CHIPSEEKER_ANNOTATE
             CHIPSEEKER_ANNOTATE.out.annot.collect() | CHIPSEEKER_PLOTLIST
             ch_plots = ch_plots.mix(
-                CHIPSEEKER_ANNOTATE.out.plots,
                 CHIPSEEKER_PLOTLIST.out.plots
                 )
         }
