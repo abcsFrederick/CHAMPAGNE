@@ -1,50 +1,48 @@
 #!/usr/bin/env Rscript
 # adapted from: https://github.com/CCBR/ASPEN/blob/55f909d76500c3502c1c397ef3000908649b0284/workflow/scripts/ccbr_annotate_peaks.R
 load_package <- function(x) {
-    suppressPackageStartupMessages(library(x, character.only = TRUE))
+  suppressPackageStartupMessages(library(x, character.only = TRUE))
+  invisible(x)
 }
-lapply(c('dplyr', 'ChIPseeker'), load_package)
+messages <- lapply(c("ChIPseeker", "dplyr", "glue", "ggplot2"), load_package)
 
 parser <- argparse::ArgumentParser()
-parser$add_argument("-n", "--narrowpeak",
-  required = TRUE,
-  dest = "narrowpeak", help = "narrowpeak file"
-)
-parser$add_argument("-a", "--annotated",
-  required = TRUE, dest = "annotated",
-  help = "annotated output file"
-)
+parser$add_argument("-p", "--peak", required = TRUE, help = "peak file")
 parser$add_argument("-u", "--uptss", required = FALSE, type = "integer", default = 2000, help = "upstream bases from TSS")
 parser$add_argument("-d", "--downtss", required = FALSE, type = "integer", default = 2000, help = "upstream bases from TSS")
 parser$add_argument("-t", "--toppromoterpeaks", required = FALSE, type = "integer", default = 1000, help = "filter top N peaks in promoters for genelist output")
-parser$add_argument("-l", "--genelist", required = TRUE, help = "list of genes with peaks in promoter regions")
-parser$add_argument("-f", "--atypefreq", required = TRUE, help = "frequency of different annotation types")
-parser$add_argument("-g", "--genome",
-  required = TRUE, type = "character", dest = "genome",
-  help = "hg38/hg19/mm10/mm9/mmul10/bosTau9"
-)
+parser$add_argument("-o", "--outfile-prefix", required = TRUE, type = "character", dest = "outfile_prefix", help = "prefix for output filenames")
+parser$add_argument("-g", "--genome", required = TRUE, help = "hg38/hg19/mm10/mm9/mmul10/bosTau9/sacCer3")
 
 # get command line options, if help option encountered print help and exit,
 # otherwise if options not found on command line then set defaults,
 args <- parser$parse_args()
+outfile_prefix <- args$outfile_prefix
 
 genomes <- tibble::tribble(
-  ~ref_genome,            ~adb,                                  ~tdb,
-        "mm9",  "org.Mm.eg.db",   "TxDb.Mmusculus.UCSC.mm9.knownGene",
-       "mm10",  "org.Mm.eg.db",  "TxDb.Mmusculus.UCSC.mm10.knownGene",
-       "hg19",  "org.Hs.eg.db",   "TxDb.Hsapiens.UCSC.hg19.knownGene",
-       "hg38",  "org.Hs.eg.db",   "TxDb.Hsapiens.UCSC.hg38.knownGene",
-     "mmul10", "org.Mmu.eg.db", "TxDb.Mmulatta.UCSC.rheMac10.refGene",
-    "bosTau9",  "org.Bt.eg.db",   "TxDb.Btaurus.UCSC.bosTau9.refGene"
+  ~ref_genome, ~adb, ~txdb,
+  "mm9", "org.Mm.eg.db", "TxDb.Mmusculus.UCSC.mm9.knownGene",
+  "mm10", "org.Mm.eg.db", "TxDb.Mmusculus.UCSC.mm10.knownGene",
+  "hg19", "org.Hs.eg.db", "TxDb.Hsapiens.UCSC.hg19.knownGene",
+  "hg38", "org.Hs.eg.db", "TxDb.Hsapiens.UCSC.hg38.knownGene",
+  "mmul10", "org.Mmu.eg.db", "TxDb.Mmulatta.UCSC.rheMac10.refGene",
+  "bosTau9", "org.Bt.eg.db", "TxDb.Btaurus.UCSC.bosTau9.refGene",
+  "sacCer3", "org.Sc.sgd.db", "TxDb.Scerevisiae.UCSC.sacCer3.sgdGene"
 )
-adb <- genomes %>% filter(ref_genome == args$genome) %>% pull(adb)
+adb <- genomes %>%
+  filter(ref_genome == args$genome) %>%
+  pull(adb)
 load_package(adb)
-tdb_str <- genomes %>% filter(ref_genome == args$genome) %>% pull(tdb)
-load_package(tdb_str)
-tdb <- tdb_str %>% rlang::sym() %>% eval()
+txdb_str <- genomes %>%
+  filter(ref_genome == args$genome) %>%
+  pull(txdb)
+load_package(txdb_str)
+txdb <- txdb_str %>%
+  rlang::sym() %>%
+  eval()
 
-np <- read.table(args$narrowpeak, sep = "\t")
-peak_colnames  <- c(
+np <- read.table(args$peak, sep = "\t")
+peak_colnames <- c(
   "chrom",
   "chromStart",
   "chromEnd",
@@ -55,25 +53,28 @@ peak_colnames  <- c(
   "pValue",
   "qValue"
 )
-num_columns  <- ncol(np)
+num_columns <- ncol(np)
 if (num_columns == 9) {
-    colnames(np) <- peak_colnames
-    np <- np %>% mutate(peak = NA)
+  colnames(np) <- peak_colnames
+  np <- np %>% mutate(peak = NA)
 } else if (num_columns == 10) {
-    colnames(np) <- c(peak_colnames, "peak")
+  colnames(np) <- c(peak_colnames, "peak")
 } else {
-    stop(paste("Expected 9 or 10 columns in peak file, but", num_columns, "given"))
+  stop(paste("Expected 9 or 10 columns in peak file, but", num_columns, "given"))
 }
 np <- np[order(-np$qValue), ]
 np$peakID <- paste(np$chrom, ":", np$chromStart, "-", np$chromEnd, sep = "")
 
-peaks <- GRanges(seqnames = np$chrom, ranges = IRanges(np$chromStart, np$chromEnd))
+peaks <- GenomicRanges::GRanges(
+  seqnames = np$chrom,
+  ranges = IRanges(np$chromStart, np$chromEnd)
+)
 
 # using annotatePeak from ChIPseeker
-pa <- annotatePeak(
+annot <- annotatePeak(
   peak = peaks,
   tssRegion = c(-2000, 2000),
-  TxDb = tdb,
+  TxDb = txdb,
   level = "transcript",
   genomicAnnotationPriority = c("Promoter", "5UTR", "3UTR", "Exon", "Intron", "Downstream", "Intergenic"),
   annoDb = adb,
@@ -83,13 +84,12 @@ pa <- annotatePeak(
   ignoreDownstream = FALSE,
   overlap = "TSS"
 )
+saveRDS(annot, file = glue("{outfile_prefix}.annotation.Rds"))
 
-padf <- as.data.frame(pa)
+padf <- as.data.frame(annot)
 padf$peakID <- paste(padf$seqnames, ":", padf$start, "-", padf$end, sep = "")
-merged <- merge(padf, np, by = "peakID")
-merged <- merged[
-  ,
-  c(
+merged <- dplyr::full_join(padf, np, by = "peakID") %>%
+  dplyr::select(all_of(c(
     "peakID",
     "chrom",
     "chromStart",
@@ -112,44 +112,18 @@ merged <- merged[
     "pValue",
     "qValue",
     "peak"
-  )
-]
-# Adding the hash to the first colname
-colnames(merged) <- c(
-  "#peakID",
-  "chrom",
-  "chromStart",
-  "chromEnd",
-  "width",
-  "annotation",
-  "geneChr",
-  "geneStart",
-  "geneEnd",
-  "geneLength",
-  "geneStrand",
-  "geneId",
-  "transcriptId",
-  "distanceToTSS",
-  "ENSEMBL",
-  "SYMBOL",
-  "GENENAME",
-  "score",
-  "signalValue",
-  "pValue",
-  "qValue",
-  "peak"
-)
+  ))) %>%
+  dplyr::rename("#peakID" = "peakID") %>%
+  dplyr::arrange(dplyr::desc(qValue))
 
-
-# merge annotation with narrowPeak file
-merged <- merged[order(-merged$qValue), ]
-write.table(merged, args$annotated, sep = "\t", quote = FALSE, row.names = FALSE)
+annotated_outfile <- glue("{outfile_prefix}.annotated.txt")
+write.table(merged, annotated_outfile, sep = "\t", quote = FALSE, row.names = FALSE)
 l <- paste("# Median peak width : ", median(merged$width), sep = "")
-write(l, args$annotated, append = TRUE)
+write(l, annotated_outfile, append = TRUE)
 l <- paste("# Median pValue : ", median(merged$pValue), sep = "")
-write(l, args$annotated, append = TRUE)
+write(l, annotated_outfile, append = TRUE)
 l <- paste("# Median qValue : ", median(merged$qValue), sep = "")
-write(l, args$annotated, append = TRUE)
+write(l, annotated_outfile, append = TRUE)
 
 
 # get promoter genes
@@ -162,18 +136,20 @@ promoters <- promoters[order(-promoters$qValue), ]
 promoters <- head(promoters, n = args$toppromoterpeaks)
 promoter_genes <- unique(promoters[, c("ENSEMBL", "SYMBOL")])
 colnames(promoter_genes) <- c("#ENSEMBL", "SYMBOL")
-write.table(promoter_genes, args$genelist, sep = "\t", quote = FALSE, row.names = FALSE)
+outfile_genelist <- glue("{outfile_prefix}.genelist.txt")
+write.table(promoter_genes, outfile_genelist, sep = "\t", quote = FALSE, row.names = FALSE)
 l <- paste("# Median peak width : ", median(promoters$width), sep = "")
-write(l, args$genelist, append = TRUE)
+write(l, outfile_genelist, append = TRUE)
 l <- paste("# Median pValue : ", median(promoters$pValue), sep = "")
-write(l, args$genelist, append = TRUE)
+write(l, outfile_genelist, append = TRUE)
 l <- paste("# Median qValue : ", median(promoters$qValue), sep = "")
-write(l, args$genelist, append = TRUE)
+write(l, outfile_genelist, append = TRUE)
 
 # annotation type frequency table
 
 l <- paste("#annotationType", "frequency", "medianWidth", "medianpValue", "medianqValue", sep = "\t")
-write(l, args$atypefreq)
+outfile_summary <- glue("{outfile_prefix}.summary.txt")
+write(l, outfile_summary)
 atypes <- c(
   "3' UTR",
   "5' UTR",
@@ -190,7 +166,7 @@ for (ann in atypes) {
   p <- median(x$pValue)
   q <- median(x$qValue)
   l <- paste(gsub(" ", "", ann), nrow(x), w, p, q, sep = "\t")
-  write(l, args$atypefreq, append = TRUE)
+  write(l, outfile_summary, append = TRUE)
 }
 for (ann in c("Exon", "Intron")) {
   x <- dplyr::filter(merged, grepl(ann, annotation))
@@ -198,5 +174,30 @@ for (ann in c("Exon", "Intron")) {
   p <- median(x$pValue)
   q <- median(x$qValue)
   l <- paste(gsub(" ", "", ann), nrow(x), w, p, q, sep = "\t")
-  write(l, args$atypefreq, append = TRUE)
+  write(l, outfile_summary, append = TRUE)
 }
+
+# plots for individual peak file
+peaks <- GenomicRanges::GRanges(
+  seqnames = np$chrom,
+  ranges = IRanges(np$chromStart, np$chromEnd),
+  qValue = np$qValue
+)
+plots <- list(
+  covplot = covplot(peaks, weightCol = "qValue"),
+  plotPeakProf2 = plotPeakProf2(
+    peak = peaks, upstream = rel(0.2), downstream = rel(0.2),
+    conf = 0.95, by = "gene", type = "body", nbin = 800,
+    TxDb = txdb, weightCol = "qValue", ignore_strand = F
+  ),
+  upsetplot = upsetplot(annot, vennpie = TRUE)
+)
+
+names(plots) %>%
+  lapply(function(plot_name) {
+    ggsave(
+      filename = glue("{outfile_prefix}_{plot_name}.png"),
+      plot = plots[[plot_name]],
+      device = "png"
+    )
+  })

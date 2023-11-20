@@ -13,7 +13,8 @@ process CONSENSUS_PEAKS {
     script:
     if (peaks.size() > 1) {
         """
-        get_consensus_peaks.py --peakfiles ${peaks.join(' ')} --outbed ${meta.id}.${meta.group}.consensus_peaks.bed
+        get_consensus_peaks.py \\
+            --peakfiles ${peaks.join(' ')} --outbed ${meta.id}.${meta.group}.consensus_peaks.bed
         """
     }
     // just copy the input if there's only one peak file

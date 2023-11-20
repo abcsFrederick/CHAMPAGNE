@@ -4,7 +4,8 @@
 - Support multiple replicates per sample and call consensus peaks. (#129)
 - Find motifs in the genome with Homer. (#142)
 - Run motif enrichment analysis with MEME. (#142)
-- Annotate peaks with chipseeker. (#142)
+- Annotate peaks with chipseeker. (#142,#147)
+- Add preseq complexity curve and fastq screen to multiqc report. (#147)
 - Fix deepTools plots (#144):
   - Per sample fingerprint plots instead of per replicate
   - Input normalized profile plots

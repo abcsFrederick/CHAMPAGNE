@@ -15,14 +15,12 @@ fastqscreen_simpleplot: true
 fn_clean_sample_names: false
 log_filesize_limit: 100000000
 
-fn_ignore_files:
-  - "*.preseq.dat"
-
 top_modules:
   - "QC_Table"
 
 run_modules:
   - custom_content
+  - fastq_screen
   - fastqc
   - cutadapt
   - samtools
@@ -147,14 +145,11 @@ custom_data:
     parent_id: peak_qc
     id: frip_nbases
     section_name: "FRiP vs. number of bases"
-  peak_widths_broad:
+  peak_widths:
     parent_id: peak_qc
-    id: peak_widths_broad
-    section_name: "Broad peak widths"
-  peak_widths_narrow:
-    parent_id: peak_qc
-    id: peak_widths_narrow
-    section_name: "Narrow peak widths"
+    id: peak_widths
+    section_name: "Peak widths"
+    description: "Histogram of peak widths. GEM is not shown because all GEM peaks are 200 bp wide."
   jaccard_heatmap:
     parent_id: peak_qc
     id: jaccard_heatmap
@@ -179,10 +174,8 @@ sp:
     fn: "FRiP_samples*.png"
   frip_nbases:
     fn: "FRiP_nbases*.png"
-  peak_widths_broad:
-    fn: "peak_widths_broad*.png"
-  peak_widths_narrow:
-    fn: "peak_widths_narrow*.png"
+  peak_widths:
+    fn: "peak_widths_histogram.png"
   jaccard_heatmap:
     fn: "jaccard_heatmap_all*.png"
   jaccard_pca_all:

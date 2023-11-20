@@ -80,7 +80,8 @@ workflow QC {
             FASTQC_TRIMMED.out.zip,
             dedup_flagstat_files,
             ppqt_spp_files,
-            QC_TABLE.out.txt
+            QC_TABLE.out.txt,
+            PRESEQ.out.c_curve
         )
 
         if (params.run.deeptools) {
