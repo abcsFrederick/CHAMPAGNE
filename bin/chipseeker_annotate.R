@@ -65,7 +65,11 @@ if (num_columns == 9) {
 np <- np[order(-np$qValue), ]
 np$peakID <- paste(np$chrom, ":", np$chromStart, "-", np$chromEnd, sep = "")
 
-peaks <- GRanges(seqnames = np$chrom, ranges = IRanges(np$chromStart, np$chromEnd))
+peaks <- GRanges(
+  seqnames = np$chrom,
+  ranges = IRanges(np$chromStart, np$chromEnd),
+  qValue = np$qValue
+)
 
 # using annotatePeak from ChIPseeker
 pa <- annotatePeak(
@@ -205,9 +209,9 @@ for (ann in c("Exon", "Intron")) {
 
 # plots for individual peak file
 plots <- list(
-  covplot = covplot(np, weightCol = "qValue"),
+  covplot = covplot(peaks, weightCol = "qValue"),
   plotPeakProf2 = plotPeakProf2(
-    peak = np, upstream = rel(0.2), downstream = rel(0.2),
+    peak = peaks, upstream = rel(0.2), downstream = rel(0.2),
     conf = 0.95, by = "gene", type = "body", nbin = 800,
     TxDb = txdb, weightCol = "qValue", ignore_strand = F
   ),
