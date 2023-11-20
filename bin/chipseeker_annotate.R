@@ -2,7 +2,7 @@
 # adapted from: https://github.com/CCBR/ASPEN/blob/55f909d76500c3502c1c397ef3000908649b0284/workflow/scripts/ccbr_annotate_peaks.R
 load_package <- function(x) {
   suppressPackageStartupMessages(library(x, character.only = TRUE))
-  return()
+  invisible()
 }
 messages <- lapply(c("ChIPseeker", "dplyr", "glue", "ggplot2"), load_package)
 
@@ -65,10 +65,9 @@ if (num_columns == 9) {
 np <- np[order(-np$qValue), ]
 np$peakID <- paste(np$chrom, ":", np$chromStart, "-", np$chromEnd, sep = "")
 
-peaks <- GRanges(
+peaks <- GenomicRanges::GRanges(
   seqnames = np$chrom,
-  ranges = IRanges(np$chromStart, np$chromEnd),
-  qValue = np$qValue
+  ranges = IRanges(np$chromStart, np$chromEnd)
 )
 
 # using annotatePeak from ChIPseeker
@@ -89,10 +88,8 @@ saveRDS(pa, file = glue("{outfile_prefix}.annotation.Rds"))
 
 padf <- as.data.frame(pa)
 padf$peakID <- paste(padf$seqnames, ":", padf$start, "-", padf$end, sep = "")
-merged <- merge(padf, np, by = "peakID")
-merged <- merged[
-  ,
-  c(
+merged <- dplyr::full_join(padf, np, by = "peakID") %>%
+  dplyr::select(all_of(c(
     "peakID",
     "chrom",
     "chromStart",
@@ -115,37 +112,10 @@ merged <- merged[
     "pValue",
     "qValue",
     "peak"
-  )
-]
-# Adding the hash to the first colname
-colnames(merged) <- c(
-  "#peakID",
-  "chrom",
-  "chromStart",
-  "chromEnd",
-  "width",
-  "annotation",
-  "geneChr",
-  "geneStart",
-  "geneEnd",
-  "geneLength",
-  "geneStrand",
-  "geneId",
-  "transcriptId",
-  "distanceToTSS",
-  "ENSEMBL",
-  "SYMBOL",
-  "GENENAME",
-  "score",
-  "signalValue",
-  "pValue",
-  "qValue",
-  "peak"
-)
+  ))) %>%
+  dplyr::rename("#peakID" = "peakID") %>%
+  dplyr::arrange(dplyr::desc(qValue))
 
-
-# merge annotation with narrowPeak file
-merged <- merged[order(-merged$qValue), ]
 annotated_outfile <- glue("{outfile_prefix}.annotated.txt")
 write.table(merged, annotated_outfile, sep = "\t", quote = FALSE, row.names = FALSE)
 l <- paste("# Median peak width : ", median(merged$width), sep = "")
@@ -208,6 +178,11 @@ for (ann in c("Exon", "Intron")) {
 }
 
 # plots for individual peak file
+peaks <- GenomicRanges::GRanges(
+  seqnames = np$chrom,
+  ranges = IRanges(np$chromStart, np$chromEnd),
+  qValue = np$qValue
+)
 plots <- list(
   covplot = covplot(peaks, weightCol = "qValue"),
   plotPeakProf2 = plotPeakProf2(
