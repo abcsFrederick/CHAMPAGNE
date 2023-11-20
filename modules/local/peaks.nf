@@ -151,7 +151,8 @@ process CONVERT_SICER { // https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d5838
         tuple val(meta), path(sicer_peaks), val(peak_tool)
 
     output:
-        tuple val(meta), path("${sicer_peaks.baseName}.converted.bed"), val(peak_tool), emit: peak
+        tuple val(meta), path("${sicer_peaks.baseName}.converted_sicer.broadPeak"), val(peak_tool), emit: peak, optional: true
+        tuple val(meta), path("${sicer_peaks.baseName}.converted.bed"), val(peak_tool),             emit: bed
 
     script:
     $/
