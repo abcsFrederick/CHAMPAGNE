@@ -203,13 +203,12 @@ for (ann in c("Exon", "Intron")) {
 }
 
 # plots for individual peak file
-peak <- readPeakFile(args$peak)
 plots <- list(
-  covplot = covplot(peak, weightCol = "V5"),
+  covplot = covplot(np, weightCol = "qValue"),
   plotPeakProf2 = plotPeakProf2(
-    peak = peak, upstream = rel(0.2), downstream = rel(0.2),
+    peak = np, upstream = rel(0.2), downstream = rel(0.2),
     conf = 0.95, by = "gene", type = "body", nbin = 800,
-    TxDb = txdb, weightCol = "V5", ignore_strand = F
+    TxDb = txdb, weightCol = "qValue", ignore_strand = F
   ),
   upsetplot = upsetplot(annot, vennpie = TRUE)
 )

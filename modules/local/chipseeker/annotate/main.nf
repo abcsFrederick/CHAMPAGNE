@@ -15,7 +15,7 @@ process CHIPSEEKER_ANNOTATE {
 
     script:
     """
-    annotate_peaks.R \\
+    chipseeker_annotate.R \\
         --peak ${bed} \\
         --outfile-prefix ${meta.id}.${meta.group} \\
         --genome ${params.genome} \\
