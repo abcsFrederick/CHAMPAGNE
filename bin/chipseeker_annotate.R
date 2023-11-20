@@ -2,7 +2,7 @@
 # adapted from: https://github.com/CCBR/ASPEN/blob/55f909d76500c3502c1c397ef3000908649b0284/workflow/scripts/ccbr_annotate_peaks.R
 load_package <- function(x) {
   suppressPackageStartupMessages(library(x, character.only = TRUE))
-  invisible()
+  invisible(x)
 }
 messages <- lapply(c("ChIPseeker", "dplyr", "glue", "ggplot2"), load_package)
 
