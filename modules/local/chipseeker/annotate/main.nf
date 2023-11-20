@@ -3,7 +3,7 @@ process CHIPSEEKER_ANNOTATE {
     label 'peaks'
     label 'process_medium'
 
-    container 'nciccbr/ccbr_chipseeker:1.1.0'
+    container 'nciccbr/ccbr_chipseeker:1.1.2'
 
     input:
         tuple val(meta), path(bed), val(group)

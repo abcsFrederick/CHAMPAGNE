@@ -1,9 +1,8 @@
 process CHIPSEEKER_PLOTLIST {
-    tag "${meta.id}.${meta.group}"
     label 'peaks'
     label 'process_medium'
 
-    container 'nciccbr/ccbr_chipseeker:1.1.0'
+    container 'nciccbr/ccbr_chipseeker:1.1.2'
 
     input:
         path(rds)
