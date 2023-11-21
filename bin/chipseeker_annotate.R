@@ -89,7 +89,7 @@ saveRDS(annot, file = glue("{outfile_prefix}.annotation.Rds"))
 padf <- as.data.frame(annot)
 padf$peakID <- paste(padf$seqnames, ":", padf$start, "-", padf$end, sep = "")
 merged <- dplyr::full_join(padf, np, by = "peakID") %>%
-  dplyr::select(all_of(c(
+  dplyr::select(any_of(c(
     "peakID",
     "chrom",
     "chromStart",
@@ -177,27 +177,9 @@ for (ann in c("Exon", "Intron")) {
   write(l, outfile_summary, append = TRUE)
 }
 
-# plots for individual peak file
-peaks <- GenomicRanges::GRanges(
-  seqnames = np$chrom,
-  ranges = IRanges(np$chromStart, np$chromEnd),
-  qValue = np$qValue
+# upset plot
+ggsave(
+  filename = glue("{outfile_prefix}_upsetplot.png"),
+  plot = upsetplot(annot, vennpie = TRUE),
+  device = "png"
 )
-plots <- list(
-  covplot = covplot(peaks, weightCol = "qValue"),
-  plotPeakProf2 = plotPeakProf2(
-    peak = peaks, upstream = rel(0.2), downstream = rel(0.2),
-    conf = 0.95, by = "gene", type = "body", nbin = 800,
-    TxDb = txdb, weightCol = "qValue", ignore_strand = F
-  ),
-  upsetplot = upsetplot(annot, vennpie = TRUE)
-)
-
-names(plots) %>%
-  lapply(function(plot_name) {
-    ggsave(
-      filename = glue("{outfile_prefix}_{plot_name}.png"),
-      plot = plots[[plot_name]],
-      device = "png"
-    )
-  })
