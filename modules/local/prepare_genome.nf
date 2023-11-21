@@ -139,6 +139,7 @@ process WRITE_GENOME_CONFIG {
         path(chrom_dir)
         path(gene_info)
         val(effective_genome_size)
+        val(meme_motifs)
         val(bioc_txdb)
         val(bioc_annot)
 
@@ -153,6 +154,7 @@ process WRITE_GENOME_CONFIG {
     import os
     import pprint
     import shutil
+    print("${meme_motifs}")
     os.makedirs("${genome_name}/")
     for subdir, filelist in (('reference/', "${reference_index}"), ('blacklist', "${blacklist_index}")):
         dirpath = f"${{genome_name}}/{subdir}"
@@ -171,7 +173,7 @@ process WRITE_GENOME_CONFIG {
                   chrom_sizes = '"\${params.index_dir}/${genome_name}/${chrom_sizes}"',
                   gene_info = '"\${params.index_dir}/${genome_name}/${gene_info}"',
                   effective_genome_size = "${effective_genome_size}",
-                  meme_motifs = "null",
+                  meme_motifs = "${meme_motifs}",
                   bioc_txdb = "${bioc_txdb}",
                   bioc_annot = "${bioc_annot}"
     )

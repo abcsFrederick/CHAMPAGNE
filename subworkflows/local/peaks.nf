@@ -32,6 +32,7 @@ workflow CALL_PEAKS {
         frag_lengths
         effective_genome_size
         genome_fasta
+        meme_motifs
         bioc_txdb
         bioc_annot
 
@@ -155,7 +156,7 @@ workflow CALL_PEAKS {
         peaks_grouped | CONSENSUS_PEAKS
         ch_consensus_peaks = CONSENSUS_PEAKS.out.peaks
 
-        if (params.run.chipseeker) {
+        if (params.run.chipseeker && bioc_txdb && bioc_annot) {
             // TODO: change consensus peak method to keep p-value, q-value, etc for use in chipseeker peakplots
             CHIPSEEKER_PEAKPLOT( ch_peaks, bioc_txdb, bioc_annot  )
             CHIPSEEKER_ANNOTATE( ch_consensus_peaks, bioc_txdb, bioc_annot )
@@ -169,9 +170,10 @@ workflow CALL_PEAKS {
                          params.homer.de_novo,
                          file(params.homer.jaspar_db, checkIfExists: true)
                         )
-            if (params.genomes[ params.genome ].meme_motifs) {
+
+            if (params.run.meme && meme_motifs) {
                 MEME_AME(HOMER_MOTIFS.out.ame,
-                         file(params.genomes[ params.genome ].meme_motifs, checkIfExists: true)
+                         meme_motifs
                         )
             }
         }

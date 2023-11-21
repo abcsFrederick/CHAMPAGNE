@@ -94,6 +94,7 @@ workflow CHIPSEQ {
                    frag_lengths,
                    effective_genome_size,
                    PREPARE_GENOME.out.fasta,
+                   PREPARE_GENOME.out.meme_motifs,
                    PREPARE_GENOME.out.bioc_txdb,
                    PREPARE_GENOME.out.bioc_annot
                    )
