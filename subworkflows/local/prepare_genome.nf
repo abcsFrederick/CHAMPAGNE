@@ -31,7 +31,7 @@ workflow PREPARE_GENOME {
             ch_chrom_sizes = Channel.fromPath(params.genomes[ params.genome ].chrom_sizes, checkIfExists: true)
             ch_gene_info = Channel.fromPath(params.genomes[ params.genome ].gene_info, checkIfExists: true)
             ch_gsize = Channel.value(params.genomes[ params.genome ].effective_genome_size)
-            ch_meme_motifs = Channel.path(params.genomes[ params.genome ].meme_motifs, checkIfExists: true)
+            ch_meme_motifs = Channel.fromPath(params.genomes[ params.genome ].meme_motifs, checkIfExists: true)
             ch_bioc_txdb = Channel.value(params.genomes[ params.genome ].bioc_txdb)
             ch_bioc_annot = Channel.value(params.genomes[ params.genome ].bioc_annot)
 
@@ -75,7 +75,7 @@ workflow PREPARE_GENOME {
             ch_chrom_dir = SPLIT_REF_CHROMS.out.chrom_dir
             if (params.meme_motifs && file(params.meme_motifs).exists()) {
                 meme_motif_name = Channel.value(params.meme_motifs)
-                ch_meme_motifs = Channel.path(params.meme_motifs)
+                ch_meme_motifs = Channel.fromPath(params.meme_motifs)
             } else {
                 meme_motif_name = 'null'
                 ch_meme_motifs = Channel.empty()
