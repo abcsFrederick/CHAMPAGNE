@@ -12,35 +12,21 @@ parser$add_argument("-u", "--uptss", required = FALSE, type = "integer", default
 parser$add_argument("-d", "--downtss", required = FALSE, type = "integer", default = 2000, help = "upstream bases from TSS")
 parser$add_argument("-t", "--toppromoterpeaks", required = FALSE, type = "integer", default = 1000, help = "filter top N peaks in promoters for genelist output")
 parser$add_argument("-o", "--outfile-prefix", required = TRUE, type = "character", dest = "outfile_prefix", help = "prefix for output filenames")
-parser$add_argument("-g", "--genome", required = TRUE, help = "hg38/hg19/mm10/mm9/mmul10/bosTau9/sacCer3")
+parser$add_argument("--genome-txdb", dest = "txdb", required = TRUE, help = "BioConductor TxDb package, e.g. TxDb.Hsapiens.UCSC.hg38.knownGene")
+parser$add_argument("--genome-annot", dest = "adb", required = TRUE, help = "BioConductor annotation package, e.g. org.Hs.eg.db")
 
 # get command line options, if help option encountered print help and exit,
 # otherwise if options not found on command line then set defaults,
 args <- parser$parse_args()
 outfile_prefix <- args$outfile_prefix
-
-genomes <- tibble::tribble(
-  ~ref_genome, ~adb, ~txdb,
-  "mm9", "org.Mm.eg.db", "TxDb.Mmusculus.UCSC.mm9.knownGene",
-  "mm10", "org.Mm.eg.db", "TxDb.Mmusculus.UCSC.mm10.knownGene",
-  "hg19", "org.Hs.eg.db", "TxDb.Hsapiens.UCSC.hg19.knownGene",
-  "hg38", "org.Hs.eg.db", "TxDb.Hsapiens.UCSC.hg38.knownGene",
-  "mmul10", "org.Mmu.eg.db", "TxDb.Mmulatta.UCSC.rheMac10.refGene",
-  "bosTau9", "org.Bt.eg.db", "TxDb.Btaurus.UCSC.bosTau9.refGene",
-  "sacCer3", "org.Sc.sgd.db", "TxDb.Scerevisiae.UCSC.sacCer3.sgdGene"
-)
-adb <- genomes %>%
-  filter(ref_genome == args$genome) %>%
-  pull(adb)
+adb <- args$adb
 load_package(adb)
-txdb_str <- genomes %>%
-  filter(ref_genome == args$genome) %>%
-  pull(txdb)
-load_package(txdb_str)
-txdb <- txdb_str %>%
+load_package(args$txdb)
+txdb <- args$txdb %>%
   rlang::sym() %>%
   eval()
 
+# parse peak file
 np <- read.table(args$peak, sep = "\t")
 peak_colnames <- c(
   "chrom",
@@ -89,7 +75,7 @@ saveRDS(annot, file = glue("{outfile_prefix}.annotation.Rds"))
 padf <- as.data.frame(annot)
 padf$peakID <- paste(padf$seqnames, ":", padf$start, "-", padf$end, sep = "")
 merged <- dplyr::full_join(padf, np, by = "peakID") %>%
-  dplyr::select(all_of(c(
+  dplyr::select(any_of(c(
     "peakID",
     "chrom",
     "chromStart",
@@ -127,6 +113,7 @@ write(l, annotated_outfile, append = TRUE)
 
 
 # get promoter genes
+outfile_genelist <- glue("{outfile_prefix}.genelist.txt")
 # ... all lines with annotation starting with "Promoter"
 promoters1 <- dplyr::filter(merged, grepl("Promoter", annotation))
 # ... all lines with annotation is "5' UTR"
@@ -134,10 +121,12 @@ promoters2 <- merged[merged$annotation == "5' UTR", ]
 promoters <- rbind(promoters1, promoters2)
 promoters <- promoters[order(-promoters$qValue), ]
 promoters <- head(promoters, n = args$toppromoterpeaks)
-promoter_genes <- unique(promoters[, c("ENSEMBL", "SYMBOL")])
-colnames(promoter_genes) <- c("#ENSEMBL", "SYMBOL")
-outfile_genelist <- glue("{outfile_prefix}.genelist.txt")
-write.table(promoter_genes, outfile_genelist, sep = "\t", quote = FALSE, row.names = FALSE)
+# ENSEMBL and SYMBOL may not be in the merged df columns, depending on adb/txdb
+if (length(intersect(c("ENSEMBL", "SYMBOL"), colnames(promoters))) == 2) {
+  promoter_genes <- unique(promoters[, c("ENSEMBL", "SYMBOL")])
+  colnames(promoter_genes) <- c("#ENSEMBL", "SYMBOL")
+  write.table(promoter_genes, outfile_genelist, sep = "\t", quote = FALSE, row.names = FALSE)
+}
 l <- paste("# Median peak width : ", median(promoters$width), sep = "")
 write(l, outfile_genelist, append = TRUE)
 l <- paste("# Median pValue : ", median(promoters$pValue), sep = "")
@@ -177,27 +166,9 @@ for (ann in c("Exon", "Intron")) {
   write(l, outfile_summary, append = TRUE)
 }
 
-# plots for individual peak file
-peaks <- GenomicRanges::GRanges(
-  seqnames = np$chrom,
-  ranges = IRanges(np$chromStart, np$chromEnd),
-  qValue = np$qValue
+# upset plot
+ggsave(
+  filename = glue("{outfile_prefix}_upsetplot.png"),
+  plot = upsetplot(annot, vennpie = TRUE),
+  device = "png"
 )
-plots <- list(
-  covplot = covplot(peaks, weightCol = "qValue"),
-  plotPeakProf2 = plotPeakProf2(
-    peak = peaks, upstream = rel(0.2), downstream = rel(0.2),
-    conf = 0.95, by = "gene", type = "body", nbin = 800,
-    TxDb = txdb, weightCol = "qValue", ignore_strand = F
-  ),
-  upsetplot = upsetplot(annot, vennpie = TRUE)
-)
-
-names(plots) %>%
-  lapply(function(plot_name) {
-    ggsave(
-      filename = glue("{outfile_prefix}_{plot_name}.png"),
-      plot = plots[[plot_name]],
-      device = "png"
-    )
-  })

@@ -21,6 +21,7 @@ include { HOMER_MOTIFS        } from "../../modules/local/homer"
 include { MEME_AME            } from "../../modules/local/meme"
 include { CHIPSEEKER_ANNOTATE } from "../../modules/local/chipseeker/annotate"
 include { CHIPSEEKER_PLOTLIST } from "../../modules/local/chipseeker/plotlist"
+include { CHIPSEEKER_PEAKPLOT } from "../../modules/local/chipseeker/peakplot"
 
 workflow CALL_PEAKS {
     take:
@@ -31,6 +32,9 @@ workflow CALL_PEAKS {
         frag_lengths
         effective_genome_size
         genome_fasta
+        meme_motifs
+        bioc_txdb
+        bioc_annot
 
     main:
         genome_frac = CALC_GENOME_FRAC(chrom_sizes, effective_genome_size)
@@ -150,23 +154,26 @@ workflow CALL_PEAKS {
                 peaks_grouped
             }
         peaks_grouped | CONSENSUS_PEAKS
+        ch_consensus_peaks = CONSENSUS_PEAKS.out.peaks
 
-        if (params.run.chipseeker) {
-            // TODO: change consensus peak method to keep p-value, q-value, etc for use in chipseeker
-            ch_peaks | CHIPSEEKER_ANNOTATE
+        if (params.run.chipseeker && bioc_txdb && bioc_annot) {
+            // TODO: change consensus peak method to keep p-value, q-value, etc for use in chipseeker peakplots
+            CHIPSEEKER_PEAKPLOT( ch_peaks, bioc_txdb, bioc_annot  )
+            CHIPSEEKER_ANNOTATE( ch_consensus_peaks, bioc_txdb, bioc_annot )
             CHIPSEEKER_ANNOTATE.out.annot.collect() | CHIPSEEKER_PLOTLIST
             ch_plots = ch_plots.mix(
                 CHIPSEEKER_PLOTLIST.out.plots
-                )
+            )
         }
         if (params.run.homer) {
-            HOMER_MOTIFS( CONSENSUS_PEAKS.out.peaks.combine(genome_fasta),
-                        params.homer.de_novo,
-                        file(params.homer.jaspar_db, checkIfExists: true)
+            HOMER_MOTIFS(ch_consensus_peaks.combine(genome_fasta),
+                         params.homer.de_novo,
+                         file(params.homer.jaspar_db, checkIfExists: true)
                         )
-            if (params.genomes[ params.genome ].meme_motifs) {
-                MEME_AME( HOMER_MOTIFS.out.ame,
-                        file(params.genomes[ params.genome ].meme_motifs, checkIfExists: true)
+
+            if (params.run.meme && meme_motifs) {
+                MEME_AME(HOMER_MOTIFS.out.ame,
+                         meme_motifs
                         )
             }
         }
