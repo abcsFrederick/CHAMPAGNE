@@ -11,6 +11,7 @@
   - Input normalized profile plots
   - Protein-coding-only versions of plots
   - Ensure sample IDs are sorted (#150)
+- Fixed a bug where the wrong SICER output file was used for downstream analyses. (#155)
 
 ## CHAMPAGNE 0.2.1
 
