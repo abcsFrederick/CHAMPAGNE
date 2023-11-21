@@ -7,6 +7,8 @@ process CHIPSEEKER_PEAKPLOT {
 
     input:
         tuple val(meta), path(bed), val(group)
+        val(txdb)
+        val(annot_db)
 
     output:
         tuple val(meta), path("*.png"), emit: plots
@@ -16,7 +18,8 @@ process CHIPSEEKER_PEAKPLOT {
     chipseeker_peakplot.R \\
         --peak ${bed} \\
         --outfile-prefix ${meta.id}.${group} \\
-        --genome ${params.genome}
+        --genome-txdb ${txdb} \\
+        --genome-annot ${annot_db}
     """
 
     stub:

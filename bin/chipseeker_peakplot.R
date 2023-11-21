@@ -8,28 +8,17 @@ messages <- lapply(c("ChIPseeker", "dplyr", "glue", "ggplot2"), load_package)
 parser <- argparse::ArgumentParser()
 parser$add_argument("-p", "--peak", required = TRUE, help = "peak file")
 parser$add_argument("-o", "--outfile-prefix", required = TRUE, type = "character", dest = "outfile_prefix", help = "prefix for output filenames")
-parser$add_argument("-g", "--genome", required = TRUE, help = "hg38/hg19/mm10/mm9/mmul10/bosTau9/sacCer3")
+parser$add_argument("--genome-txdb", dest = "txdb", required = TRUE, help = "BioConductor TxDb package, e.g. TxDb.Hsapiens.UCSC.hg38.knownGene")
+parser$add_argument("--genome-annot", dest = "adb", required = TRUE, help = "BioConductor annotation package, e.g. org.Hs.eg.db")
 
 # get command line options, if help option encountered print help and exit,
 # otherwise if options not found on command line then set defaults,
 args <- parser$parse_args()
 outfile_prefix <- args$outfile_prefix
-
-genomes <- tibble::tribble(
-  ~ref_genome, ~adb, ~txdb,
-  "mm9", "org.Mm.eg.db", "TxDb.Mmusculus.UCSC.mm9.knownGene",
-  "mm10", "org.Mm.eg.db", "TxDb.Mmusculus.UCSC.mm10.knownGene",
-  "hg19", "org.Hs.eg.db", "TxDb.Hsapiens.UCSC.hg19.knownGene",
-  "hg38", "org.Hs.eg.db", "TxDb.Hsapiens.UCSC.hg38.knownGene",
-  "mmul10", "org.Mmu.eg.db", "TxDb.Mmulatta.UCSC.rheMac10.refGene",
-  "bosTau9", "org.Bt.eg.db", "TxDb.Btaurus.UCSC.bosTau9.refGene",
-  "sacCer3", "org.Sc.sgd.db", "TxDb.Scerevisiae.UCSC.sacCer3.sgdGene"
-)
-txdb_str <- genomes %>%
-  filter(ref_genome == args$genome) %>%
-  pull(txdb)
-load_package(txdb_str)
-txdb <- txdb_str %>%
+adb <- args$adb
+load_package(adb)
+load_package(args$txdb)
+txdb <- args$txdb %>%
   rlang::sym() %>%
   eval()
 

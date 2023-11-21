@@ -7,6 +7,8 @@ process CHIPSEEKER_ANNOTATE {
 
     input:
         tuple val(meta), path(bed)
+        val(txdb)
+        val(annot_db)
 
     output:
         tuple val(meta), path("*.annotated.txt"), path("*.summary.txt"), path("*.genelist.txt"), emit: txt
@@ -18,7 +20,8 @@ process CHIPSEEKER_ANNOTATE {
     chipseeker_annotate.R \\
         --peak ${bed} \\
         --outfile-prefix ${meta.id}.${meta.group} \\
-        --genome ${params.genome} \\
+        --genome-txdb ${txdb} \\
+        --genome-annot ${annot_db} \\
         --uptss 2000 \\
         --downtss 2000 \\
         --toppromoterpeaks 1000

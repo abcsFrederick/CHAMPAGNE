@@ -154,9 +154,11 @@ workflow CALL_PEAKS {
         ch_consensus_peaks = CONSENSUS_PEAKS.out.peaks
 
         if (params.run.chipseeker) {
+            bioc_txdb = Channel.value(params.genomes[ params.genome ].bioc_txdb)
+            bioc_annot = Channel.value(params.genomes[ params.genome ].bioc_annot)
             // TODO: change consensus peak method to keep p-value, q-value, etc for use in chipseeker peakplots
-            ch_peaks | CHIPSEEKER_PEAKPLOT
-            ch_consensus_peaks | CHIPSEEKER_ANNOTATE
+            CHIPSEEKER_PEAKPLOT( ch_peaks, bioc_txdb, bioc_annot  )
+            CHIPSEEKER_ANNOTATE( ch_consensus_peaks, bioc_txdb, bioc_annot )
             CHIPSEEKER_ANNOTATE.out.annot.collect() | CHIPSEEKER_PLOTLIST
             ch_plots = ch_plots.mix(
                 CHIPSEEKER_PLOTLIST.out.plots
