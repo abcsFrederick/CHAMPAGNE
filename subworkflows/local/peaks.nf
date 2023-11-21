@@ -91,7 +91,8 @@ workflow CALL_PEAKS {
             ch_peaks = ch_peaks.mix(MACS_NARROW.out.peak)
         }
         if (params.run.sicer) {
-            ch_sicer | SICER | CONVERT_SICER
+            ch_sicer | SICER
+            SICER.out.peak | CONVERT_SICER
             ch_peaks = ch_peaks.mix(CONVERT_SICER.out.peak)
         }
         if (params.run.gem) {

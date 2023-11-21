@@ -114,8 +114,8 @@ process SICER {
         tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
 
     output:
-        tuple val(meta), path("*island.bed"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
-        //tuple path("*.scoreisland"), path("*normalized.wig"), path("*islands-summary")
+        tuple val(meta), path("*islands-summary"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
+        tuple path("*island.bed"), path("*.scoreisland"), path("*normalized.wig"),                         emit: sicer
 
     script:
     """
