@@ -93,7 +93,9 @@ workflow CHIPSEQ {
                    deduped_bam,
                    frag_lengths,
                    effective_genome_size,
-                   PREPARE_GENOME.out.fasta
+                   PREPARE_GENOME.out.fasta,
+                   PREPARE_GENOME.out.bioc_txdb,
+                   PREPARE_GENOME.out.bioc_annot
                    )
         ch_multiqc = ch_multiqc.mix(CALL_PEAKS.out.plots)
     }

@@ -31,6 +31,8 @@ workflow PREPARE_GENOME {
             ch_chrom_sizes = Channel.fromPath(params.genomes[ params.genome ].chrom_sizes, checkIfExists: true)
             ch_gene_info = Channel.fromPath(params.genomes[ params.genome ].gene_info, checkIfExists: true)
             ch_gsize = Channel.value(params.genomes[ params.genome ].effective_genome_size)
+            ch_bioc_txdb = Channel.value(params.genomes[ params.genome ].bioc_txdb)
+            ch_bioc_annot = Channel.value(params.genomes[ params.genome ].bioc_annot)
 
         } else if (params.genome_fasta && params.genes_gtf && params.blacklist) {
             println "Building a reference from provided genome fasta, gtf, and blacklist files"
@@ -71,6 +73,9 @@ workflow PREPARE_GENOME {
             ch_chrom_sizes = SPLIT_REF_CHROMS.out.chrom_sizes
             ch_chrom_dir = SPLIT_REF_CHROMS.out.chrom_dir
 
+            ch_bioc_txdb = Channel.value(params.bioc_txdb)
+            ch_bioc_annot = Channel.value(params.bioc_annot)
+
             WRITE_GENOME_CONFIG(
                 ch_fasta,
                 ch_genes_gtf,
@@ -79,7 +84,9 @@ workflow PREPARE_GENOME {
                 ch_chrom_sizes,
                 ch_chrom_dir,
                 ch_gene_info,
-                ch_gsize
+                ch_gsize,
+                ch_bioc_txdb,
+                ch_bioc_annot
             )
             println "Saving custom genome config in ${params.outdir}/genome"
 
@@ -95,4 +102,6 @@ workflow PREPARE_GENOME {
         chrom_dir = ch_chrom_dir
         gene_info = ch_gene_info
         effective_genome_size = ch_gsize
+        bioc_txdb = ch_bioc_txdb
+        bioc_annot = ch_bioc_annot
 }

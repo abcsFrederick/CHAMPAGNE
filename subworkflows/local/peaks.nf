@@ -32,6 +32,8 @@ workflow CALL_PEAKS {
         frag_lengths
         effective_genome_size
         genome_fasta
+        bioc_txdb
+        bioc_annot
 
     main:
         genome_frac = CALC_GENOME_FRAC(chrom_sizes, effective_genome_size)
@@ -154,8 +156,6 @@ workflow CALL_PEAKS {
         ch_consensus_peaks = CONSENSUS_PEAKS.out.peaks
 
         if (params.run.chipseeker) {
-            bioc_txdb = Channel.value(params.genomes[ params.genome ].bioc_txdb)
-            bioc_annot = Channel.value(params.genomes[ params.genome ].bioc_annot)
             // TODO: change consensus peak method to keep p-value, q-value, etc for use in chipseeker peakplots
             CHIPSEEKER_PEAKPLOT( ch_peaks, bioc_txdb, bioc_annot  )
             CHIPSEEKER_ANNOTATE( ch_consensus_peaks, bioc_txdb, bioc_annot )

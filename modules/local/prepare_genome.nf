@@ -139,6 +139,8 @@ process WRITE_GENOME_CONFIG {
         path(chrom_dir)
         path(gene_info)
         val(effective_genome_size)
+        val(bioc_txdb)
+        val(bioc_annot)
 
     output:
         path("*.config"), emit: conf
@@ -169,7 +171,9 @@ process WRITE_GENOME_CONFIG {
                   chrom_sizes = '"\${params.index_dir}/${genome_name}/${chrom_sizes}"',
                   gene_info = '"\${params.index_dir}/${genome_name}/${gene_info}"',
                   effective_genome_size = "${effective_genome_size}",
-                  meme_motifs = "null"
+                  meme_motifs = "null",
+                  bioc_txdb = "${bioc_txdb}",
+                  bioc_annot = "${bioc_annot}"
     )
     pprint.pprint(genome)
     with open('${genome_name}.config', 'w') as conf_file:
