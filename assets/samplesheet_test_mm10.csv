@@ -1,4 +1,4 @@
-sample,rep,fastq_1,fastq_2,antibody,control
-CTCF_ChIP_macrophage_p20,,/data/CCBR_Pipeliner/testdata/chipseq/SRR3081748_1.fastq.gz,,CTCF,WCE_p20
-CTCF_ChIP_MEF_p20,,/data/CCBR_Pipeliner/testdata/chipseq/SRR3081752_1.fastq.gz,,CTCF,WCE_p20
-WCE_p20,,/data/CCBR_Pipeliner/testdata/chipseq/SRR3081773_1.fastq.gz,,,
+sample,rep,fastq_1,fastq_2,antibody,control,diagnosis
+CTCF_ChIP_macrophage_p20,,/data/CCBR_Pipeliner/testdata/chipseq/SRR3081748_1.fastq.gz,,CTCF,WCE_p20,cancer
+CTCF_ChIP_MEF_p20,,/data/CCBR_Pipeliner/testdata/chipseq/SRR3081752_1.fastq.gz,,CTCF,WCE_p20,normal
+WCE_p20,,/data/CCBR_Pipeliner/testdata/chipseq/SRR3081773_1.fastq.gz,,,,
