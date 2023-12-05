@@ -22,39 +22,42 @@ txdb <- args$txdb %>%
   rlang::sym() %>%
   eval()
 
-np <- read.table(args$peak, sep = "\t")
-peak_colnames <- c(
-  "chrom",
-  "chromStart",
-  "chromEnd",
-  "name",
-  "score",
-  "strand",
-  "signalValue",
-  "pValue",
-  "qValue"
-)
-num_columns <- ncol(np)
-if (num_columns == 9) {
-  colnames(np) <- peak_colnames
-  np <- np %>% mutate(peak = NA)
-} else if (num_columns == 10) {
-  colnames(np) <- c(peak_colnames, "peak")
-} else {
-  stop(paste("Expected 9 or 10 columns in peak file, but", num_columns, "given"))
+read_peaks <- function(peak_file) {
+  peak_colnames <- c(
+    "chrom",
+    "start",
+    "end",
+    "peakID",
+    "score",
+    "strand",
+    "signal",
+    "pvalue",
+    "qvalue",
+    "peak"
+  )
+  peaks <- read.table(peak_file, sep = "\t")
+  if (!dplyr::between(ncol(peaks), 9, 10)) {
+    stop("Unexpected number of columns in peak file")
+  }
+  colnames(peaks) <- peak_colnames[seq_len(ncol(peaks))]
+  return(peaks)
 }
+np <- read_peaks(args$peak)
+
 # plots for individual peak file
 peaks <- GenomicRanges::GRanges(
   seqnames = np$chrom,
-  ranges = IRanges(np$chromStart, np$chromEnd),
-  qValue = np$qValue
+  ranges = IRanges(np$start, np$end),
+  pvalue = np$pvalue,
+  qvalue = np$qvalue
 )
+print(peaks)
 plots <- list(
-  covplot = covplot(peaks, weightCol = "qValue"),
+  covplot = covplot(peaks, weightCol = "qvalue"),
   plotPeakProf2 = plotPeakProf2(
     peak = peaks, upstream = rel(0.2), downstream = rel(0.2),
     conf = 0.95, by = "gene", type = "body", nbin = 800,
-    TxDb = txdb, weightCol = "qValue", ignore_strand = F
+    TxDb = txdb, weightCol = "qvalue", ignore_strand = TRUE
   )
 )
 

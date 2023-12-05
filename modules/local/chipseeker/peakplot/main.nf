@@ -1,12 +1,12 @@
 process CHIPSEEKER_PEAKPLOT {
-    tag "${meta.id}.${group}"
+    tag "${meta.id}"
     label 'peaks'
     label 'process_medium'
 
     container 'nciccbr/ccbr_chipseeker:1.1.2'
 
     input:
-        tuple val(meta), path(bed), val(group)
+        tuple val(meta), path(bed)
         val(txdb)
         val(annot_db)
 
@@ -17,7 +17,7 @@ process CHIPSEEKER_PEAKPLOT {
     """
     chipseeker_peakplot.R \\
         --peak ${bed} \\
-        --outfile-prefix ${meta.id}.${group} \\
+        --outfile-prefix ${meta.id} \\
         --genome-txdb ${txdb} \\
         --genome-annot ${annot_db}
     """
@@ -26,7 +26,7 @@ process CHIPSEEKER_PEAKPLOT {
     """
     for ftype in annotated.txt summary.txt genelist.txt annotation.Rds .png
     do
-        touch ${meta.id}.${group}.\${ftype}
+        touch ${meta.id}.\${ftype}
     done
     """
 }

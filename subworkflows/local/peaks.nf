@@ -16,12 +16,6 @@ include { CALC_GENOME_FRAC
           CONCAT_PEAK_META
           PLOT_PEAK_WIDTHS    } from "../../modules/local/peaks.nf"
 include { BAM_TO_BED          } from "../../modules/local/bedtools.nf"
-include { CONSENSUS_PEAKS     } from "../../modules/local/consensus_peaks"
-include { HOMER_MOTIFS        } from "../../modules/local/homer"
-include { MEME_AME            } from "../../modules/local/meme"
-include { CHIPSEEKER_ANNOTATE } from "../../modules/local/chipseeker/annotate"
-include { CHIPSEEKER_PLOTLIST } from "../../modules/local/chipseeker/plotlist"
-include { CHIPSEEKER_PEAKPLOT } from "../../modules/local/chipseeker/peakplot"
 
 workflow CALL_PEAKS {
     take:
@@ -31,10 +25,6 @@ workflow CALL_PEAKS {
         deduped_bam
         frag_lengths
         effective_genome_size
-        genome_fasta
-        meme_motifs
-        bioc_txdb
-        bioc_annot
 
     main:
         genome_frac = CALC_GENOME_FRAC(chrom_sizes, effective_genome_size)
@@ -134,51 +124,7 @@ workflow CALL_PEAKS {
             .mix(PLOT_JACCARD.out)
             .mix(PLOT_PEAK_WIDTHS.out)
 
-        // consensus peak calling on replicates
-        ch_peaks
-            .map{ meta, bed, tool ->
-                [ "${meta.sample_basename}_${tool}", meta, bed, tool,]
-            }
-            .groupTuple(by: 0) // group by the sample_basename and peak-calling tool
-            .set{ peak_reps }
-        // assert that sample_basenames & tools match
-        peak_reps.subscribe { basename_tool, metas, beds, tools ->
-            assert metas.collect{ it.sample_basename }.toSet().size() == 1
-            assert tools.toSet().size() == 1
-        }
-        peak_reps
-            .map { basename_tool, metas, beds, tools ->
-                [ [id: metas[0].sample_basename, group: tools[0]], beds ]
-            }
-            .set{
-                peaks_grouped
-            }
-        peaks_grouped | CONSENSUS_PEAKS
-        ch_consensus_peaks = CONSENSUS_PEAKS.out.peaks
-
-        if (params.run.chipseeker && bioc_txdb && bioc_annot) {
-            // TODO: change consensus peak method to keep p-value, q-value, etc for use in chipseeker peakplots
-            CHIPSEEKER_PEAKPLOT( ch_peaks, bioc_txdb, bioc_annot  )
-            CHIPSEEKER_ANNOTATE( ch_consensus_peaks, bioc_txdb, bioc_annot )
-            CHIPSEEKER_ANNOTATE.out.annot.collect() | CHIPSEEKER_PLOTLIST
-            ch_plots = ch_plots.mix(
-                CHIPSEEKER_PLOTLIST.out.plots
-            )
-        }
-        if (params.run.homer) {
-            HOMER_MOTIFS(ch_consensus_peaks.combine(genome_fasta),
-                         params.homer.de_novo,
-                         file(params.homer.jaspar_db, checkIfExists: true)
-                        )
-
-            if (params.run.meme && meme_motifs) {
-                MEME_AME(HOMER_MOTIFS.out.ame,
-                         meme_motifs
-                        )
-            }
-        }
-
     emit:
-        peaks = ch_bam_peaks
+        peaks = ch_peaks
         plots = ch_plots
 }
