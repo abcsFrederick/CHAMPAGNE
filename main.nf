@@ -18,7 +18,6 @@ log.info """\
          .stripIndent()
 
 // SUBWORKFLOWS
-
 include { INPUT_CHECK              } from './subworkflows/local/input_check.nf'
 include { PREPARE_GENOME           } from './subworkflows/local/prepare_genome.nf'
 include { FILTER_BLACKLIST         } from './subworkflows/CCBR/filter_blacklist/'
@@ -31,10 +30,10 @@ include { ANNOTATE                 } from './subworkflows/local/annotate.nf'
 
 // MODULES
 include { CUTADAPT                 } from "./modules/CCBR/cutadapt"
-include { PHANTOM_PEAKS            } from "./modules/local/qc.nf"
-include { PPQT_PROCESS
+include { PHANTOM_PEAKS
+          PPQT_PROCESS
           MULTIQC                  } from "./modules/local/qc.nf"
-include { NORMALIZE_INPUT          } from "./modules/local/deeptools.nf"
+include { CHECK_CONTRASTS          } from "./modules/local/check_contrasts/"
 
 workflow.onComplete {
     if (!workflow.stubRun && !workflow.commandLine.contains('-preview')) {
@@ -55,7 +54,12 @@ workflow {
 }
 
 workflow CHIPSEQ {
-    INPUT_CHECK(file(params.input), params.seq_center)
+    sample_sheet = file(params.input, checkIfExists: true)
+    INPUT_CHECK(sample_sheet, params.seq_center)
+    if (params.contrasts) {
+        CHECK_CONTRASTS(sample_sheet, file(params.contrasts, checkIfExists: true))
+    }
+
     INPUT_CHECK.out.reads.set { raw_fastqs }
     raw_fastqs | CUTADAPT
     CUTADAPT.out.reads.set{ trimmed_fastqs }
@@ -110,6 +114,18 @@ workflow CHIPSEQ {
                  PREPARE_GENOME.out.bioc_annot)
         ch_multiqc = ch_multiqc.mix(CALL_PEAKS.out.plots, ANNOTATE.out.plots)
 
+        // retrieve sample basename and peak-calling tool from metadata
+        CONSENSUS_PEAKS.out.peaks
+            .map{ meta, bed ->
+                meta_split = meta.id.tokenize('.')
+                assert meta_split.size() == 2
+                [ [ id: meta_split[0], tool: meta_split[1] ], bed ]
+            }
+            .set{ ch_consensus_peaks }
+        if (params.contrasts) {
+            CHECK_CONTRASTS.out.csv
+                .flatten() | view
+        }
     }
 
     MULTIQC(

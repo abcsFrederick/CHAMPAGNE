@@ -6,14 +6,15 @@ library(glue)
 main <- function(contrasts_filename = "${contrasts}",
                  samplesheet_filename = "${samplesheet}",
                  output_basename = "${output_basename}",
-                 versions_filename = "versions.yml") {
-  write_version(versions_filename)
+                 versions_filename = "versions.yml",
+                 process_name = "${task.process}") {
+  write_version(versions_filename, process_name = process_name)
   contrasts_lst <- yaml::read_yaml(contrasts_filename)
   samples_df <- readr::read_csv(samplesheet_filename)
 
   assert_that(
     all(unlist(contrasts_lst) %in% (samples_df %>% dplyr::pull(sample))),
-    glue("All sample names in contrasts must also be in the sample sheet")
+    msg = glue("All sample names in contrasts must also be in the sample sheet")
   )
   names(contrasts_lst) %>% lapply(check_contrast, contrasts_lst)
   names(contrasts_lst) %>% lapply(
@@ -22,14 +23,16 @@ main <- function(contrasts_filename = "${contrasts}",
   )
 }
 
+#' Ensure contrast has exactly two groups to compare
 check_contrast <- function(contrast_name, contrasts_lst) {
   contrast_len <- length(contrasts_lst[[contrast_name]])
   assert_that(
     contrast_len == 2,
-    glue("Contrasts must have only two groups per comparison, but {contrast_name} has {contrast_len}")
+    msg = glue("Contrasts must have only two groups per comparison, but {contrast_name} has {contrast_len}")
   )
 }
 
+#' Combine sample sheet with contrast group
 write_contrast_samplesheet <- function(contrast_name, contrasts_lst, samples_df, output_basename) {
   contrast_df <- contrasts_lst[[contrast_name]] %>%
     tibble::as_tibble() %>%
@@ -42,12 +45,20 @@ write_contrast_samplesheet <- function(contrast_name, contrasts_lst, samples_df,
     readr::write_csv(glue("{output_basename}.{contrast_name}.csv"))
 }
 
-get_version <- function() {
+#' Get R version as a semantic versioning string
+get_r_version <- function() {
   return(paste0(R.version[["major"]], ".", R.version[["minor"]]))
 }
 
-write_version <- function(version_file) {
-  write_lines(get_version(), version_file)
+#' Write R version to a yaml file
+write_version <- function(version_file, process_name = "${task.process}") {
+  readr::write_lines(
+    glue('"{process_name}":',
+      "R: {get_r_version()}",
+      .sep = "\\n\\t"
+    ),
+    version_file
+  )
 }
 
 main()

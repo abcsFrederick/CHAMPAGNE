@@ -5,13 +5,14 @@ process CHECK_CONTRASTS {
     container 'nciccbr/consensus_peaks:v1.1'
 
     input:
-        path(samplesheet), path(contrasts)
+        path(samplesheet)
+        path(contrasts)
 
     output:
         path("*.csv"),        emit: csv
         path("versions.yml"), emit: versions
 
     script:
-    output_filename = "contrasts.valid.csv"
+    output_basename = "sample_contrasts"
     template 'check_contrasts.R'
 }

@@ -3,3 +3,8 @@ timepoint:
     - SPT5_T0
   T15:
     - SPT5_T15
+condition:
+  control:
+    - SPT5_T0
+  treatment:
+    - SPT5_T15
