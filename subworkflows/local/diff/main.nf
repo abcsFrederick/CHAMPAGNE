@@ -22,16 +22,15 @@ workflow DIFF {
         bam_peaks
             .combine( contrasts )
             .map{ sample_basename1, peak_meta, bam, bai, peak, ctrl_bam, ctrl_bai, sample_basename2, con_meta ->
-                sample_basename1 == sample_basename2 ? [ "${meta.contrast}.${meta.tool}", peak_meta + con_meta, bam, bai, peak, ctrl_bam, ctrl_bai ] : null
+                sample_basename1 == sample_basename2 ? [ peak_meta + con_meta, bam, bai, peak, ctrl_bam, ctrl_bai ] : null
             }
             .unique()
-            .groupTuple()
-            .map{ it -> // drop meta.contrast
-              it[1..-1]
-            }
             .set{ ch_peaks_contrasts }
-        ch_peaks_contrasts | view
         ch_peaks_contrasts | PREP_DIFFBIND
+        PREP_DIFFBIND.out.csv
+            .collectFile(storeDir: "${params.outdir}/diffbind/contrasts") { meta, row ->
+                [ "${meta.contrast}.${meta.tool}.csv", row + '\n' ]
+            }
     emit:
         diff_peaks = bam_peaks
 

@@ -23,13 +23,15 @@ main <- function(contrasts_filename = "${contrasts}",
   )
 }
 
-#' Ensure contrast has exactly two groups to compare
+#' Check an individual contrast comparison
 check_contrast <- function(contrast_name, contrasts_lst) {
+  # Ensure contrast has exactly two groups to compare
   contrast_len <- length(contrasts_lst[[contrast_name]])
   assert_that(
     contrast_len == 2,
     msg = glue("Contrasts must have only two groups per comparison, but {contrast_name} has {contrast_len}")
   )
+  # TODO: check that each sample only appears in one group
 }
 
 #' Combine sample sheet with contrast group
