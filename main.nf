@@ -27,13 +27,13 @@ include { QC                       } from './subworkflows/local/qc.nf'
 include { CALL_PEAKS               } from './subworkflows/local/peaks.nf'
 include { CONSENSUS_PEAKS          } from './subworkflows/CCBR/consensus_peaks/'
 include { ANNOTATE                 } from './subworkflows/local/annotate.nf'
+include { DIFF                     } from './subworkflows/local/diff/'
 
 // MODULES
 include { CUTADAPT                 } from "./modules/CCBR/cutadapt"
 include { PHANTOM_PEAKS
           PPQT_PROCESS
           MULTIQC                  } from "./modules/local/qc.nf"
-include { CHECK_CONTRASTS          } from "./modules/local/check_contrasts/"
 
 workflow.onComplete {
     if (!workflow.stubRun && !workflow.commandLine.contains('-preview')) {
@@ -54,11 +54,7 @@ workflow {
 }
 
 workflow CHIPSEQ {
-    sample_sheet = file(params.input, checkIfExists: true)
-    INPUT_CHECK(sample_sheet, params.seq_center)
-    if (params.contrasts) {
-        CHECK_CONTRASTS(sample_sheet, file(params.contrasts, checkIfExists: true))
-    }
+    INPUT_CHECK(file(params.input, checkIfExists: true), params.seq_center)
 
     INPUT_CHECK.out.reads.set { raw_fastqs }
     raw_fastqs | CUTADAPT
@@ -119,12 +115,13 @@ workflow CHIPSEQ {
             .map{ meta, bed ->
                 meta_split = meta.id.tokenize('.')
                 assert meta_split.size() == 2
-                [ [ id: meta_split[0], tool: meta_split[1] ], bed ]
+                [ [ sample_basename: meta_split[0], tool: meta_split[1] ], bed ]
             }
             .set{ ch_consensus_peaks }
         if (params.contrasts) {
-            CHECK_CONTRASTS.out.csv
-                .flatten() | view
+            contrasts = file(params.contrasts, checkIfExists: true)
+            DIFF( ch_consensus_peaks, INPUT_CHECK.out.csv, contrasts )
+
         }
     }
 
