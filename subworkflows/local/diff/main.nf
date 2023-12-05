@@ -1,8 +1,9 @@
 include { CHECK_CONTRASTS          } from "../../../modules/local/check_contrasts/"
+include { PREP_DIFFBIND            } from "../../../modules/local/diffbind/prep/"
 
 workflow DIFF {
     take:
-        peaks
+        bam_peaks
         samplesheet_file
         contrasts_file
 
@@ -17,20 +18,27 @@ workflow DIFF {
                 [ meta.sample_basename, [group: meta.group, contrast: meta.contrast] ]
             }
             .set{ contrasts }
-        peaks.map{ meta, bed ->
-            [ meta.sample_basename, meta, bed]
+        bam_peaks.map{ meta, bam, bai, peak, tool ->
+            [ meta.sample_basename, meta + [tool: tool], bam, bai, peak ]
             }
-            .cross( contrasts )
-            .map{ it.flatten() }
-            .map{ sample_basename1, peak_meta, bed, sample_basename2, con_meta ->
-                assert sample_basename1 == sample_basename2
-                meta = peak_meta + con_meta
-                [ meta, bed ]
+            .combine( contrasts )
+            .map{ sample_basename1, peak_meta, bam, bai, peak, sample_basename2, con_meta ->
+                sample_basename1 == sample_basename2 ? [ peak_meta + con_meta, bam, bai, peak ] : null
             }
+            .unique()
             .set{ ch_peaks_contrasts }
-
+        ch_peaks_contrasts
+            .map{ meta, bam, bai, peak ->
+                [ "${meta.contrast}.${meta.tool}", meta, bam, bai, peak ]
+            }
+            .groupTuple()
+            .map{ it -> // drop meta.contrast
+              it[1..-1]
+            }
+            .view()
+            | PREP_DIFFBIND
     emit:
-        diff_peaks = peaks
+        diff_peaks = bam_peaks
 
 }
 
