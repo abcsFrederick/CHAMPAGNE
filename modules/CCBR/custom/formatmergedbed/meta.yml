@@ -1,0 +1,50 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/yaml-schema.json
+name: "custom_formatmergedbed"
+description: |
+  Reformat consensus peaks from bedtools merge.
+  Used in the consensus_peaks subworkflow.
+keywords:
+  - chipseq
+  - peaks
+  - consensus
+  - bedtools
+tools:
+  - "R":
+      description: "R is a free software environment for statistical computing and graphics"
+      homepage: "https://www.r-project.org/"
+      licence: ["GPL-3"]
+
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. `[ id:'test', single_end:false ]`
+  - merged_bed:
+      type: file
+      description: |
+        Merged output file from calling
+        `bedtools merge -c 1,5,6,7,8,9 -o count,collapse,collapse,collapse,collapse,collapse`
+        on a concatenated & sorted peak file
+      pattern: "*.bed"
+
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. `[ id:'test', single_end:false ]`
+  - bed:
+      type: file
+      description: |
+        A narrow peak bed file with the best p-value for each consensus peak
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+
+authors:
+  - "@kelly-sovacool"
+maintainers:
+  - "@kelly-sovacool"

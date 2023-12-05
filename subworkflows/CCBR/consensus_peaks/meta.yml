@@ -1,0 +1,47 @@
+name: "consensus_peaks"
+description: |
+  Find consensus peaks from peak files, and optionally perform normalization.
+  This is an alternative to the custom/consensuspeaks module.
+keywords:
+  - peaks
+  - chipseq
+  - normalization
+  - consensus
+components:
+  - bedtools/merge
+  - cat/cat
+  - custom/normalizepeaks
+  - custom/formatmergedbed
+  - sort/bed
+input:
+  - ch_peaks:
+      type: file
+      description: |
+        The input channel containing the peak files.
+        Structure: [ val(meta), path(peak) ].
+        Meta must contain a `group` variable by which the peaks will be grouped for consensus calling.
+      pattern: "*.{bed/narrowPeak/broadPeak}"
+  - normalize:
+      type: boolean
+      description: |
+        Whether to normalize p-values and q-values for consensus peaks.
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. `[ id:'test', single_end:false ]`
+  - peaks:
+      type: file
+      description: A single consensus peak file for each meta.group
+      pattern: "*.{broadPeak,narrowPeak,bed}"
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+        Structure: [ path(versions.yml) ]
+      pattern: "versions.yml"
+authors:
+  - "@kelly-sovacool"
+maintainers:
+  - "@kelly-sovacool"

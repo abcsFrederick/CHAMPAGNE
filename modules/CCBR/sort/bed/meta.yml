@@ -1,0 +1,47 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/yaml-schema.json
+name: "sort_bed"
+description: sort a bed file by chromosome then by start position
+keywords:
+  - sort
+  - bed
+  - genomics
+tools:
+  - "GNU_coreutils":
+      description: "The GNU Core Utilities are the basic file, shell and text manipulation utilities of the GNU operating system. These are the core utilities which are expected to exist on every operating system."
+      homepage: "https://www.gnu.org/software/coreutils/"
+      licence: ["GPL-3.0"]
+
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. `[ id:'test', single_end:false ]`
+
+  - bed:
+      type: file
+      description: BED file, or any tab-delimited text file with at least two columns
+      pattern: "*.bed"
+
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. `[ id:'test', single_end:false ]`
+
+  - bed:
+      type: file
+      description: input file sorted by first and second columns
+      pattern: "*.bed"
+
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+
+authors:
+  - "@kelly-sovacool"
+maintainers:
+  - "@kelly-sovacool"

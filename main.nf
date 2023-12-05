@@ -21,12 +21,13 @@ log.info """\
 
 include { INPUT_CHECK              } from './subworkflows/local/input_check.nf'
 include { PREPARE_GENOME           } from './subworkflows/local/prepare_genome.nf'
-include { FILTER_BLACKLIST         } from './subworkflows/CCBR/filter_blacklist'
+include { FILTER_BLACKLIST         } from './subworkflows/CCBR/filter_blacklist/'
 include { ALIGN_GENOME             } from "./subworkflows/local/align.nf"
 include { DEDUPLICATE              } from "./subworkflows/local/deduplicate.nf"
 include { QC                       } from './subworkflows/local/qc.nf'
 include { CALL_PEAKS               } from './subworkflows/local/peaks.nf'
-
+include { CONSENSUS_PEAKS          } from './subworkflows/CCBR/consensus_peaks/'
+include { ANNOTATE                 } from './subworkflows/local/annotate.nf'
 
 // MODULES
 include { CUTADAPT                 } from "./modules/CCBR/cutadapt"
@@ -92,13 +93,23 @@ workflow CHIPSEQ {
                    deduped_tagalign,
                    deduped_bam,
                    frag_lengths,
-                   effective_genome_size,
-                   PREPARE_GENOME.out.fasta,
-                   PREPARE_GENOME.out.meme_motifs,
-                   PREPARE_GENOME.out.bioc_txdb,
-                   PREPARE_GENOME.out.bioc_annot
+                   effective_genome_size
                    )
-        ch_multiqc = ch_multiqc.mix(CALL_PEAKS.out.plots)
+
+        // consensus peak calling on replicates
+        ch_peaks_grouped = CALL_PEAKS.out.peaks
+            .map{ meta, bed, tool ->
+                [ [ group: "${meta.sample_basename}.${tool}" ], bed ]
+            }
+        CONSENSUS_PEAKS( ch_peaks_grouped, params.run.normalize_peaks )
+
+        ANNOTATE(CONSENSUS_PEAKS.out.peaks,
+                 PREPARE_GENOME.out.fasta,
+                 PREPARE_GENOME.out.meme_motifs,
+                 PREPARE_GENOME.out.bioc_txdb,
+                 PREPARE_GENOME.out.bioc_annot)
+        ch_multiqc = ch_multiqc.mix(CALL_PEAKS.out.plots, ANNOTATE.out.plots)
+
     }
 
     MULTIQC(

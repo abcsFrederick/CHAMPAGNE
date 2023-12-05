@@ -1,5 +1,5 @@
 process HOMER_MOTIFS {
-    tag "${meta.id}.${meta.group}"
+    tag "${meta.id}"
     label 'peaks'
     label 'process_medium'
 
@@ -11,8 +11,8 @@ process HOMER_MOTIFS {
         path(motif_db)
 
     output:
-        tuple val(meta), path("${meta.id}.${meta.group}_homer/*"), emit: motifs
-        tuple val(meta), path("${meta.id}.${meta.group}_homer/background.fa"), path("${meta.id}.${meta.group}_homer/target.fa"), emit: ame
+        tuple val(meta), path("${meta.id}_homer/*"), emit: motifs
+        tuple val(meta), path("${meta.id}_homer/background.fa"), path("${meta.id}_homer/target.fa"), emit: ame
 
     script:
     def args = de_novo ? "" : " -nomotif "
@@ -20,7 +20,7 @@ process HOMER_MOTIFS {
     findMotifsGenome.pl \\
         ${bed} \\
         ${genome_fasta} \\
-        ${meta.id}.${meta.group}_homer/ \\
+        ${meta.id}_homer/ \\
         -mknown ${motif_db} \\
         -size given \\
         -p ${task.cpus} \\
@@ -32,7 +32,7 @@ process HOMER_MOTIFS {
 
     stub:
     """
-    mkdir ${meta.id}.${meta.group}_homer/
-    touch ${meta.id}.${meta.group}_homer/background.fa ${meta.id}.${meta.group}_homer/target.fa
+    mkdir ${meta.id}_homer/
+    touch ${meta.id}_homer/background.fa ${meta.id}_homer/target.fa
     """
 }
