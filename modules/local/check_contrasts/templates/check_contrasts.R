@@ -13,7 +13,7 @@ main <- function(contrasts_filename = "${contrasts}",
   samples_df <- readr::read_csv(samplesheet_filename)
 
   assert_that(
-    all(unlist(contrasts_lst) %in% (samples_df %>% dplyr::pull(sample))),
+    all(unlist(contrasts_lst) %in% (samples_df %>% dplyr::pull(sample_basename))),
     msg = glue("All sample names in contrasts must also be in the sample sheet")
   )
   names(contrasts_lst) %>% lapply(check_contrast, contrasts_lst)
@@ -38,10 +38,12 @@ write_contrast_samplesheet <- function(contrast_name, contrasts_lst, samples_df,
     tibble::as_tibble() %>%
     tidyr::pivot_longer(
       cols = everything(),
-      names_to = "group", values_to = "sample"
-    )
+      names_to = "group", values_to = "sample_basename"
+    ) %>%
+    mutate(contrast = contrast_name)
+  print(head(contrast_df))
   samples_df %>%
-    dplyr::inner_join(contrast_df) %>%
+    dplyr::inner_join(contrast_df, by = "sample_basename") %>%
     readr::write_csv(glue("{output_basename}.{contrast_name}.csv"))
 }
 
