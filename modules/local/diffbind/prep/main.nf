@@ -6,9 +6,12 @@ process PREP_DIFFBIND {
         tuple val(metas), path(bams), path(bais), path(peaks)
 
     output:
-        path("*.csv")
+        tuple val(new_meta), path("*.csv"), emit: csv
 
     script:
+    assert metas*.contrast.toSet().size() == 1
+    assert metas*.tool.toSet().size() == 1
+    new_meta = [contrast: metas[0].contrast, tool: metas[0].tool]
     def csv_text = [['sampleID', "replicate", 'condition', 'bam', 'bai', 'peak']]
     [metas, bams, bais, peaks]
         .transpose()
