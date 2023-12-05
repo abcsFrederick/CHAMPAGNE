@@ -1,6 +1,7 @@
 // source: https://github.com/nf-core/chipseq/blob/51eba00b32885c4d0bec60db3cb0a45eb61e34c5/modules/local/samplesheet_check.nf
 process SAMPLESHEET_CHECK {
     tag "$samplesheet"
+    label 'process_single'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/python:3.8.3' :
