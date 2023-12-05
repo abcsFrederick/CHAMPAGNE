@@ -120,7 +120,8 @@ workflow CHIPSEQ {
             .set{ ch_consensus_peaks }
         if (params.contrasts) {
             contrasts = file(params.contrasts, checkIfExists: true)
-            DIFF( ch_consensus_peaks, INPUT_CHECK.out.csv, contrasts )
+            // TODO use consensus peaks for regions of interest in diffbind
+            DIFF( CALL_PEAKS.out.bam_peaks, INPUT_CHECK.out.csv, contrasts )
 
         }
     }

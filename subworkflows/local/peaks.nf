@@ -104,9 +104,8 @@ workflow CALL_PEAKS {
             .map{  meta1, bam, bai, meta2, peak, tool ->
                 meta1 == meta2 ? [ meta1, bam, bai, peak, tool ] : null
             }
-            .combine(chrom_sizes)
             .set{ ch_bam_peaks }
-        ch_bam_peaks | FRACTION_IN_PEAKS
+        ch_bam_peaks.combine(chrom_sizes) | FRACTION_IN_PEAKS
         FRACTION_IN_PEAKS.out.collect() | CONCAT_FRIPS | PLOT_FRIP
 
         ch_peaks
@@ -117,7 +116,7 @@ workflow CALL_PEAKS {
             .combine(chrom_sizes) | JACCARD_INDEX
         JACCARD_INDEX.out.collect() | CONCAT_JACCARD | PLOT_JACCARD
 
-        ch_bam_peaks | GET_PEAK_META
+        ch_bam_peaks.combine(chrom_sizes) | GET_PEAK_META
         GET_PEAK_META.out.collect() | CONCAT_PEAK_META | PLOT_PEAK_WIDTHS
 
         ch_plots = PLOT_FRIP.out
@@ -126,5 +125,6 @@ workflow CALL_PEAKS {
 
     emit:
         peaks = ch_peaks
+        bam_peaks = ch_bam_peaks
         plots = ch_plots
 }
