@@ -17,26 +17,21 @@ workflow DIFF {
                 meta = get_contrast_meta(it)
                 [ meta.sample_basename, [group: meta.group, contrast: meta.contrast] ]
             }
+            .unique()
             .set{ contrasts }
-        bam_peaks.map{ meta, bam, bai, peak, tool ->
-            [ meta.sample_basename, meta + [tool: tool], bam, bai, peak ]
-            }
+        bam_peaks
             .combine( contrasts )
-            .map{ sample_basename1, peak_meta, bam, bai, peak, sample_basename2, con_meta ->
-                sample_basename1 == sample_basename2 ? [ peak_meta + con_meta, bam, bai, peak ] : null
+            .map{ sample_basename1, peak_meta, bam, bai, peak, ctrl_bam, ctrl_bai, sample_basename2, con_meta ->
+                sample_basename1 == sample_basename2 ? [ "${meta.contrast}.${meta.tool}", peak_meta + con_meta, bam, bai, peak, ctrl_bam, ctrl_bai ] : null
             }
             .unique()
-            .set{ ch_peaks_contrasts }
-        ch_peaks_contrasts
-            .map{ meta, bam, bai, peak ->
-                [ "${meta.contrast}.${meta.tool}", meta, bam, bai, peak ]
-            }
             .groupTuple()
             .map{ it -> // drop meta.contrast
               it[1..-1]
             }
-            .view()
-            | PREP_DIFFBIND
+            .set{ ch_peaks_contrasts }
+        ch_peaks_contrasts | view
+        ch_peaks_contrasts | PREP_DIFFBIND
     emit:
         diff_peaks = bam_peaks
 

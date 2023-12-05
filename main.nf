@@ -121,7 +121,12 @@ workflow CHIPSEQ {
         if (params.contrasts) {
             contrasts = file(params.contrasts, checkIfExists: true)
             // TODO use consensus peaks for regions of interest in diffbind
-            DIFF( CALL_PEAKS.out.bam_peaks, INPUT_CHECK.out.csv, contrasts )
+            bam_peaks = CALL_PEAKS.out.bam_peaks
+                .combine(deduped_bam)
+                .map{meta1, bam1, bai1, peak, tool, meta2, bam2, bai2 ->
+                    meta1.control == meta2.id ? [ meta1.sample_basename, meta1 + [tool: tool], bam1, bai1, peak, bam2, bai2 ] : null
+                }
+            DIFF( bam_peaks, INPUT_CHECK.out.csv, contrasts )
 
         }
     }
