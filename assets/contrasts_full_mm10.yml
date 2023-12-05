@@ -1,0 +1,12 @@
+antibody:
+    p20:
+      - CTCF_ChIP_macrophage_p20
+      - CTCF_ChIP_MEF_p20
+    p3:
+      - CTCF_ChIP_macrophage_p3
+celltype:
+    macrophage:
+      - CTCF_ChIP_macrophage_p20
+      - CTCF_ChIP_macrophage_p3
+    cancer:
+      - CTCF_ChIP_MEF_p20
