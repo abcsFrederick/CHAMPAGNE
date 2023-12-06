@@ -29,7 +29,7 @@ workflow DIFF {
         ch_peaks_contrasts | PREP_DIFFBIND
         PREP_DIFFBIND.out.csv
             .collectFile(storeDir: "${params.outdir}/diffbind/contrasts") { meta, row ->
-                [ "${meta.contrast}.${meta.tool}.csv", row + '\n' ]
+                [ "${meta.contrast}.${meta.tool}.csv", row ]
             }
     emit:
         diff_peaks = bam_peaks
