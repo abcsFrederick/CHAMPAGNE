@@ -1,5 +1,6 @@
-include { CHECK_CONTRASTS          } from "../../../modules/local/check_contrasts/"
-include { PREP_DIFFBIND            } from "../../../modules/local/diffbind/prep/"
+include { CHECK_CONTRASTS   } from "../../../modules/local/check_contrasts/"
+include { PREP_DIFFBIND     } from "../../../modules/local/diffbind/prep/"
+include { RMARKDOWNNOTEBOOK } from '../../../modules/nf-core/rmarkdownnotebook/'
 
 workflow DIFF {
     take:
@@ -27,10 +28,45 @@ workflow DIFF {
             .unique()
             .set{ ch_peaks_contrasts }
         ch_peaks_contrasts | PREP_DIFFBIND
+
+        ch_peaks_contrasts
+            .map{ meta, bam, bai, peak, ctrl_bam, ctrl_bai ->
+                [ [contrast: meta.contrast, tool: meta.tool], [bam, bai, peak, ctrl_bam, ctrl_bai] ]
+            }
+            .groupTuple()
+            .map{ meta, files ->
+                [ meta, files.flatten().unique() ]
+            }
+            .set{ data_files }
+
         PREP_DIFFBIND.out.csv
             .collectFile(storeDir: "${params.outdir}/diffbind/contrasts") { meta, row ->
                 [ "${meta.contrast}.${meta.tool}.csv", row ]
             }
+            .map{ contrast_file ->
+                meta = [:]
+                meta_list = contrast_file.baseName.tokenize('.')
+                meta.contrast = meta_list[0]
+                meta.tool = meta_list[1]
+                [ meta, contrast_file ]
+            }
+            .cross(data_files)
+            .map{ contrast, files ->
+                meta = contrast[0]
+                meta.csvfile = contrast[1]
+                file_list = [contrast[1], files[1]].flatten().unique()
+                [ meta, file_list ] // meta, csv, filelist
+            }
+            .set{contrast_files}
+        contrast_files
+            .combine(Channel.fromPath(file(params.diffbind.report, checkIfExists: true)))
+            .map{ meta, files, rmarkdown ->
+                [ meta, rmarkdown ]
+            }
+            .set{ch_rmarkdown}
+        contrast_files.map{ meta, files -> files}.flatten().unique().collect().set{file_list}
+        RMARKDOWNNOTEBOOK( ch_rmarkdown, [], file_list )
+
     emit:
         diff_peaks = bam_peaks
 

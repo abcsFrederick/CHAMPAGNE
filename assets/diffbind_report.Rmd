@@ -6,8 +6,8 @@ output:
         toc_depth: 2
 params:
     csvfile: samplesheet.csv
-    contrast: "group1_vs_group2"
-    tool: "macs"
+    contrasts: "group1_vs_group2"
+    peakcaller: "macs"
 ---
 
 <!--
@@ -18,8 +18,8 @@ source: https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4
 dateandtime <- format(Sys.time(), "%a %b %d %Y - %X")
 
 csvfile <- params$csvfile
-contrasts <- params$contrast
-peakcaller <- params$tool
+contrasts <- params$contrasts
+peakcaller <- params$peakcaller
 ```
 
 ### **Groups being compared:**
