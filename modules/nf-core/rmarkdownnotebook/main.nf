@@ -4,13 +4,7 @@ process RMARKDOWNNOTEBOOK {
     tag "$meta.id"
     label 'process_low'
 
-    //NB: You likely want to override this with a container containing all required
-    //dependencies for your analysis. The container at least needs to contain the
-    //yaml and rmarkdown R packages.
-    conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-31ad840d814d356e5f98030a4ee308a16db64ec5:0e852a1e4063fdcbe3f254ac2c7469747a60e361-0' :
-        'biocontainers/mulled-v2-31ad840d814d356e5f98030a4ee308a16db64ec5:0e852a1e4063fdcbe3f254ac2c7469747a60e361-0' }"
+    container 'nciccbr/ccbr_diffbind:v1'
 
     input:
     tuple val(meta), path(notebook)
@@ -126,6 +120,18 @@ process RMARKDOWNNOTEBOOK {
         ${indent_code_block(render_cmd, 8)}
         writeLines(capture.output(sessionInfo()), "session_info.log")
     EOF
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        rmarkdown: \$(Rscript -e "cat(paste(packageVersion('rmarkdown'), collapse='.'))")
+    END_VERSIONS
+    """
+
+    stub:
+    """
+    touch ${notebook.baseName}.html
+
+    R -e 'writeLines(capture.output(sessionInfo()), "session_info.log")'
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
