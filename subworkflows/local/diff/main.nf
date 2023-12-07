@@ -57,6 +57,10 @@ workflow DIFF {
 
         contrast_meta
             .combine(Channel.fromPath(file(params.diffbind.report, checkIfExists: true)))
+            .map{ meta, rmd ->
+                meta.id = "${meta.contrast}.${meta.tool}"
+                [ meta, rmd ]
+            }
             .set{ch_rmarkdown}
 
         RMARKDOWNNOTEBOOK( ch_rmarkdown, [], ch_data_files )
