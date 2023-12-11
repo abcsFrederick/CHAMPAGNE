@@ -1,14 +1,13 @@
 include { dump_params_yml; indent_code_block } from "./parametrize"
 
 process RMARKDOWNNOTEBOOK {
-    tag "$meta.id"
+    tag { meta.id }
     label 'process_low'
 
     container 'nciccbr/ccbr_diffbind:v1'
 
     input:
-    tuple val(meta), path(notebook)
-    val parameters
+    tuple val(meta), val(parameters), path(notebook)
     path input_files
 
     output:

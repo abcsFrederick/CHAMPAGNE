@@ -1,8 +1,12 @@
 Changes in module 'nf-core/rmarkdownnotebook'
 --- modules/nf-core/rmarkdownnotebook/main.nf
 +++ modules/nf-core/rmarkdownnotebook/main.nf
-@@ -4,13 +4,7 @@
-     tag "$meta.id"
+@@ -1,20 +1,13 @@
+ include { dump_params_yml; indent_code_block } from "./parametrize"
+
+ process RMARKDOWNNOTEBOOK {
+-    tag "$meta.id"
++    tag { meta.id }
      label 'process_low'
 
 -    //NB: You likely want to override this with a container containing all required
@@ -15,8 +19,13 @@ Changes in module 'nf-core/rmarkdownnotebook'
 +    container 'nciccbr/ccbr_diffbind:v1'
 
      input:
-     tuple val(meta), path(notebook)
-@@ -132,4 +126,16 @@
+-    tuple val(meta), path(notebook)
+-    val parameters
++    tuple val(meta), val(parameters), path(notebook)
+     path input_files
+
+     output:
+@@ -132,4 +125,16 @@
          rmarkdown: \$(Rscript -e "cat(paste(packageVersion('rmarkdown'), collapse='.'))")
      END_VERSIONS
      """

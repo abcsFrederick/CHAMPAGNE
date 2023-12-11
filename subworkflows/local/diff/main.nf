@@ -34,36 +34,35 @@ workflow DIFF {
                 [ "${meta.contrast}.${meta.tool}.csv", row ]
             }
             .map{ contrast_file ->
-                meta = [:]
+                params = [:]
                 meta_list = contrast_file.baseName.tokenize('.')
-                meta.contrast = meta_list[0]
-                meta.tool = meta_list[1]
-                meta.csvfile = contrast_file.baseName
-                [ meta, contrast_file ]
+                params.csvfile = contrast_file.getName()
+                params.contrast = meta_list[0]
+                params.tool = meta_list[1]
+
+                meta = [:]
+                meta.id = "${params.contrast}.${params.tool}"
+
+                [ meta, params, contrast_file ]
             }
-            .tap{contrast_file} // [ meta, contrast]
-            .map{ meta, file -> meta }
-            .set{contrast_meta} // [ meta ]
+            .set{ contrast_files } // [ meta, params, contrast ]
 
         ch_peaks_contrasts
             .map{ meta, bam, bai, peak, ctrl_bam, ctrl_bai ->
                 [bam, bai, peak, ctrl_bam, ctrl_bai]
             }
-            .mix(contrast_file.map{meta,csv->csv})
+            .mix(contrast_files.map{ meta,params,csv -> csv })
             .flatten()
             .unique()
             .collect()
             .set{ ch_data_files }
 
-        contrast_meta
+        contrast_files
+            .map{ meta, params, file -> [ meta, params ] }
             .combine(Channel.fromPath(file(params.diffbind.report, checkIfExists: true)))
-            .map{ meta, rmd ->
-                meta.id = "${meta.contrast}.${meta.tool}"
-                [ meta, rmd ]
-            }
-            .set{ch_rmarkdown}
+            .set{ ch_rmarkdown }
 
-        RMARKDOWNNOTEBOOK( ch_rmarkdown, [], ch_data_files )
+        RMARKDOWNNOTEBOOK( ch_rmarkdown, ch_data_files )
 
     emit:
         diff_peaks = bam_peaks
