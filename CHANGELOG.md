@@ -1,11 +1,20 @@
 ## development version
 
+### New features
+
 - Print the recommended citation in bibtex format with `champagne --citation`. (#153)
-- Support multiple replicates per sample and call consensus peaks. (#129)
+- Support multiple replicates per sample and call consensus peaks on replicates. (#129)
+  - Optionally normalize p-values.
 - Find motifs in the genome with Homer. (#142)
 - Run motif enrichment analysis with MEME. (#142)
 - Annotate peaks with chipseeker. (#142,#147,#157)
 - Add preseq complexity curve and fastq screen to multiqc report. (#147)
+- Implement differential peak calling. (#158)
+  - Optionally specify contrasts via a YAML file.
+  - If any sample has only one replicate, run `MAnorm`, otherwise run `diffbind`.
+
+### Bug fixes
+
 - Fix deepTools plots (#144):
   - Per sample fingerprint plots instead of per replicate
   - Input normalized profile plots
