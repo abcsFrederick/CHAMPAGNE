@@ -13,8 +13,14 @@ tsv_filename <- args[1]
 peak_dat <- read_tsv(tsv_filename) %>%
   mutate(
     peak_width = chromEnd - chromStart,
-  ) %>%
-  filter(tool != "gem") # exclude gem because width is always 200
+  )
+tools <- peak_dat %>%
+  pull(tool) %>%
+  unique()
+if (!((length(tools) == 1) & (tools == "gem"))) {
+  peak_dat <- peak_dat %>%
+    filter(tool != "gem") # exclude gem because width is always 200
+}
 
 sample_ids <- peak_dat %>%
   pull(sample_id) %>%

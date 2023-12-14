@@ -14,7 +14,7 @@ process PREP_DIFFBIND {
     def csv_text = [
         ['SampleID', "Replicate", 'Condition', 'bamReads', "ControlID", "bamControl", 'Peaks', 'PeakCaller'],
         [meta.id,     meta.rep,    meta.group,  bam,       meta.control, ctrl_bam,     peak,    meta.tool]
-    ]*.join(',').join(System.lineSeparator)
+    ]*.join(',').join(System.lineSeparator) + '\n'
     """
     echo -ne "${csv_text}" > ${meta.contrast}.${meta.tool}.${meta.id}.csv
     """

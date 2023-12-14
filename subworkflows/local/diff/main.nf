@@ -30,7 +30,7 @@ workflow DIFF {
         ch_peaks_contrasts | PREP_DIFFBIND
 
         PREP_DIFFBIND.out.csv
-            .collectFile(storeDir: "${params.outdir}/diffbind/contrasts") { meta, row ->
+            .collectFile(storeDir: "${params.outdir}/diffbind/contrasts", newLine: false, keepHeader: true, skip: 1) { meta, row ->
                 [ "${meta.contrast}.${meta.tool}.csv", row ]
             }
             .map{ contrast_file ->
