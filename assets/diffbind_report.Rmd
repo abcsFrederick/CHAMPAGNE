@@ -120,45 +120,33 @@ print(DBdatacontrast)
 
 <br/>
 
-## Call differential peaks using Deseq2 and EdgeR
+## Call differential peaks using Deseq2
 ```{r analyze, echo=FALSE, warning=FALSE,message=FALSE}
 DBAnalysisDeseq2 <- dba.analyze(DBdatacontrast, method = DBA_DESEQ2)
-DBAnalysisEdgeR <- dba.analyze(DBdatacontrast, method = DBA_EDGER)
 ```
 
 ```{r, echo=FALSE, warning=FALSE,message=FALSE}
 DBReportDeseq2 <- dba.report(DBAnalysisDeseq2, method = DBA_DESEQ2)
-DBReportEdgeR <- dba.report(DBAnalysisEdgeR, method = DBA_EDGER)
 ```
 
-### PCA: DeSeq2
+### PCA
 ```{r PCA3, echo=FALSE, warning=FALSE,message=FALSE,fig.height=5,fig.width=5,fig.align="center"}
 try(dba.plotPCA(DBAnalysisDeseq2, contrast = 1, method = DBA_DESEQ2), silent = TRUE)
 ```
 
-### PCA: EdgeR
-```{r PCA4, echo=FALSE, warning=FALSE,message=FALSE,fig.height=5,fig.width=5,fig.align="center"}
-try(dba.plotPCA(DBAnalysisEdgeR, contrast = 1, method = DBA_EDGER), silent = TRUE)
-```
 
-### MANorm: (left) Deseq2, (right) EdgeR
+### MANorm
 ```{r MA, echo=FALSE, warning=FALSE,message=FALSE,fig.width=10,fig.height=4,fig.align="center"}
-par(mfcol = c(1, 2))
+
 try(dba.plotMA(DBAnalysisDeseq2, method = DBA_DESEQ2), silent = TRUE)
-try(dba.plotMA(DBAnalysisEdgeR, method = DBA_EDGER), silent = TRUE)
 ```
 
-### Volcano plot: DeSeq2
+### Volcano plot
 ```{r Volcano1, echo=FALSE, warning=FALSE,message=FALSE,out.width = "80%",fig.align="center"}
 try(dba.plotVolcano(DBAnalysisDeseq2, method = DBA_DESEQ2), silent = TRUE)
 ```
 
-### Volcano plot: EdgeR
-```{r Volcano2, echo=FALSE, warning=FALSE,message=FALSE,out.width = "80%",fig.align="center"}
-try(dba.plotVolcano(DBAnalysisEdgeR, method = DBA_EDGER), silent = TRUE)
-```
-
-### Boxplots: (left) Deseq2, (right) EdgeR
+### Boxplots
 ```{r BoxPlot, echo=FALSE, warning=FALSE,message=FALSE,fig.width=10,fig.height=4,fig.align="center"}
 par(mfcol = c(1, 2))
 if (length(DBReportDeseq2) > 0) {
@@ -166,21 +154,13 @@ if (length(DBReportDeseq2) > 0) {
 } else {
   plot(0, type = "n", axes = FALSE, ann = FALSE)
 }
-try(dba.plotBox(DBAnalysisEdgeR, method = DBA_EDGER), silent = TRUE)
 ```
 
-## Differentially bound peaks: Deseq2 output
+## Differentially bound peaks
 ```{r Deseq2Report, echo=FALSE, warning=FALSE,message=FALSE}
 outfile <- paste0(contrasts, "-", peakcaller, "_Diffbind_Deseq2.txt")
 write.table(DBReportDeseq2, outfile, quote = F, sep = "\t", row.names = F)
 DT::datatable(data.frame(DBReportDeseq2), rownames = F)
-```
-
-## Differentially bound peaks: EdgeR output
-```{r EdgeRReport, echo=FALSE, warning=FALSE,message=FALSE}
-outfile <- paste0(contrasts, "-", peakcaller, "_Diffbind_EdgeR.txt")
-write.table(DBReportEdgeR, outfile, quote = F, sep = "\t", row.names = F)
-DT::datatable(data.frame(DBReportEdgeR), rownames = F)
 ```
 
 ## R tool version information
