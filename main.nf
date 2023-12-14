@@ -27,7 +27,7 @@ include { QC                       } from './subworkflows/local/qc.nf'
 include { CALL_PEAKS               } from './subworkflows/local/peaks.nf'
 include { CONSENSUS_PEAKS          } from './subworkflows/CCBR/consensus_peaks/'
 include { ANNOTATE                 } from './subworkflows/local/annotate.nf'
-include { DIFF                     } from './subworkflows/local/diff/'
+include { DIFF                     } from './subworkflows/local/differential/'
 
 // MODULES
 include { CUTADAPT                 } from "./modules/CCBR/cutadapt"
@@ -74,7 +74,7 @@ workflow CHIPSEQ {
 
     deduped_bam | PHANTOM_PEAKS
     PHANTOM_PEAKS.out.fraglen | PPQT_PROCESS
-    PPQT_PROCESS.out.fraglen.set {frag_lengths }
+    PPQT_PROCESS.out.fraglen.set { frag_lengths }
 
     ch_multiqc = Channel.of()
     if (params.run.qc) {
@@ -124,10 +124,20 @@ workflow CHIPSEQ {
             CALL_PEAKS.out.bam_peaks
                 .combine(deduped_bam)
                 .map{meta1, bam1, bai1, peak, tool, meta2, bam2, bai2 ->
-                    meta1.control == meta2.id ? [ meta1.sample_basename, meta1 + [tool: tool], bam1, bai1, peak, bam2, bai2 ] : null
+                    meta1.control == meta2.id ? [ meta1 + [tool: tool], bam1, bai1, peak, bam2, bai2 ] : null
                 }
                 .set{bam_peaks}
-            DIFF( bam_peaks, INPUT_CHECK.out.csv, contrasts )
+            CALL_PEAKS.out.tagalign_peaks
+                .join(frag_lengths)
+                .map{ meta, tagalign, peak, tool, frag_len ->
+                    [ meta + [tool: tool, fraglen: frag_len], tagalign, peak ]
+                }
+                .set{ tagalign_peaks }
+            DIFF( bam_peaks,
+                  tagalign_peaks,
+                  INPUT_CHECK.out.csv,
+                  contrasts
+                )
 
         }
     }

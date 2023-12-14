@@ -96,6 +96,15 @@ workflow CALL_PEAKS {
             ch_peaks = ch_peaks.mix(FILTER_GEM.out.peak)
         }
 
+        // Create tag align w/ peaks
+        tag_all_bed.cross(ch_peaks)
+            .map{ it ->
+                it.flatten()
+            }
+            .map{ meta1, tagalign, meta2, peak, tool ->
+                meta1 == meta2 ? [ meta1, tagalign, peak, tool ] : null
+            }
+            .set{ ch_tagalign_peaks }
         // Create Channel with meta, deduped bam, peak file, peak-calling tool, and chrom sizes fasta
         deduped_bam.cross(ch_peaks)
             .map{ it ->
@@ -105,6 +114,7 @@ workflow CALL_PEAKS {
                 meta1 == meta2 ? [ meta1, bam, bai, peak, tool ] : null
             }
             .set{ ch_bam_peaks }
+
         ch_bam_peaks.combine(chrom_sizes) | FRACTION_IN_PEAKS
         FRACTION_IN_PEAKS.out.collect() | CONCAT_FRIPS | PLOT_FRIP
 
@@ -126,5 +136,6 @@ workflow CALL_PEAKS {
     emit:
         peaks = ch_peaks
         bam_peaks = ch_bam_peaks
+        tagalign_peaks = ch_tagalign_peaks
         plots = ch_plots
 }
