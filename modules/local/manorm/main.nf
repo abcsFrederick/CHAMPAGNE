@@ -5,7 +5,7 @@ process MANORM_PAIRWISE {
     tag "${meta1.id}.${meta2.id}"
     label 'process_single'
 
-    container ''
+    container 'nciccbr/ccbr_manorm:v1'
 
     input:
         tuple val(meta1), val(meta2), path(tagalign1), path(tagalign2), path(peak1), path(peak2)
