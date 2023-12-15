@@ -1,6 +1,6 @@
 process PREP_DIFFBIND {
     tag { "${meta.id}.${meta.contrast}.${meta.tool}" }
-    label 'process_single'
+    label 'process_low'
 
     container "${params.containers.base}"
 

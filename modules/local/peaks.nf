@@ -378,7 +378,7 @@ process PLOT_FRIP {
 process JACCARD_INDEX {
     tag "${toolA} ${metaA.id} vs. ${toolB} ${metaB.id}"
     label 'peaks'
-    label 'process_single'
+    label 'process_low'
 
     container "${params.containers.base}"
 
