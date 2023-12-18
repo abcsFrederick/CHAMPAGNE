@@ -21,6 +21,7 @@
   - Protein-coding-only versions of plots
   - Ensure sample IDs are sorted (#150)
 - Fixed a bug where the wrong SICER output file was used for downstream analyses. (#155)
+- Option to normalize p-values for consensus peaks with the [CCBR/consensus_peaks](https://github.com/CCBR/nf-modules/tree/60d50f4c45a50378cad70b49013f51750617caaa/subworkflows/CCBR/consensus_peaks) subworkflow.
 
 ## CHAMPAGNE 0.2.1
 
