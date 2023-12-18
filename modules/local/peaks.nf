@@ -185,10 +185,10 @@ process CONVERT_SICER { // https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d5838
             outBed[i] = "\t".join(tmp[0:3] + ["Peak"+str(i+1),score])
     # output broadPeak columns: chrom, start, end, name, ChIP tag count, strand, fold-enrichment, -log10 p-value, -log10 q-value
     with open("${sicer_peaks.baseName}.converted.bed",'w') as g:
-        g.write( "\n".join(outBed) )
+        g.write( "\n".join(outBed) + '\n' )
     if outBroadPeak[0] != None:
         with open("${sicer_peaks.baseName}.converted_sicer.broadPeak", 'w') as h:
-            h.write( "\n".join(outBroadPeak) )
+            h.write( "\n".join(outBroadPeak) + '\n' )
     /$
 
     stub:
@@ -378,7 +378,7 @@ process PLOT_FRIP {
 process JACCARD_INDEX {
     tag "${toolA} ${metaA.id} vs. ${toolB} ${metaB.id}"
     label 'peaks'
-    label 'process_single'
+    label 'process_low'
 
     container "${params.containers.base}"
 

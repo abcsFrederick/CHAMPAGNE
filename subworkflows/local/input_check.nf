@@ -11,14 +11,15 @@ workflow INPUT_CHECK {
         seq_center  // string: sequencing center for read group
 
     main:
-        SAMPLESHEET_CHECK ( samplesheet )
-            .csv
+        valid_csv = SAMPLESHEET_CHECK( samplesheet ).csv
+        valid_csv
             .splitCsv ( header:true, sep:',' )
             .map { create_fastq_channel(it, seq_center) }
             .set { reads }
 
     emit:
         reads                                     // channel: [ val(meta), [ reads ] ]
+        csv      = valid_csv
         versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 
