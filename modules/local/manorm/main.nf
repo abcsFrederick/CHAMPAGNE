@@ -11,7 +11,7 @@ process MANORM_PAIRWISE {
         tuple val(meta1), val(meta2), path(tagalign1), path(tagalign2), path(peak1), path(peak2)
 
     output:
-        path("manorm_output/*"), emit: dir
+        path("${meta1.id}_vs_${meta2.id}/*"), emit: dir
 
     script:
     """
@@ -22,14 +22,14 @@ process MANORM_PAIRWISE {
         --r2 ${tagalign2} \\
         --s1 ${meta1.fraglen} \\
         --s2 ${meta2.fraglen} \\
-        -o manorm_output/ \\
+        -o ${meta1.id}_vs_${meta2.id}/ \\
         --name1 ${meta1.group} \\
         --name2 ${meta2.group}
     """
 
     stub:
     """
-    mkdir manorm_output/
-    touch manorm_output/blank.txt
+    mkdir ${meta1.id}_vs_${meta2.id}/
+    touch ${meta1.id}_vs_${meta2.id}/blank.txt
     """
 }
