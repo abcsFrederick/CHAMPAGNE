@@ -60,7 +60,7 @@ workflow DIFF {
             .branch{ meta, tagalign, peak, min_reps ->
                 manorm: min_reps == 1
                     return (tuple(meta, tagalign, peak))
-                diffbind: min_reps >= 2
+                diffbind: min_reps >= 2 // bam files used instead of tagalign for diffbind
                     return (null)
             }
             .set{ tagalign_diff }

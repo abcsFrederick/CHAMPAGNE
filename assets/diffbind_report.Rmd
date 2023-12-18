@@ -39,7 +39,7 @@ suppressMessages(library(DiffBind))
 
 ## Read in sample sheet information and peak information
 ```{r samples, echo=FALSE, warning=FALSE,message=FALSE}
-samples <- dba(sampleSheet = csvfile)
+samples <- dba(sampleSheet = csvfile, peakFormat = 'bed')
 consensus <- dba.peakset(samples, consensus = DBA_CONDITION)
 print(samples)
 ```
