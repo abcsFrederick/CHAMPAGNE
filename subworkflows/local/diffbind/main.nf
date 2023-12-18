@@ -1,5 +1,5 @@
 include { PREP_DIFFBIND     } from "../../../modules/local/diffbind/prep/"
-include { RMARKDOWNNOTEBOOK } from '../../../modules/nf-core/rmarkdownnotebook/'
+include { RMARKDOWNNOTEBOOK as DIFFBIND_RMD } from '../../../modules/nf-core/rmarkdownnotebook/'
 
 workflow DIFFBIND {
     take:
@@ -40,10 +40,10 @@ workflow DIFFBIND {
             .combine(Channel.fromPath(file(params.diffbind.report, checkIfExists: true)))
             .set{ ch_rmarkdown }
 
-        RMARKDOWNNOTEBOOK( ch_rmarkdown, ch_data_files )
+        DIFFBIND_RMD( ch_rmarkdown, ch_data_files )
 
     emit:
-        report = RMARKDOWNNOTEBOOK.out.report
-        artifacts = RMARKDOWNNOTEBOOK.out.artifacts
-        versions = RMARKDOWNNOTEBOOK.out.versions
+        report = DIFFBIND_RMD.out.report
+        artifacts = DIFFBIND_RMD.out.artifacts
+        versions = DIFFBIND_RMD.out.versions
 }
