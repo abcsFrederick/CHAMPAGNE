@@ -2,26 +2,26 @@
 
 ### New features
 
-- Print the recommended citation in bibtex format with `champagne --citation`. (#153)
-- Support multiple replicates per sample and call consensus peaks on replicates. (#129)
-  - Optionally normalize p-values.
 - Find motifs in the genome with Homer. (#142)
 - Run motif enrichment analysis with MEME. (#142)
 - Annotate peaks with chipseeker. (#142,#147,#157)
 - Add preseq complexity curve and fastq screen to multiqc report. (#147)
+- Print the recommended citation in bibtex format with `champagne --citation`. (#153)
+- Support multiple replicates per sample and call consensus peaks on replicates. (#129)
+  - Optionally normalize p-values with the [CCBR/consensus_peaks](https://github.com/CCBR/nf-modules/tree/60d50f4c45a50378cad70b49013f51750617caaa/subworkflows/CCBR/consensus_peaks) subworkflow.
 - Implement differential peak calling. (#158)
-  - Optionally specify contrasts via a YAML file.
+  - Optionally specify contrasts via a YAML file. If no file is specified, differential analysis is not performed.
   - If any sample has only one replicate, run `MAnorm`, otherwise run `diffbind`.
 
 ### Bug fixes
 
 - Fix deepTools plots (#144):
-  - Per sample fingerprint plots instead of per replicate
-  - Input normalized profile plots
-  - Protein-coding-only versions of plots
-  - Ensure sample IDs are sorted (#150)
-- Fixed a bug where the wrong SICER output file was used for downstream analyses. (#155)
-- Option to normalize p-values for consensus peaks with the [CCBR/consensus_peaks](https://github.com/CCBR/nf-modules/tree/60d50f4c45a50378cad70b49013f51750617caaa/subworkflows/CCBR/consensus_peaks) subworkflow.
+  - Per sample fingerprint plots instead of per replicate.
+  - Input normalized profile plots.
+  - Protein-coding-only versions of plots.
+  - Ensure sample IDs are sorted. (#150)
+- Fix a bug where the wrong SICER output file was used for downstream analyses. (#155)
+
 
 ## CHAMPAGNE 0.2.1
 
