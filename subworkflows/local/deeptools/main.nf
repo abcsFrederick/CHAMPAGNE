@@ -63,7 +63,10 @@ workflow DEEPTOOLS {
         ch_all_bigwigs = Channel.value([ id: 'inputnorm' ])
             .combine(bigwigs_norm)
             .mix(bigwigs_raw)
-            .groupTuple() // sort files on basenames, otherwise uses full file path
+            .groupTuple()
+            .map{ meta, bigwigs ->
+                [ meta, bigwigs.unique() ]
+            }
             .combine(beds)
             .combine(Channel.of('metagene','TSS'))
         COMPUTE_MATRIX(ch_all_bigwigs)
@@ -84,6 +87,9 @@ workflow DEEPTOOLS {
             }
         ch_controls.mix(ch_samples)
             .groupTuple()
+            .map{ meta, bams, bais ->
+                [ meta, bams.unique(), bais.unique() ]
+            }
             .set { ch_ip_ctrl_bam_bai }
         ch_ip_ctrl_bam_bai | PLOT_FINGERPRINT
 
