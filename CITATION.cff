@@ -11,3 +11,6 @@ title: "CHAMPAGNE: CHromAtin iMmuno PrecipitAtion sequencinG aNalysis pipEline"
 url: https://ccbr.github.io/CHAMPAGNE/
 repository-code: https://github.com/CCBR/CHAMPAGNE
 license: MIT
+type: software
+version: v0.2.1
+date-released: 2023-11-02
