@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "docs/**"
+      - "**.md"
 
 env:
   actor: "41898282+github-actions[bot]"
