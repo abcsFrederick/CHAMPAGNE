@@ -1,0 +1,7 @@
+sample,rep,fastq_1,fastq_2,antibody,control
+sample1,1,/data/CCBR_Pipeliner/testdata/CHAMPAGNE/DCSsub/results/bam2fastq/mm10_chr19_C18_50u50d_sample1-rep1_R1.fastq.gz,,cebpa,sample1_INPUT
+sample1,2,/data/CCBR_Pipeliner/testdata/CHAMPAGNE/DCSsub/results/bam2fastq/mm10_chr19_C18_50u50d_sample1-rep2_R1.fastq.gz,,cebpa,sample1_INPUT
+sample2,1,/data/CCBR_Pipeliner/testdata/CHAMPAGNE/DCSsub/results/bam2fastq/mm10_chr19_C18_50u50d_sample2-rep1_R1.fastq.gz,,cebpa,sample2_INPUT
+sample2,2,/data/CCBR_Pipeliner/testdata/CHAMPAGNE/DCSsub/results/bam2fastq/mm10_chr19_C18_50u50d_sample2-rep2_R1.fastq.gz,,cebpa,sample2_INPUT
+sample1_INPUT,,/data/CCBR_Pipeliner/testdata/CHAMPAGNE/DCSsub/results/bam2fastq/mm10_chr19_C18_50u50d_sample1-INPUT_R1.fastq.gz,,,
+sample2_INPUT,,/data/CCBR_Pipeliner/testdata/CHAMPAGNE/DCSsub/results/bam2fastq/mm10_chr19_C18_50u50d_sample2-INPUT_R1.fastq.gz,,,

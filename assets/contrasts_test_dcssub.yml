@@ -1,0 +1,5 @@
+condition:
+  control:
+    - sample1
+  treatment:
+    - sample2
