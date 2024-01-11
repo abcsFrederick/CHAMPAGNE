@@ -1,4 +1,4 @@
-# CHAMPAGNE
+# CHAMPAGNE 🍾
 
 **CH**rom**A**tin i**M**muno **P**recipit**A**tion sequencin**G** a**N**alysis pip**E**line
 
