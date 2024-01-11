@@ -1,9 +1,0 @@
-sample,rep,fastq_1,fastq_2,antibody,control
-CTCF_ChIP_macrophage_p20,1,/data/CCBR_Pipeliner/testdata/chipseq/SRR3081748_1.fastq.gz,,CTCF,WCE_p20
-CTCF_ChIP_macrophage_p20,2,/data/CCBR_Pipeliner/testdata/chipseq/SRR3081749_1.fastq.gz,,CTCF,WCE_p20
-CTCF_ChIP_macrophage_p3,1,/data/CCBR_Pipeliner/testdata/chipseq/SRR3081750_1.fastq.gz,,CTCF,WCE_p3
-CTCF_ChIP_macrophage_p3,2,/data/CCBR_Pipeliner/testdata/chipseq/SRR3081751_1.fastq.gz,,CTCF,WCE_p3
-CTCF_ChIP_MEF_p20,1,/data/CCBR_Pipeliner/testdata/chipseq/SRR3081752_1.fastq.gz,,CTCF,WCE_p20
-CTCF_ChIP_MEF_p20,2,/data/CCBR_Pipeliner/testdata/chipseq/SRR3081753_1.fastq.gz,,CTCF,WCE_p20
-WCE_p3,,/data/CCBR_Pipeliner/testdata/chipseq/SRR3081772_1.fastq.gz,,,
-WCE_p20,,/data/CCBR_Pipeliner/testdata/chipseq/SRR3081773_1.fastq.gz,,,
