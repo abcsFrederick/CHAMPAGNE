@@ -183,7 +183,10 @@ def run_nextflow(
         profiles.add("slurm")
     if hpc:
         profiles.add(hpc_options[hpc]["profile"])
-    args_dict["-profile"] = ",".join(sorted(profiles))
+    if (
+        profiles
+    ):  # only add to the profiles if there are any. there are none when champagne is run on GitHub Actions.
+        args_dict["-profile"] = ",".join(sorted(profiles))
     nextflow_command += list(f"{k} {v}" for k, v in args_dict.items())
 
     # Print nextflow command
