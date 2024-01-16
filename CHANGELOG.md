@@ -1,3 +1,7 @@
+## CHAMPAGNE 0.2.2
+
+- Fix permissions issues in the CLI. (#167)
+
 ## CHAMPAGNE 0.2.1
 
 - Fixed a bug in QC stats that mixed up the statistics for different samples. (#125)
