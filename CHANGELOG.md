@@ -21,7 +21,7 @@
   - Protein-coding-only versions of plots.
   - Ensure sample IDs are sorted. (#150)
 - Fix a bug where the wrong SICER output file was used for downstream analyses. (#155)
-
+- Fix CLI profile on machines other than biowulf & FRCE. (#168)
 
 ## CHAMPAGNE 0.2.1
 
