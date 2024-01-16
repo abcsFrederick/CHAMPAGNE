@@ -23,25 +23,32 @@
 - Fix a bug where the wrong SICER output file was used for downstream analyses. (#155)
 - Fix CLI profile on machines other than biowulf & FRCE. (#168)
 
+
+## CHAMPAGNE 0.2.2
+
+- Fix permissions issues in the CLI. (#167)
+
+
 ## CHAMPAGNE 0.2.1
 
-- Fixed a bug in QC stats that mixed up the statistics for different samples. (#125)
-- Fixed a bug in the CLI that added the `-profile` to the nextflow command even if it wasn't needed (#125).
+- Fix a bug in QC stats that mixed up the statistics for different samples. (#125)
+- Fix a bug in the CLI that added the `-profile` to the nextflow command even if it wasn't needed (#125).
 - Report read counts between blacklist & filtering steps in the QC table. (#125)
 - Run spooker on workflow completion (#126).
+
 
 ## CHAMPAGNE 0.2.0
 
 ### New features
 
-- Implemented peak calling with sicer2, macs2, and gem. (#52)
-- Added parameter options to skip QC, input normalization, and/or peak calling steps. (#72)
+- Implement peak calling with sicer2, macs2, and gem. (#52)
+- Add parameter options to skip QC, input normalization, and/or peak calling steps. (#72)
 - Calculate and plot QC metrics for called peaks:
   - Fraction in Peaks (FRiP) (#89)
   - Jaccard index (#92)
   - Histogram of peak widths (#92)
-- Added support for paired-end reads. (#105)
-- Added an option to use a custom reference from a genome fasta, gtf, and blacklist file. (#105)
+- Add support for paired-end reads. (#105)
+- Add an option to use a custom reference from a genome fasta, gtf, and blacklist file. (#105)
 - Champagne CLI: (#112)
   - New `--mode` option for `champagne run` to execute the workflow locally ('local') or submit it as a slurm job ('slurm').
   - Option to override the path to the champagne `main.nf` file or specify the github repo (`CCBR/CHAMPAGNE`) instead.
@@ -69,6 +76,7 @@
 - An error is thrown when a required input file doesn't exist. (#71)
   - Previously, the workflow quietly didn't run the process(es) that required the missing file.
 - Renamed `champagne config` to `champagne init` to avoid clashing with `nextflow config`. (#112)
+
 
 ## CHAMPAGNE 0.1.0
 

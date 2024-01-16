@@ -4,6 +4,7 @@
 
 [![build](https://github.com/CCBR/CHAMPAGNE/actions/workflows/build.yml/badge.svg)](https://github.com/CCBR/CHAMPAGNE/actions/workflows/build.yml)
 [![mkdocs](https://github.com/CCBR/CHAMPAGNE/actions/workflows/docs.yml/badge.svg)](https://github.com/CCBR/CHAMPAGNE/actions/workflows/docs.yml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10516079.svg)](https://doi.org/10.5281/zenodo.10516079)
 
 🚧 **This project is under active development. It is not yet ready for production use.** 🚧
 

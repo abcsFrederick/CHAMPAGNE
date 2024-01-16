@@ -14,5 +14,9 @@ url: https://ccbr.github.io/CHAMPAGNE/
 repository-code: https://github.com/CCBR/CHAMPAGNE
 license: MIT
 type: software
-version: v0.2.1
-date-released: 2023-11-02
+identifiers:
+  - description: "Archived snapshots of all versions"
+    type: doi
+    value: "10.5281/zenodo.10516079"
+version: v0.2.2
+date-released: 2024-01-15
