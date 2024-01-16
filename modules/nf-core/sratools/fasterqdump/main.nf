@@ -20,10 +20,8 @@ process SRATOOLS_FASTERQDUMP {
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
+    def args = task.ext.args ?: '--split-3'
     def args2 = task.ext.args2 ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    def outfile = "${prefix}.fastq"
     def key_file = ''
     if (certificate.toString().endsWith('.jwt')) {
         key_file += " --perm ${certificate}"
@@ -34,16 +32,16 @@ process SRATOOLS_FASTERQDUMP {
     export NCBI_SETTINGS="\$PWD/${ncbi_settings}"
 
     fasterq-dump \\
-        $args \\
-        --threads $task.cpus \\
-        --outfile $outfile \\
+        ${args} \\
+        --threads ${task.cpus} \\
+        -O ./ \\
         ${key_file} \\
         ${sra}
 
     pigz \\
-        $args2 \\
+        ${args2} \\
         --no-name \\
-        --processes $task.cpus \\
+        --processes ${task.cpus} \\
         *.fastq
 
     cat <<-END_VERSIONS > versions.yml
