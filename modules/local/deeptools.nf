@@ -5,14 +5,13 @@ process BAM_COVERAGE {
     label 'deeptools'
     label 'process_high'
 
-    container = "${params.containers.deeptools}"
+    container "${params.containers.deeptools}"
 
     input:
         tuple val(meta), path(bam), path(bai), val(fraglen), val(effective_genome_size)
 
     output:
-        val(meta), emit: meta
-        path("${meta.id}.bw"), emit: bigwig
+        tuple val(meta), path("${meta.id}.bw"), emit: bigwig
 
     script:
     def args = meta.single_end ? "--extendReads ${fraglen}" : '--centerReads'
@@ -35,12 +34,45 @@ process BAM_COVERAGE {
     """
 
 }
+
+process NORMALIZE_INPUT {
+  label 'qc'
+  label 'deeptools'
+  label 'process_high'
+
+  container "${params.containers.deeptools}"
+
+  input:
+    tuple val(meta), path(chip), path(input)
+
+  output:
+    tuple val(meta), path("*.inputnorm.bw"), emit: bigwig
+
+  script:
+  """
+  bigwigCompare \\
+  --binSize ${params.deeptools.bin_size} \\
+  --outFileName ${meta.id}.inputnorm.bw \\
+  --outFileFormat 'bigwig' \\
+  --bigwig1 ${chip} \\
+  --bigwig2 ${input} \\
+  --operation 'subtract' \\
+  --skipNonCoveredRegions \\
+  --numberOfProcessors ${task.cpus}
+  """
+
+  stub:
+  """
+  touch ${meta.id}.inputnorm.bw
+  """
+}
+
 process BIGWIG_SUM {
     label 'qc'
     label 'deeptools'
     label 'process_high'
 
-    container = "${params.containers.deeptools}"
+    container "${params.containers.deeptools}"
 
     input:
         path(bigwigs)
@@ -49,9 +81,10 @@ process BIGWIG_SUM {
         path("bigWigSum.npz"), emit: array
 
     script:
+    // sort files on basenames, otherwise uses full file path
     """
     multiBigwigSummary bins \\
-      -b ${bigwigs.join(' ')} \\
+      -b ${bigwigs.sort({ a, b -> a.baseName <=> b.baseName }).join(' ')} \\
       --smartLabels \\
       -o bigWigSum.npz
     """
@@ -65,14 +98,15 @@ process BIGWIG_SUM {
 process PLOT_CORRELATION {
     label 'qc'
     label 'deeptools'
+    label 'process_single'
 
-    container = "${params.containers.deeptools}"
+    container "${params.containers.deeptools}"
 
     input:
         tuple path(array), val(plottype)
 
     output:
-        path("*.pdf"), emit: pdf
+        path("*.png"), emit: png
         path("*.tab"), emit: tab
 
     script:
@@ -81,7 +115,7 @@ process PLOT_CORRELATION {
     """
     plotCorrelation \\
       -in ${array} \\
-      -o ${array.baseName}.spearman_${plottype}.pdf \\
+      -o ${array.baseName}.spearman_${plottype}.png \\
       --outFileCorMatrix ${array.baseName}.spearman_${plottype}.tab \\
       -c 'spearman' \\
       -p '${plottype}' \\
@@ -91,15 +125,16 @@ process PLOT_CORRELATION {
 
     stub:
     """
-    touch ${array.baseName}.spearman_${plottype}.pdf ${array.baseName}.spearman_${plottype}.tab
+    touch ${array.baseName}.spearman_${plottype}.png ${array.baseName}.spearman_${plottype}.tab
     """
 }
 
 process PLOT_PCA {
     label 'qc'
     label 'deeptools'
+    label 'process_single'
 
-    container = "${params.containers.deeptools}"
+    container "${params.containers.deeptools}"
 
     input:
         path(array)
@@ -127,7 +162,7 @@ process PLOT_FINGERPRINT {
   label 'deeptools'
   label 'process_high'
 
-  container = "${params.containers.deeptools}"
+  container "${params.containers.deeptools}"
 
   input:
     tuple val(meta), path(bams), path(bais)
@@ -164,36 +199,39 @@ process PLOT_FINGERPRINT {
 
 process BED_PROTEIN_CODING {
     label 'qc'
+    label 'process_single'
 
-    container = "${params.containers.base}"
+    container "${params.containers.base}"
 
     input:
       path(bed)
 
     output:
-      path("*.bed"), emit: bed
+      path("*.protein_coding.bed"), emit: bed_prot
+      path("*.all_genes.bed"),      emit: bed_all
 
     script:
     """
-    grep --line-buffered 'protein_coding' ${bed} | awk -v OFS='\t' -F'\t' '{{print \$1, \$2, \$3, \$5, \".\", \$4}}' > ${params.genome}.protein_coding.bed
+    grep --line-buffered 'protein_coding' ${bed} | awk -v OFS='\t' -F'\t' '{{print \$1, \$2, \$3, \$5, \".\", \$4}}' > ${bed.baseName}.protein_coding.bed
+    cp ${bed} ${bed.baseName}.all_genes.bed
     """
 
     stub:
     """
-    touch ${params.genome}.protein_coding.bed
+    touch ${bed.baseName}.protein_coding.bed ${bed.baseName}.all_genes.bed
     """
 }
 
 process COMPUTE_MATRIX {
+  tag { meta.id }
   label 'qc'
   label 'deeptools'
   label 'process_high'
 
-  container = "${params.containers.deeptools}"
+  container "${params.containers.deeptools}"
 
   input:
-    path(bigwigs)
-    tuple path(bed), val(mattype)
+    tuple val(meta), path(bigwigs), path(bed), val(mattype)
 
   output:
     path("*.mat.gz"), emit: mat
@@ -203,28 +241,26 @@ process COMPUTE_MATRIX {
   def args = null
   if (mattype == 'TSS') {
     cmd = 'reference-point'
-    args = { ['--referencePoint TSS',
-              '--upstream 3000',
-              '--downstream 3000'
-              ].join(' ').trim()
-            }
+    args = ['--referencePoint TSS',
+            '--upstream 3000',
+            '--downstream 3000'
+            ].join(' ').trim()
+
   } else if (mattype == 'metagene') {
     cmd = 'scale-regions'
-    args = { ['--upstream 1000',
-              '--regionBodyLength 2000',
-              '--downstream 1000'
-              ].join(' ').trim()
-            }
+    args = ['--upstream 1000',
+            '--regionBodyLength 2000',
+            '--downstream 1000'
+            ].join(' ').trim()
   } else {
     error "Invalid matrix type: ${mattype}"
   }
   """
-  echo "$mattype" > file.txt
   computeMatrix ${cmd} \\
-    -S ${bigwigs.join(' ')} \\
+    -S ${bigwigs.sort({ a, b -> a.baseName <=> b.baseName }).join(' ')} \\
     -R ${bed} \\
     -p ${task.cpus} \\
-    -o ${mattype}.mat.gz \\
+    -o ${meta.id}.${bed.baseName}.${mattype}.mat.gz \\
     --skipZeros \\
     --smartLabels \\
     ${args}
@@ -232,28 +268,30 @@ process COMPUTE_MATRIX {
 
   stub:
   """
-  touch ${mattype}.mat.gz
+  touch ${meta.id}.${bed.baseName}.${mattype}.mat.gz
   """
 }
 process PLOT_HEATMAP {
   label 'qc'
   label 'deeptools'
+  label 'process_medium'
 
-  container = "${params.containers.deeptools}"
+  container "${params.containers.deeptools}"
 
   input:
     path(mat)
 
   output:
-    path("*.pdf"), emit: pdf
+    path("*.png"), emit: png
 
   script:
   // sets colorMap to "BuGn" if "metagene" in matrix filename, otherwise use "BuPu"
   def color_map = mat.baseName.contains('metagene') ? 'BuGn' : 'BuPu'
   """
+  export MPLCONFIGDIR=./tmp
   plotHeatmap \\
     -m ${mat} \\
-    -out ${mat.baseName}.heatmap.pdf \\
+    -out ${mat.baseName}.heatmap.png \\
     --colorMap ${color_map} \\
     --yAxisLabel 'average RPGC' \\
     --regionsLabel 'genes' \\
@@ -262,15 +300,16 @@ process PLOT_HEATMAP {
 
   stub:
   """
-  touch ${mat.baseName}.heatmap.pdf
+  touch ${mat.baseName}.heatmap.png
   """
 }
 
 process PLOT_PROFILE {
   label 'qc'
   label 'deeptools'
+  label 'process_single'
 
-  container = "${params.containers.deeptools}"
+  container "${params.containers.deeptools}"
 
   input:
     path(mat)
@@ -297,37 +336,5 @@ process PLOT_PROFILE {
   stub:
   """
   touch ${mat.baseName}.lineplot.pdf ${mat.baseName}.plotProfile.tab
-  """
-}
-
-process NORMALIZE_INPUT {
-  label 'qc'
-  label 'deeptools'
-  label 'process_high'
-
-  container = "${params.containers.deeptools}"
-
-  input:
-    tuple val(meta), path(chip), path(input)
-
-  output:
-    tuple val(meta), path("*.norm.bw"), emit: bigwig
-
-  script:
-  """
-  bigwigCompare \\
-  --binSize ${params.deeptools.bin_size} \\
-  --outFileName ${meta.id}.norm.bw \\
-  --outFileFormat 'bigwig' \\
-  --bigwig1 ${chip} \\
-  --bigwig2 ${input} \\
-  --operation 'subtract' \\
-  --skipNonCoveredRegions \\
-  --numberOfProcessors ${task.cpus}
-  """
-
-  stub:
-  """
-  touch ${meta.id}.norm.bw
   """
 }

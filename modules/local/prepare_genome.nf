@@ -132,12 +132,16 @@ process WRITE_GENOME_CONFIG {
     ]
     input:
         path(fasta)
+        path(gtf)
         tuple val(meta_ref), path(reference_index)
         tuple val(meta_bl), path(blacklist_index)
         path(chrom_sizes)
         path(chrom_dir)
         path(gene_info)
         val(effective_genome_size)
+        val(meme_motifs)
+        val(bioc_txdb)
+        val(bioc_annot)
 
     output:
         path("*.config"), emit: conf
@@ -150,6 +154,7 @@ process WRITE_GENOME_CONFIG {
     import os
     import pprint
     import shutil
+    print("${meme_motifs}")
     os.makedirs("${genome_name}/")
     for subdir, filelist in (('reference/', "${reference_index}"), ('blacklist', "${blacklist_index}")):
         dirpath = f"${{genome_name}}/{subdir}"
@@ -157,15 +162,20 @@ process WRITE_GENOME_CONFIG {
         for file in filelist.split():
             shutil.copy(file, dirpath)
     shutil.copytree("${chrom_dir}", '${genome_name}/chroms/')
-    for file in ("${fasta}", "${chrom_sizes}", "${gene_info}"):
+    for file in ("${fasta}", "${gtf}", "${chrom_sizes}", "${gene_info}"):
         shutil.copy(file, "${genome_name}/")
 
-    genome = dict(reference_index = '"\${params.index_dir}/${genome_name}/reference/*"',
+    genome = dict(fasta = '"\${params.index_dir}/${genome_name}/${fasta}"',
+                  genes_gtf = '"\${params.index_dir}/${genome_name}/${gtf}"',
+                  reference_index = '"\${params.index_dir}/${genome_name}/reference/*"',
                   blacklist_index = '"\${params.index_dir}/${genome_name}/blacklist/*"',
                   chromosomes_dir = '"\${params.index_dir}/${genome_name}/chroms/"',
                   chrom_sizes = '"\${params.index_dir}/${genome_name}/${chrom_sizes}"',
                   gene_info = '"\${params.index_dir}/${genome_name}/${gene_info}"',
-                  effective_genome_size = "${effective_genome_size}"
+                  effective_genome_size = "${effective_genome_size}",
+                  meme_motifs = "${meme_motifs}",
+                  bioc_txdb = "${bioc_txdb}",
+                  bioc_annot = "${bioc_annot}"
     )
     pprint.pprint(genome)
     with open('${genome_name}.config', 'w') as conf_file:

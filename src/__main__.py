@@ -31,6 +31,14 @@ def common_options(func):
     cls=OrderedCommands, context_settings=dict(help_option_names=["-h", "--help"])
 )
 @click.version_option(get_version(), "-v", "--version", is_flag=True)
+@click.option(
+    "--citation",
+    is_flag=True,
+    callback=print_citation,
+    expose_value=False,
+    is_eager=True,
+    help="Print the citation in bibtex format and exit.",
+)
 def cli():
     """CHromAtin iMmuno PrecipitAtion sequencinG aNalysis pipEline
 
@@ -113,7 +121,6 @@ def citation(**kwargs):
 
 cli.add_command(run)
 cli.add_command(init)
-# cli.add_command(citation) # TODO uncomment if champagne is published in a journal or Zenodo
 
 
 def main():

@@ -14,6 +14,9 @@ workflow PREPARE_GENOME {
         if (params.genomes[ params.genome ]) {
             println "Using ${params.genome} as the reference"
 
+            ch_fasta = Channel.fromPath(params.genomes[ params.genome ].fasta, checkIfExists: true)
+            ch_genes_gtf = Channel.fromPath(params.genomes[ params.genome ].genes_gtf, checkIfExists: true)
+
             ch_blacklist_index = Channel.fromPath(params.genomes[ params.genome ].blacklist_index, checkIfExists: true)
                 .collect()
                 .map{ file ->
@@ -28,6 +31,9 @@ workflow PREPARE_GENOME {
             ch_chrom_sizes = Channel.fromPath(params.genomes[ params.genome ].chrom_sizes, checkIfExists: true)
             ch_gene_info = Channel.fromPath(params.genomes[ params.genome ].gene_info, checkIfExists: true)
             ch_gsize = Channel.value(params.genomes[ params.genome ].effective_genome_size)
+            ch_meme_motifs = Channel.fromPath(params.genomes[ params.genome ].meme_motifs, checkIfExists: true)
+            ch_bioc_txdb = Channel.value(params.genomes[ params.genome ].bioc_txdb)
+            ch_bioc_annot = Channel.value(params.genomes[ params.genome ].bioc_annot)
 
         } else if (params.genome_fasta && params.genes_gtf && params.blacklist) {
             println "Building a reference from provided genome fasta, gtf, and blacklist files"
@@ -58,6 +64,7 @@ workflow PREPARE_GENOME {
             blacklist_meta = ch_blacklist_fasta.map{ it -> [it.baseName, it]}
             fasta_meta = ch_fasta.map{ it -> [it.baseName, it]}
 
+            ch_genes_gtf = Channel.fromPath(gtf_file)
             ch_blacklist_index =  BWA_INDEX_BL(blacklist_meta).index.collect()
             ch_reference_index = BWA_INDEX_REF(fasta_meta).index.collect()
             KHMER_UNIQUEKMERS(ch_fasta, params.read_length)
@@ -66,15 +73,29 @@ workflow PREPARE_GENOME {
             SPLIT_REF_CHROMS(ch_fasta)
             ch_chrom_sizes = SPLIT_REF_CHROMS.out.chrom_sizes
             ch_chrom_dir = SPLIT_REF_CHROMS.out.chrom_dir
+            if (params.meme_motifs && file(params.meme_motifs).exists()) {
+                meme_motif_name = Channel.value(params.meme_motifs)
+                ch_meme_motifs = Channel.fromPath(params.meme_motifs)
+            } else {
+                meme_motif_name = 'null'
+                ch_meme_motifs = Channel.empty()
+                params.run.meme = false
+            }
+            ch_bioc_txdb = Channel.value(params.bioc_txdb)
+            ch_bioc_annot = Channel.value(params.bioc_annot)
 
             WRITE_GENOME_CONFIG(
                 ch_fasta,
+                ch_genes_gtf,
                 ch_reference_index,
                 ch_blacklist_index,
                 ch_chrom_sizes,
                 ch_chrom_dir,
                 ch_gene_info,
-                ch_gsize
+                ch_gsize,
+                meme_motif_name,
+                ch_bioc_txdb,
+                ch_bioc_annot
             )
             println "Saving custom genome config in ${params.outdir}/genome"
 
@@ -83,10 +104,14 @@ workflow PREPARE_GENOME {
         }
 
     emit:
+        fasta = ch_fasta
         blacklist_index = ch_blacklist_index
         reference_index = ch_reference_index
         chrom_sizes = ch_chrom_sizes
         chrom_dir = ch_chrom_dir
         gene_info = ch_gene_info
         effective_genome_size = ch_gsize
+        meme_motifs = ch_meme_motifs
+        bioc_txdb = ch_bioc_txdb
+        bioc_annot = ch_bioc_annot
 }

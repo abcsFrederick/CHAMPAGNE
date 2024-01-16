@@ -2,3 +2,5 @@
 /conf/
 /nextflow.config
 /submit_slurm.sh
+/results
+/work

@@ -1,0 +1,50 @@
+---
+name: "custom_normalizepeaks"
+description: normalize p-values and q-values of consensus peaks with the method from Corces et al. (https://doi.org/10.1126/science.aav1898)
+keywords:
+  - chipseq
+  - peaks
+  - consensus
+  - normalization
+tools:
+  - "R":
+      description: "R is a free software environment for statistical computing and graphics"
+      homepage: "https://www.r-project.org/"
+      licence: ["GPL-3"]
+
+input:
+  # Only when we have meta
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. `[ id:'test', single_end:false ]`
+  - count:
+      type: file
+      description: consensus peak file from custom/combinepeakcounts
+      pattern: "*.bed"
+  - peaks:
+      type: file
+      description: merged and sorted peak file
+      pattern: "*.bed"
+
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. `[ id:'test', single_end:false ]`
+  - bed:
+      type: file
+      description: |
+        consensus peak file with normalized p-values and q-values
+
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+
+authors:
+  - "@kelly-sovacool"
+maintainers:
+  - "@kelly-sovacool"

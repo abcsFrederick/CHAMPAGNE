@@ -114,8 +114,8 @@ process SICER {
         tuple val(meta), path(chip), path(input), val(fraglen), val(genome_frac)
 
     output:
-        tuple val(meta), path("*island.bed"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
-        //tuple path("*.scoreisland"), path("*normalized.wig"), path("*islands-summary")
+        tuple val(meta), path("*islands-summary"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
+        tuple path("*island.bed"), path("*.scoreisland"), path("*normalized.wig"),                         emit: sicer
 
     script:
     """
@@ -151,7 +151,8 @@ process CONVERT_SICER { // https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d5838
         tuple val(meta), path(sicer_peaks), val(peak_tool)
 
     output:
-        tuple val(meta), path("${sicer_peaks.baseName}.converted.bed"), val(peak_tool), emit: peak
+        tuple val(meta), path("${sicer_peaks.baseName}.converted_sicer.broadPeak"), val(peak_tool), emit: peak, optional: true
+        tuple val(meta), path("${sicer_peaks.baseName}.converted.bed"), val(peak_tool),             emit: bed
 
     script:
     $/
@@ -184,10 +185,10 @@ process CONVERT_SICER { // https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d5838
             outBed[i] = "\t".join(tmp[0:3] + ["Peak"+str(i+1),score])
     # output broadPeak columns: chrom, start, end, name, ChIP tag count, strand, fold-enrichment, -log10 p-value, -log10 q-value
     with open("${sicer_peaks.baseName}.converted.bed",'w') as g:
-        g.write( "\n".join(outBed) )
+        g.write( "\n".join(outBed) + '\n' )
     if outBroadPeak[0] != None:
         with open("${sicer_peaks.baseName}.converted_sicer.broadPeak", 'w') as h:
-            h.write( "\n".join(outBroadPeak) )
+            h.write( "\n".join(outBroadPeak) + '\n' )
     /$
 
     stub:
@@ -377,7 +378,7 @@ process PLOT_FRIP {
 process JACCARD_INDEX {
     tag "${toolA} ${metaA.id} vs. ${toolB} ${metaB.id}"
     label 'peaks'
-    label 'process_single'
+    label 'process_low'
 
     container "${params.containers.base}"
 
@@ -456,7 +457,7 @@ process PLOT_JACCARD {
 }
 
 process GET_PEAK_META {
-    tag "${meta.id}_${peak_tool}"
+    tag "${meta.id}.${peak_tool}"
     label 'peaks'
     label 'process_single'
 
