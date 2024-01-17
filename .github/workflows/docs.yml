@@ -20,6 +20,7 @@ on:
 
 env:
   actor: "41898282+github-actions[bot]"
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
   deploy:
