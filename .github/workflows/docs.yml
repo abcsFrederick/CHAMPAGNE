@@ -72,7 +72,7 @@ jobs:
               docs_alias = 'dev'
               docs_version = current_semver
             else:
-              raise ValueError(f"current version {curren_version} is not greater than latest release {release_tag}")
+              raise ValueError(f"current version {current_version} is not greater than latest release {release_tag}")
 
           with open(os.getenv("GITHUB_ENV"), 'a') as out_env:
             out_env.write(f"VERSION={docs_version}\n")
