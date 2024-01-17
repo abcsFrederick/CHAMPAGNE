@@ -68,7 +68,7 @@ jobs:
             current_semver = re.match(semver_pattern, current_version)
 
             groups = ['major', 'minor', 'patch']
-            if current_semver.group('prerelease') and any([current_semver.group(grp) > release_semver.group(grp) for grp in groups]):
+            if current_semver.group('prerelease') and any([current_semver.group(grp) >= release_semver.group(grp) for grp in groups]):
               docs_alias = 'dev'
               docs_version = current_semver
             else:
