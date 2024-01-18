@@ -24,6 +24,7 @@
   - Ensure sample IDs are sorted. (#150)
 - Fix a bug where the wrong SICER output file was used for downstream analyses. (#155)
 - Fix CLI profile on machines other than biowulf & FRCE. (#168)
+- Fix broken bold styling in documentation website. (#53)
 
 ## CHAMPAGNE 0.2.2
 
