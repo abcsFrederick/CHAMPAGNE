@@ -70,7 +70,7 @@ jobs:
             groups = ['major', 'minor', 'patch']
             if current_semver.group('prerelease') and any([current_semver.group(grp) >= release_semver.group(grp) for grp in groups]):
               docs_alias = 'dev'
-              docs_version = current_semver
+              docs_version = current_version
             else:
               raise ValueError(f"current version {current_version} is not greater than latest release {release_tag}")
 
