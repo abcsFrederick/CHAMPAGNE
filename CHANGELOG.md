@@ -22,10 +22,13 @@
   - Protein-coding-only versions of plots.
   - Ensure sample IDs are sorted. (#150)
 - Fix a bug where the wrong SICER output file was used for downstream analyses. (#155)
+- Fix CLI profile on machines other than biowulf & FRCE. (#168)
+
 
 ## CHAMPAGNE 0.2.2
 
 - Fix permissions issues in the CLI. (#167)
+
 
 ## CHAMPAGNE 0.2.1
 
@@ -33,6 +36,7 @@
 - Fix a bug in the CLI that added the `-profile` to the nextflow command even if it wasn't needed (#125).
 - Report read counts between blacklist & filtering steps in the QC table. (#125)
 - Run spooker on workflow completion (#126).
+
 
 ## CHAMPAGNE 0.2.0
 
@@ -73,6 +77,7 @@
 - An error is thrown when a required input file doesn't exist. (#71)
   - Previously, the workflow quietly didn't run the process(es) that required the missing file.
 - Renamed `champagne config` to `champagne init` to avoid clashing with `nextflow config`. (#112)
+
 
 ## CHAMPAGNE 0.1.0
 
