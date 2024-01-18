@@ -1,4 +1,4 @@
-## CHAMPAGNE development version
+## CHAMPAGNE 0.3.0
 
 ### New features
 
