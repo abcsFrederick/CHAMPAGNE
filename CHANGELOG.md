@@ -1,4 +1,4 @@
-## development version
+## CHAMPAGNE development version
 
 ### New features
 
@@ -6,12 +6,13 @@
 - Run motif enrichment analysis with MEME. (#142)
 - Annotate peaks with chipseeker. (#142,#147,#157)
 - Add preseq complexity curve and fastq screen to multiqc report. (#147)
-- Print the recommended citation in bibtex format with `champagne --citation`. (#153)
 - Support multiple replicates per sample and call consensus peaks on replicates. (#129)
   - Optionally normalize p-values with the [CCBR/consensus_peaks](https://github.com/CCBR/nf-modules/tree/60d50f4c45a50378cad70b49013f51750617caaa/subworkflows/CCBR/consensus_peaks) subworkflow.
 - Implement differential peak calling. (#158)
   - Optionally specify contrasts via a YAML file. If no file is specified, differential analysis is not performed.
   - If any sample has only one replicate, run `MAnorm`, otherwise run `diffbind`.
+- Print the recommended citation in bibtex format with `champagne --citation`. (#153)
+  - CHAMPAGNE is also now archived in Zenodo with DOI `10.5281/zenodo.10516078`.
 - The docs website now has a dropdown menu to select which version to view. The latest release is shown by default. (#170)
 
 ### Bug fixes
@@ -24,11 +25,9 @@
 - Fix a bug where the wrong SICER output file was used for downstream analyses. (#155)
 - Fix CLI profile on machines other than biowulf & FRCE. (#168)
 
-
 ## CHAMPAGNE 0.2.2
 
 - Fix permissions issues in the CLI. (#167)
-
 
 ## CHAMPAGNE 0.2.1
 
@@ -36,7 +35,6 @@
 - Fix a bug in the CLI that added the `-profile` to the nextflow command even if it wasn't needed (#125).
 - Report read counts between blacklist & filtering steps in the QC table. (#125)
 - Run spooker on workflow completion (#126).
-
 
 ## CHAMPAGNE 0.2.0
 
@@ -77,7 +75,6 @@
 - An error is thrown when a required input file doesn't exist. (#71)
   - Previously, the workflow quietly didn't run the process(es) that required the missing file.
 - Renamed `champagne config` to `champagne init` to avoid clashing with `nextflow config`. (#112)
-
 
 ## CHAMPAGNE 0.1.0
 
