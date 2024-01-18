@@ -12,6 +12,7 @@
 - Implement differential peak calling. (#158)
   - Optionally specify contrasts via a YAML file. If no file is specified, differential analysis is not performed.
   - If any sample has only one replicate, run `MAnorm`, otherwise run `diffbind`.
+- The docs website now has a dropdown menu to select which version to view. The latest release is shown by default. (#170)
 
 ### Bug fixes
 
