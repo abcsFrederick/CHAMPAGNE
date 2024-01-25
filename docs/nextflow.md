@@ -12,7 +12,7 @@ nextflow run CCBR/CHAMPAGNE -profile test,singularity
 You can specify a specific version, tag, or branch with `-r`:
 
 ```sh
-nextflow run CCBR/CHAMPAGNE -r v1.0.0 -profile test,singularity
+nextflow run CCBR/CHAMPAGNE -r v0.3.0 -profile test,singularity
 ```
 
 Create and use a custom reference genome:
