@@ -1,5 +1,12 @@
 ## CHAMPAGNE development version
 
+- Fix configuration files for compatibility with using the GitHub repo as the source. (#173, @kelly-sovacool)
+  These equivalent commands now work:
+  ```sh
+  nextflow run CCBR/CHAMPAGNE
+  champagne run --main CCBR/CHAMPAGNE
+  ```
+
 ## CHAMPAGNE 0.3.0
 
 ### New features
