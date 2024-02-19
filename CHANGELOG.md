@@ -1,4 +1,13 @@
-## development version
+## CHAMPAGNE development version
+
+- Fix configuration files for compatibility with using the GitHub repo as the source. (#173, @kelly-sovacool)
+  - These equivalent commands now work:
+    ```sh
+    nextflow run CCBR/CHAMPAGNE
+    champagne run --main CCBR/CHAMPAGNE
+    ```
+
+## CHAMPAGNE 0.3.0
 
 ### New features
 
@@ -6,12 +15,14 @@
 - Run motif enrichment analysis with MEME. (#142)
 - Annotate peaks with chipseeker. (#142,#147,#157)
 - Add preseq complexity curve and fastq screen to multiqc report. (#147)
-- Print the recommended citation in bibtex format with `champagne --citation`. (#153)
 - Support multiple replicates per sample and call consensus peaks on replicates. (#129)
   - Optionally normalize p-values with the [CCBR/consensus_peaks](https://github.com/CCBR/nf-modules/tree/60d50f4c45a50378cad70b49013f51750617caaa/subworkflows/CCBR/consensus_peaks) subworkflow.
 - Implement differential peak calling. (#158)
   - Optionally specify contrasts via a YAML file. If no file is specified, differential analysis is not performed.
   - If any sample has only one replicate, run `MAnorm`, otherwise run `diffbind`.
+- Print the recommended citation in bibtex format with `champagne --citation`. (#153)
+  - CHAMPAGNE is also now archived in Zenodo with DOI `10.5281/zenodo.10516078`.
+- The docs website now has a dropdown menu to select which version to view. The latest release is shown by default. (#170)
 
 ### Bug fixes
 
@@ -21,12 +32,17 @@
   - Protein-coding-only versions of plots.
   - Ensure sample IDs are sorted. (#150)
 - Fix a bug where the wrong SICER output file was used for downstream analyses. (#155)
+- Fix CLI profile on machines other than biowulf & FRCE. (#168)
+- Fix broken bold styling in documentation website. (#53)
 
+## CHAMPAGNE 0.2.2
+
+- Fix permissions issues in the CLI. (#167)
 
 ## CHAMPAGNE 0.2.1
 
-- Fixed a bug in QC stats that mixed up the statistics for different samples. (#125)
-- Fixed a bug in the CLI that added the `-profile` to the nextflow command even if it wasn't needed (#125).
+- Fix a bug in QC stats that mixed up the statistics for different samples. (#125)
+- Fix a bug in the CLI that added the `-profile` to the nextflow command even if it wasn't needed (#125).
 - Report read counts between blacklist & filtering steps in the QC table. (#125)
 - Run spooker on workflow completion (#126).
 
@@ -34,14 +50,14 @@
 
 ### New features
 
-- Implemented peak calling with sicer2, macs2, and gem. (#52)
-- Added parameter options to skip QC, input normalization, and/or peak calling steps. (#72)
+- Implement peak calling with sicer2, macs2, and gem. (#52)
+- Add parameter options to skip QC, input normalization, and/or peak calling steps. (#72)
 - Calculate and plot QC metrics for called peaks:
   - Fraction in Peaks (FRiP) (#89)
   - Jaccard index (#92)
   - Histogram of peak widths (#92)
-- Added support for paired-end reads. (#105)
-- Added an option to use a custom reference from a genome fasta, gtf, and blacklist file. (#105)
+- Add support for paired-end reads. (#105)
+- Add an option to use a custom reference from a genome fasta, gtf, and blacklist file. (#105)
 - Champagne CLI: (#112)
   - New `--mode` option for `champagne run` to execute the workflow locally ('local') or submit it as a slurm job ('slurm').
   - Option to override the path to the champagne `main.nf` file or specify the github repo (`CCBR/CHAMPAGNE`) instead.
