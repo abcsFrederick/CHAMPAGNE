@@ -37,7 +37,7 @@
                     },
                     "custom/normalizepeaks": {
                         "branch": "main",
-                        "git_sha": "d70a54308963bdbf4873ca988576ba5119062e0d",
+                        "git_sha": "e9a1ba91cb24fe36f83ce5b5f7312cfb689adbd6",
                         "installed_by": ["consensus_peaks"]
                     },
                     "cutadapt": {
@@ -81,7 +81,7 @@
                 "CCBR": {
                     "consensus_peaks": {
                         "branch": "main",
-                        "git_sha": "e2b9aef3566c7ca6fd4b85f53d37afe62cb89ac3",
+                        "git_sha": "9bc99b53a2d22099a7f9da1b394771d2d13872a6",
                         "installed_by": ["subworkflows"]
                     },
                     "filter_blacklist": {
@@ -100,11 +100,41 @@
                         "git_sha": "8fc1d24c710ebe1d5de0f2447ec9439fd3d9d66a",
                         "installed_by": ["modules"]
                     },
+                    "custom/sratoolsncbisettings": {
+                        "branch": "master",
+                        "git_sha": "20e78a9868eaa69c8cac91152397def32374b807",
+                        "installed_by": [
+                            "fastq_download_prefetch_fasterqdump_sratools"
+                        ]
+                    },
                     "rmarkdownnotebook": {
                         "branch": "master",
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/rmarkdownnotebook/rmarkdownnotebook.diff"
+                    },
+                    "sratools/fasterqdump": {
+                        "branch": "master",
+                        "git_sha": "20e78a9868eaa69c8cac91152397def32374b807",
+                        "installed_by": [
+                            "fastq_download_prefetch_fasterqdump_sratools"
+                        ]
+                    },
+                    "sratools/prefetch": {
+                        "branch": "master",
+                        "git_sha": "20e78a9868eaa69c8cac91152397def32374b807",
+                        "installed_by": [
+                            "fastq_download_prefetch_fasterqdump_sratools"
+                        ]
+                    }
+                }
+            },
+            "subworkflows": {
+                "nf-core": {
+                    "fastq_download_prefetch_fasterqdump_sratools": {
+                        "branch": "master",
+                        "git_sha": "bdfd7bc8d2e5a93531e14bd94c4128d9a72a2435",
+                        "installed_by": ["subworkflows"]
                     }
                 }
             }

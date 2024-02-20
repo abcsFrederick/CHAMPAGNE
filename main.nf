@@ -18,6 +18,7 @@ log.info """\
          .stripIndent()
 
 // SUBWORKFLOWS
+include { FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS as DOWNLOAD_FASTQ } from './subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools'
 include { INPUT_CHECK              } from './subworkflows/local/input_check.nf'
 include { PREPARE_GENOME           } from './subworkflows/local/prepare_genome.nf'
 include { FILTER_BLACKLIST         } from './subworkflows/CCBR/filter_blacklist/'
@@ -42,6 +43,15 @@ workflow.onComplete {
             println message
         }
     }
+}
+
+workflow DOWNLOAD_SRA {
+    ch_sra = Channel.from(file(params.sra_csv)) // assets/test_human_metadata.csv
+        .splitCsv ( header:true, sep:',' )
+        .map{ it -> [ it + [id: it.sra], it.sra ]}
+        .view()
+    DOWNLOAD_FASTQ(ch_sra, file('BLANK'))
+
 }
 
 workflow MAKE_REFERENCE {
