@@ -9,10 +9,10 @@ as the config files will be accessed directly from the GitHub repo.
 nextflow run CCBR/CHAMPAGNE -profile test,singularity
 ```
 
-You can specify a specific version, tag, or branch with `-r`:
+You can specify a specific version, tag, or branch on [GitHub](https://github.com/CCBR/CHAMPAGNE) with `-r`:
 
 ```sh
-nextflow run CCBR/CHAMPAGNE -r v1.0.0 -profile test,singularity
+nextflow run CCBR/CHAMPAGNE -r v0.3.0 -profile test,singularity
 ```
 
 Create and use a custom reference genome:
@@ -20,4 +20,16 @@ Create and use a custom reference genome:
 ```sh
 nextflow run CCBR/CHAMPAGNE -profile test -entry MAKE_REFERENCE
 nextflow run CCBR/CHAMPAGNE -profile test -c results/test/genome/custom_genome.config
+```
+
+## biowulf
+
+If you're running it on biowulf without the `champagne` CLI,
+first load the ccbrpipeliner and nextflow modules,
+and be sure to specify the `biowulf` and `slurm` profiles:
+
+```sh
+module load ccbrpipeliner
+module load nextflow
+nextflow run CCBR/CHAMPAGNE -profile test,biowulf,slurm
 ```

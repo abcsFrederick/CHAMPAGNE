@@ -46,7 +46,7 @@ workflow.onComplete {
 }
 
 workflow DOWNLOAD_SRA {
-    ch_sra = Channel.from(file('assets/test_human_metadata.csv'))
+    ch_sra = Channel.from(file(params.sra_csv)) // assets/test_human_metadata.csv
         .splitCsv ( header:true, sep:',' )
         .map{ it -> [ it + [id: it.sra], it.sra ]}
         .view()
@@ -152,10 +152,11 @@ workflow CHIPSEQ {
         }
     }
 
-    MULTIQC(
-        file(params.multiqc.config, checkIfExists: true),
-        file(params.multiqc.logo, checkIfExists: true),
-        ch_multiqc.collect()
-    )
-
+    if (!workflow.stubRun) {
+        MULTIQC(
+            file(params.multiqc.config, checkIfExists: true),
+            file(params.multiqc.logo, checkIfExists: true),
+            ch_multiqc.collect()
+        )
+    }
 }

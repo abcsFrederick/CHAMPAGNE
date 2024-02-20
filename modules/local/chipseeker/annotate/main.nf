@@ -1,7 +1,7 @@
 process CHIPSEEKER_ANNOTATE {
     tag "${meta.id}.${meta.group}"
     label 'peaks'
-    label 'process_medium'
+    label 'process_high'
 
     container 'nciccbr/ccbr_chipseeker:1.1.2'
 
@@ -24,7 +24,8 @@ process CHIPSEEKER_ANNOTATE {
         --genome-annot ${annot_db} \\
         --uptss 2000 \\
         --downtss 2000 \\
-        --toppromoterpeaks 1000
+        --toppromoterpeaks 1000 \\
+        --cores ${task.cpus}
     """
 
     stub:
