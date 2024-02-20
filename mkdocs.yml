@@ -39,6 +39,10 @@ plugins:
   - git-revision-date
   - minify:
       minify_html: true
+  - mike:
+      alias_type: symlink
+      canonical_version: latest
+      version_selector: true
 
 # Customization
 extra:
@@ -64,8 +68,6 @@ markdown_extensions:
       permalink: true
   - pymdownx.arithmatex:
       generic: true
-  - pymdownx.betterem:
-      smart_enable: all
   - pymdownx.caret
   - pymdownx.critic
   - pymdownx.details

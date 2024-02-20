@@ -113,6 +113,12 @@ def init(**kwargs):
         os.mkdir("log/")
 
 
+@click.command()
+def citation(**kwargs):
+    """Print the citation"""
+    print_citation()
+
+
 cli.add_command(run)
 cli.add_command(init)
 

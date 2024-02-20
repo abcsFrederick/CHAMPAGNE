@@ -152,10 +152,11 @@ workflow CHIPSEQ {
         }
     }
 
-    MULTIQC(
-        file(params.multiqc.config, checkIfExists: true),
-        file(params.multiqc.logo, checkIfExists: true),
-        ch_multiqc.collect()
-    )
-
+    if (!workflow.stubRun) {
+        MULTIQC(
+            file(params.multiqc.config, checkIfExists: true),
+            file(params.multiqc.logo, checkIfExists: true),
+            ch_multiqc.collect()
+        )
+    }
 }
