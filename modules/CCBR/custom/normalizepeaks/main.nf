@@ -5,7 +5,7 @@ process CUSTOM_NORMALIZEPEAKS {
     tag { meta.id }
     label 'process_single'
 
-    container 'nciccbr/spacesavers2:0.1.1'
+    container 'nciccbr/consensus_peaks:v1.1'
 
     input:
     tuple val(meta), path(peak)

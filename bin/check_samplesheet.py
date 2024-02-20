@@ -5,9 +5,9 @@ source: https://github.com/nf-core/chipseq/blob/51eba00b32885c4d0bec60db3cb0a45e
 """
 
 import os
-import sys
 import errno
 import argparse
+import operator
 import pprint
 
 
@@ -31,13 +31,12 @@ def make_dir(path):
 
 
 def print_error(error, context="Line", context_str=""):
-    error_str = "ERROR: Please check samplesheet -> {}".format(error)
+    error_str = f"ERROR: Please check samplesheet ->"
     if context != "" and context_str != "":
         error_str = "ERROR: Please check samplesheet -> {}\n{}: '{}'".format(
             error, context.strip(), context_str.strip()
         )
-    print(error_str)
-    sys.exit(1)
+    raise ValueError(error_str)
 
 
 def check_samplesheet(file_in, file_out):
@@ -56,22 +55,24 @@ def check_samplesheet(file_in, file_out):
     with open(file_in, "r", encoding="utf-8-sig") as fin:
         ## Check header
         MIN_COLS = 2
-        HEADER = ["sample", "rep", "fastq_1", "fastq_2", "antibody", "control"]
+        HEADER_MIN = ["sample", "rep", "fastq_1", "fastq_2", "antibody", "control"]
         header = [x.strip('"') for x in fin.readline().strip().split(",")]
-        if header[: len(HEADER)] != HEADER:
-            print(
-                f"ERROR: Please check samplesheet header -> {','.join(header)} != {','.join(HEADER)}"
+
+        header_int = set(HEADER_MIN).intersection(set(header))
+        if header_int != set(HEADER_MIN):
+            print_error(
+                f"{','.join(header)} doesn't contain required elements from {','.join(HEADER)}",
+                context="Header",
             )
-            sys.exit(1)
 
         ## Check sample entries
         for line in fin:
             lspl = [x.strip().strip('"') for x in line.strip().split(",")]
 
             # Check valid number of columns per row
-            if len(lspl) < len(HEADER):
+            if len(lspl) != len(header):
                 print_error(
-                    "Invalid number of columns (minimum = {})!".format(len(HEADER)),
+                    f"Invalid number of columns (header length = {len(header)})!",
                     "Line",
                     line,
                 )
@@ -85,9 +86,17 @@ def check_samplesheet(file_in, file_out):
                     line,
                 )
 
+            line_dict = {key: val for key, val in zip(header, lspl)}
             ## Check sample name entries
-            sample_basename, rep, fastq_1, fastq_2, antibody, control = lspl[:]
-            print('lspl')
+            (
+                sample_basename,
+                rep,
+                fastq_1,
+                fastq_2,
+                antibody,
+                control,
+            ) = operator.itemgetter(*HEADER_MIN)(line_dict)
+            print("lspl")
             pprint.pprint(lspl)
             sample = f"{sample_basename}_{rep}" if rep else sample_basename
             if sample.find(" ") != -1:
@@ -119,7 +128,7 @@ def check_samplesheet(file_in, file_out):
                     antibody = antibody.replace(" ", "_")
                 if not control:
                     print_error(
-                        "Both antibody and control columns must be specified!",
+                        "Both antibody and control columns must be specified for non-control samples!",
                         "Line",
                         line,
                     )
@@ -131,7 +140,7 @@ def check_samplesheet(file_in, file_out):
                     control = control.replace(" ", "_")
                 if not antibody:
                     print_error(
-                        "Both antibody and control columns must be specified!",
+                        "Both antibody and control columns must be specified for non-control samples!",
                         "Line",
                         line,
                     )
@@ -151,7 +160,7 @@ def check_samplesheet(file_in, file_out):
                 antibody,
                 control,
             ]
-            print('sample_info')
+            print("sample_info")
             pprint.pprint(sample_info)
 
             ## Create sample mapping dictionary = {sample: [[ single_end, fastq_1, fastq_2, antibody, control ]]}
@@ -163,7 +172,7 @@ def check_samplesheet(file_in, file_out):
                     print_error("Samplesheet contains duplicate rows!", "Line", line)
                 else:
                     sample_mapping_dict[sample].append(sample_info)
-    #pprint.pprint(sample_mapping_dict)
+    # pprint.pprint(sample_mapping_dict)
     ## Write validated samplesheet with appropriate columns
     if len(sample_mapping_dict) > 0:
         out_dir = os.path.dirname(file_out)
@@ -215,4 +224,4 @@ def main(args=None):
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

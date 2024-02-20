@@ -37,7 +37,7 @@ plot_hist <- function(peak_dat) {
     max()
   peak_dat %>%
     ggplot(aes(peak_width, fill = sample_id)) +
-    geom_histogram(alpha = 0.7, position = "identity") +
+    geom_histogram(alpha = 0.7, position = "stack") +
     scale_fill_manual(
       values = fill_colors,
       breaks = names(fill_colors)
@@ -46,7 +46,11 @@ plot_hist <- function(peak_dat) {
       label.position = "bottom",
       title.position = "top"
     )) +
-    facet_wrap(~tool, ncol = 1) +
+    facet_wrap(~tool, ncol = 1) + # , scales = 'free') +
+    scale_x_log10(
+      breaks = scales::trans_breaks("log10", function(x) 10^x),
+      labels = scales::trans_format("log10", scales::math_format(10^.x))
+    ) +
     theme_bw() +
     theme(legend.position = "right")
 }
