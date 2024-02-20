@@ -6,6 +6,11 @@
     nextflow run CCBR/CHAMPAGNE
     champagne run --main CCBR/CHAMPAGNE
     ```
+- Allow multiple samples to use the same input. (#176, @kelly-sovacool)
+- Allow additional columns in the sample sheet beyond the minimum required header. (#176, @kelly-sovacool)
+- Change the peak widths histogram type from overlay to stack. (#176, @kelly-sovacool)
+- Add a workflow entry point to download fastq files from SRA. (#176, @kelly-sovacool)
+- Add `test_human` profile with chipseq data from ENCODE. (#176, @kelly-sovacool)
 
 ## CHAMPAGNE 0.3.0
 
