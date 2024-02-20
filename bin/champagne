@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-SCRIPTNAME="$BASH_SOURCE"
-SCRIPTDIRNAME=$(readlink -f $(dirname "$SCRIPTNAME"))
-TOOLDIR=$(dirname "$SCRIPTDIRNAME")
-TOOLNAME=$(basename "$SCRIPTNAME")
+TOOLDIR=$(realpath $(dirname $(dirname ${BASH_SOURCE})))
 
 ${TOOLDIR}/main.py "$@"
