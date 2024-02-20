@@ -14,6 +14,7 @@ parser$add_argument("-t", "--toppromoterpeaks", required = FALSE, type = "intege
 parser$add_argument("-o", "--outfile-prefix", required = TRUE, type = "character", dest = "outfile_prefix", help = "prefix for output filenames")
 parser$add_argument("--genome-txdb", dest = "txdb", required = TRUE, help = "BioConductor TxDb package, e.g. TxDb.Hsapiens.UCSC.hg38.knownGene")
 parser$add_argument("--genome-annot", dest = "adb", required = TRUE, help = "BioConductor annotation package, e.g. org.Hs.eg.db")
+parser$add_argument("--cores", required = TRUE, type = "integer", help = "Number of cores to use")
 
 # get command line options, if help option encountered print help and exit,
 # otherwise if options not found on command line then set defaults,
