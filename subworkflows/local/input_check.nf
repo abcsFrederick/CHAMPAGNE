@@ -64,3 +64,18 @@ def create_fastq_channel(LinkedHashMap row, String seq_center) {
     }
     return fastq_meta
 }
+
+// Function to get contrast list of [meta, [id, sample_basename, rep, single_end, antibody, control, group, contrast]]
+def get_contrast_meta(LinkedHashMap row) {
+    def meta = [:]
+    meta.id              = row.sample
+    meta.sample_basename = row.sample_basename
+    meta.rep             = row.rep
+    meta.single_end      = row.single_end.toBoolean()
+    meta.antibody        = row.antibody
+    meta.control         = row.control
+    meta.group           = row.group
+    meta.contrast        = row.contrast
+
+    return meta
+}

@@ -58,17 +58,3 @@ workflow DIFF {
         // TODO
 
 }
-
-def get_contrast_meta(LinkedHashMap row) {
-    def meta = [:]
-    meta.id              = row.sample
-    meta.sample_basename = row.sample_basename
-    meta.rep             = row.rep
-    meta.single_end      = row.single_end.toBoolean()
-    meta.antibody        = row.antibody
-    meta.control         = row.control
-    meta.group           = row.group
-    meta.contrast        = row.contrast
-
-    return meta
-}
