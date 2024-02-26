@@ -20,7 +20,7 @@ workflow INPUT_CHECK {
             .set { reads }
 
         if (params.contrasts) {
-            CHECK_CONTRASTS(samplesheet, contrastsheet)
+            CHECK_CONTRASTS(valid_csv, contrastsheet)
                 .csv
                 .flatten()
                 .splitCsv( header: true, sep: ',' )
