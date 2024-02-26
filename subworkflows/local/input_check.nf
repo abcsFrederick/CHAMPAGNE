@@ -4,11 +4,13 @@
 //
 
 include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check.nf'
+include { CHECK_CONTRASTS } from "../../modules/local/check_contrasts/"
 
 workflow INPUT_CHECK {
     take:
         samplesheet // file: /path/to/samplesheet.csv
         seq_center  // string: sequencing center for read group
+        contrastsheet // file: /path/to/contrast.yaml
 
     main:
         valid_csv = SAMPLESHEET_CHECK( samplesheet ).csv
@@ -17,10 +19,24 @@ workflow INPUT_CHECK {
             .map { create_fastq_channel(it, seq_center) }
             .set { reads }
 
+        if (params.contrasts) {
+            CHECK_CONTRASTS(samplesheet, contrastsheet)
+                .csv
+                .flatten()
+                .splitCsv( header: true, sep: ',' )
+                .map{ it ->
+                    meta = get_contrast_meta(it)
+                    [ sample_basename: meta.sample_basename, group: meta.group, contrast: meta.contrast ]
+                }
+                .unique()
+                .set{ contrasts }
+        }
+
     emit:
         reads                                     // channel: [ val(meta), [ reads ] ]
-        csv      = valid_csv
-        versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
+        csv                                 = valid_csv
+        contrasts                           = contrasts
+        versions                            = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 
 // Function to get list of [ meta, [ fastq_1, fastq_2 ] ]

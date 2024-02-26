@@ -64,7 +64,7 @@ workflow {
 }
 
 workflow CHIPSEQ {
-    INPUT_CHECK(file(params.input, checkIfExists: true), params.seq_center)
+    INPUT_CHECK(file(params.input, checkIfExists: true), params.seq_center, file(params.contrasts, checkIfExists: true))
 
     INPUT_CHECK.out.reads.set { raw_fastqs }
     raw_fastqs | CUTADAPT
@@ -129,7 +129,6 @@ workflow CHIPSEQ {
             }
             .set{ ch_consensus_peaks }
         if (params.contrasts) {
-            contrasts = file(params.contrasts, checkIfExists: true)
             // TODO use consensus peaks for regions of interest in diffbind
             CALL_PEAKS.out.bam_peaks
                 .combine(deduped_bam)
@@ -145,8 +144,7 @@ workflow CHIPSEQ {
                 .set{ tagalign_peaks }
             DIFF( bam_peaks,
                   tagalign_peaks,
-                  INPUT_CHECK.out.csv,
-                  contrasts
+                  INPUT_CHECK.out.contrasts
                 )
 
         }
