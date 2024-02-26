@@ -1,5 +1,5 @@
 process CHIPSEEKER_ANNOTATE {
-    tag "${meta.id}.${meta.group}"
+    tag "${meta.id}"
     label 'peaks'
     label 'process_high'
 
@@ -19,7 +19,7 @@ process CHIPSEEKER_ANNOTATE {
     """
     chipseeker_annotate.R \\
         --peak ${bed} \\
-        --outfile-prefix ${meta.id}.${meta.group} \\
+        --outfile-prefix ${meta.id} \\
         --genome-txdb ${txdb} \\
         --genome-annot ${annot_db} \\
         --uptss 2000 \\
@@ -32,7 +32,7 @@ process CHIPSEEKER_ANNOTATE {
     """
     for ftype in annotated.txt summary.txt genelist.txt annotation.Rds .png
     do
-        touch ${meta.id}.${meta.group}.\${ftype}
+        touch ${meta.id}.\${ftype}
     done
     """
 }
