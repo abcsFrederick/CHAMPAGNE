@@ -36,6 +36,9 @@ include { PHANTOM_PEAKS
           PPQT_PROCESS
           MULTIQC                  } from "./modules/local/qc.nf"
 
+
+contrastsheet = params.contrastsheet ?: "/assets/contrast_test.ymls"
+
 workflow.onComplete {
     if (!workflow.stubRun && !workflow.commandLine.contains('-preview')) {
         def message = Utils.spooker(workflow)
@@ -64,7 +67,7 @@ workflow {
 }
 
 workflow CHIPSEQ {
-    INPUT_CHECK(file(params.input, checkIfExists: true), params.seq_center, file(params.contrasts, checkIfExists: true))
+    INPUT_CHECK(file(params.input, checkIfExists: true), params.seq_center, file(contrastsheet))
 
     INPUT_CHECK.out.reads.set { raw_fastqs }
     raw_fastqs | CUTADAPT

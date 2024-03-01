@@ -19,6 +19,8 @@ workflow INPUT_CHECK {
             .map { create_fastq_channel(it, seq_center) }
             .set { reads }
 
+        // Run check on the contrast manifest
+        contrasts=Channel.empty()
         if (params.contrasts) {
             CHECK_CONTRASTS(valid_csv, contrastsheet)
                 .csv
@@ -33,7 +35,7 @@ workflow INPUT_CHECK {
         }
 
     emit:
-        reads                                     // channel: [ val(meta), [ reads ] ]
+        reads                               = reads      // channel: [ val(meta), [ reads ] ]
         csv                                 = valid_csv
         contrasts                           = contrasts
         versions                            = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
