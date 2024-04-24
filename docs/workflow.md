@@ -1,6 +1,6 @@
 ## Process workflow
 
-Will need to add images to show workflow 
+TODO add images to show workflow 
 
 ### Pipeline Checks
 - Input files are checked that they meet standard formatting; some file access is reviewed
