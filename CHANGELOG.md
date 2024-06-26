@@ -13,6 +13,7 @@
 - Change the peak widths histogram type from overlay to stack. (#176, @kelly-sovacool)
 - Add a workflow entry point to download fastq files from SRA. (#176, @kelly-sovacool)
 - Add `test_human` profile with chipseq data from ENCODE. (#176, @kelly-sovacool)
+- In biowulf config profile, switch variable $SLURM_JOBID to $SLURM_JOB_ID. (@kelly-sovacool)
 
 ## CHAMPAGNE 0.3.0
 
