@@ -20,8 +20,8 @@ workflow INPUT_CHECK {
             .set { reads }
 
         // Run check on the contrast manifest
-        contrasts=Channel.empty()
-        if (params.contrasts) {
+        ch_contrasts = Channel.empty()
+        if (contrastsheet) {
             CHECK_CONTRASTS(valid_csv, contrastsheet)
                 .csv
                 .flatten()
@@ -31,13 +31,13 @@ workflow INPUT_CHECK {
                     [ sample_basename: meta.sample_basename, group: meta.group, contrast: meta.contrast ]
                 }
                 .unique()
-                .set{ contrasts }
+                .set{ ch_contrasts }
         }
 
     emit:
         reads                               = reads      // channel: [ val(meta), [ reads ] ]
         csv                                 = valid_csv
-        contrasts                           = contrasts
+        contrasts                           = ch_contrasts
         versions                            = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 
