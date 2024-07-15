@@ -37,7 +37,7 @@ include { PHANTOM_PEAKS
           MULTIQC                  } from "./modules/local/qc.nf"
 
 
-contrastsheet = params.contrastsheet ?: "/assets/contrast_test.ymls"
+contrast_sheet = params.contrastsheet ? Channel.fromPath(file(params.contrastsheet, checkIfExists: true)) : params.contrastsheet
 
 workflow.onComplete {
     if (!workflow.stubRun && !workflow.commandLine.contains('-preview')) {
@@ -67,7 +67,7 @@ workflow {
 }
 
 workflow CHIPSEQ {
-    INPUT_CHECK(file(params.input, checkIfExists: true), params.seq_center, file(contrastsheet))
+    INPUT_CHECK(file(params.input, checkIfExists: true), params.seq_center, contrast_sheet)
 
     INPUT_CHECK.out.reads.set { raw_fastqs }
     raw_fastqs | CUTADAPT
@@ -131,7 +131,9 @@ workflow CHIPSEQ {
                 [ [ sample_basename: meta_split[0], tool: meta_split[1] ], bed ]
             }
             .set{ ch_consensus_peaks }
-        if (params.contrasts) {
+
+        ch_contrasts = INPUT_CHECK.out.contrasts
+        if (!ch_contrasts.ifEmpty(null)) {
             // TODO use consensus peaks for regions of interest in diffbind
             CALL_PEAKS.out.bam_peaks
                 .combine(deduped_bam)

@@ -1,7 +1,15 @@
 ## CHAMPAGNE development version
 
+### New features
+
 - Create a script (`bin/champagne`) to provide an interface to the champagne CLI that works out-of-the-box without the need to install the python package with `pip`. (#180, @kelly-sovacool)
   - However, any dependencies not in the Python Standard Library must be installed for this to work. See the dependencies list in `pyproject.toml`.
+- Allow additional columns in the sample sheet beyond the minimum required header. (#176, @kelly-sovacool)
+- Add a workflow entry point to download fastq files from SRA. (#176, @kelly-sovacool)
+- Add `test_human` profile with chipseq data from ENCODE. (#176, @kelly-sovacool)
+
+### Bug fixes
+
 - Fix configuration files for compatibility with using the GitHub repo as the source. (#173, @kelly-sovacool)
   - These equivalent commands now work:
     ```sh
@@ -9,11 +17,14 @@
     champagne run --main CCBR/CHAMPAGNE
     ```
 - Allow multiple samples to use the same input. (#176, @kelly-sovacool)
-- Allow additional columns in the sample sheet beyond the minimum required header. (#176, @kelly-sovacool)
+- In the biowulf config profile, switch variable $SLURM_JOBID to $SLURM_JOB_ID. (@kelly-sovacool)
+- Increase resource allocations for chipseeker and deeptools. (#192, @slsevilla)
+- Check the validity of the contrastsheet earlier on in the workflow. (#192, @slsevilla; #200, @kelly-sovacool)
+
+### Misc
+
 - Change the peak widths histogram type from overlay to stack. (#176, @kelly-sovacool)
-- Add a workflow entry point to download fastq files from SRA. (#176, @kelly-sovacool)
-- Add `test_human` profile with chipseq data from ENCODE. (#176, @kelly-sovacool)
-- In biowulf config profile, switch variable $SLURM_JOBID to $SLURM_JOB_ID. (@kelly-sovacool)
+- Documentation improvements. (#192, @slsevilla)
 
 ## CHAMPAGNE 0.3.0
 
