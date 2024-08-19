@@ -3,7 +3,7 @@
 **CH**rom**A**tin i**M**muno **P**recipit**A**tion sequencin**G** a**N**alysis pip**E**line
 
 [![build](https://github.com/CCBR/CHAMPAGNE/actions/workflows/build.yml/badge.svg)](https://github.com/CCBR/CHAMPAGNE/actions/workflows/build.yml)
-[![mkdocs](https://github.com/CCBR/CHAMPAGNE/actions/workflows/docs.yml/badge.svg)](https://github.com/CCBR/CHAMPAGNE/actions/workflows/docs.yml)
+[![docs](https://github.com/CCBR/CHAMPAGNE/actions/workflows/docs-mkdocs.yml/badge.svg)](https://github.com/CCBR/CHAMPAGNE/actions/workflows/docs-mkdocs.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10516079.svg)](https://doi.org/10.5281/zenodo.10516079)
 
 🚧 **This project is under active development. It is not yet ready for production use.** 🚧
