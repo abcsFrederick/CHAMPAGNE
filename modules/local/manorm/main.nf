@@ -18,7 +18,7 @@ process MANORM_PAIRWISE {
     manorm \\
         --p1 ${peak1} \\
         --p2 ${peak2} \\
-        --r1 ${tagalign2} \\
+        --r1 ${tagalign1} \\
         --r2 ${tagalign2} \\
         --s1 ${meta1.fraglen} \\
         --s2 ${meta2.fraglen} \\
