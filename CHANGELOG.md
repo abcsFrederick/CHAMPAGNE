@@ -20,6 +20,7 @@
 - In the biowulf config profile, switch variable $SLURM_JOBID to $SLURM_JOB_ID. (@kelly-sovacool)
 - Increase resource allocations for chipseeker and deeptools. (#192, @slsevilla)
 - Check the validity of the contrastsheet earlier on in the workflow. (#192, @slsevilla; #200, @kelly-sovacool)
+- Fix bug where `manorm` was using R1 twice instead of R1 and R2. (#206, @kelly-sovacool)
 
 ### Misc
 
