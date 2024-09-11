@@ -1,5 +1,7 @@
 ## CHAMPAGNE development version
 
+## CHAMPAGNE 0.4.0
+
 ### New features
 
 - Create a script (`bin/champagne`) to provide an interface to the champagne CLI that works out-of-the-box without the need to install the python package with `pip`. (#180, @kelly-sovacool)
