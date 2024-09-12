@@ -2,7 +2,7 @@
 site_name: CHAMPAGNE
 site_author: CCR Collaborative Bioinformatics Resource
 site_description: >-
-  insert a one-line description of CHAMPAGNE here
+  CHiP-seq pipeline
 # Repository
 repo_name: CCBR/CHAMPAGNE
 repo_url: https://github.com/CCBR/CHAMPAGNE
