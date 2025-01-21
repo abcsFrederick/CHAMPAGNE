@@ -5,6 +5,7 @@
 [![build](https://github.com/CCBR/CHAMPAGNE/actions/workflows/build.yml/badge.svg)](https://github.com/CCBR/CHAMPAGNE/actions/workflows/build.yml)
 [![docs](https://github.com/CCBR/CHAMPAGNE/actions/workflows/docs-mkdocs.yml/badge.svg)](https://github.com/CCBR/CHAMPAGNE/actions/workflows/docs-mkdocs.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10516079.svg)](https://doi.org/10.5281/zenodo.10516079)
+[![release](https://img.shields.io/github/v/release/CCBR/CHAMPAGNE?color=blue&label=latest%20release)](https://github.com/ccbr/champagne/releases/latest)
 
 🚧 **This project is under active development. It is not yet ready for production use.** 🚧
 
