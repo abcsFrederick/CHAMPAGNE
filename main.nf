@@ -39,8 +39,6 @@ include { PHANTOM_PEAKS
 include { CONSENSUS_CORCES         } from "./modules/local/consensus/corces/main.nf"
 
 
-contrast_sheet = params.contrastsheet ? Channel.fromPath(file(params.contrastsheet, checkIfExists: true)) : params.contrastsheet
-
 workflow.onComplete {
     if (!workflow.stubRun && !workflow.commandLine.contains('-preview')) {
         def message = Utils.spooker(workflow)
@@ -52,6 +50,14 @@ workflow.onComplete {
 
 workflow version {
     println "CHAMPAGNE ${workflow.manifest.version}"
+}
+
+workflow debug {
+
+    sample_sheet = Channel.fromPath(file(params.input, checkIfExists: true))
+    contrast_sheet = params.contrasts ? Channel.fromPath(file(params.contrasts, checkIfExists: true)) : params.contrasts
+    raw_fastqs = INPUT_CHECK(sample_sheet, params.seq_center, contrast_sheet).reads
+
 }
 
 workflow DOWNLOAD_SRA {
@@ -73,7 +79,9 @@ workflow {
 }
 
 workflow CHIPSEQ {
-    raw_fastqs = INPUT_CHECK(file(params.input, checkIfExists: true), params.seq_center, contrast_sheet).reads
+    sample_sheet = Channel.fromPath(file(params.input, checkIfExists: true))
+    contrast_sheet = params.contrasts ? Channel.fromPath(file(params.contrasts, checkIfExists: true)) : params.contrasts
+    raw_fastqs = INPUT_CHECK(sample_sheet, params.seq_center, contrast_sheet).reads
 
     CUTADAPT(raw_fastqs).reads | POOL_INPUTS
     trimmed_fastqs = POOL_INPUTS.out.reads
@@ -145,13 +153,14 @@ workflow CHIPSEQ {
             }
             .set{ ch_consensus_peaks }
 
+        // run differential analysis
         ch_contrasts = INPUT_CHECK.out.contrasts
-        if (!ch_contrasts.ifEmpty(null)) {
+        if (params.contrasts) {
             // TODO use consensus peaks for regions of interest in diffbind
             CALL_PEAKS.out.bam_peaks
                 .combine(deduped_bam)
                 .map{meta1, bam1, bai1, peak, tool, meta2, bam2, bai2 ->
-                    meta1.control == meta2.id ? [ meta1 + [tool: tool], bam1, bai1, peak, bam2, bai2 ] : null
+                    meta1.input == meta2.id ? [ meta1 + [tool: tool], bam1, bai1, peak, bam2, bai2 ] : null
                 }
                 .set{bam_peaks}
             CALL_PEAKS.out.tagalign_peaks
@@ -162,7 +171,7 @@ workflow CHIPSEQ {
                 .set{ tagalign_peaks }
             DIFF( bam_peaks,
                   tagalign_peaks,
-                  INPUT_CHECK.out.contrasts
+                  ch_contrasts
                 )
 
         }
