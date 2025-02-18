@@ -7,10 +7,11 @@ process CONSENSUS_CORCES {
         path(chrom_sizes)
 
     output:
-        tuple val(meta), path("*.corces_cons.bed"), emit: consensus_peaks
+        tuple val(meta), path("*.consensus_corces.bed"), emit: consensus_peaks
+
     script:
     def cat_peak_file = "${meta.id}.${meta.tool}.cat.bed"
-    def outfile = "${meta.id}.${meta.tool}.corces_cons.bed"
+    def outfile = "${meta.id}.${meta.tool}.consensus_corces.bed"
     """
     cat ${peaks.join(' ')} > ${cat_peak_file}
     consensus_corces.py ${cat_peak_file} ${outfile} ${chrom_sizes}

@@ -7,6 +7,7 @@
 - Set `process.cache` to `deep` by default rather than lenient. (#224, @kelly-sovacool)
 - Fix a file name clash during input pooling. (#224, @kelly-sovacool)
 - Use `nextflow run -resume` by default, or turn it off with `champagne run --forceall`. (#224, @kelly-sovacool)
+- New consensus peak method from Corces _et al._ ([doi:10.1126/science.aav1898](https://www.science.org/doi/10.1126/science.aav1898))
 
 ## CHAMPAGNE 0.4.1
 
