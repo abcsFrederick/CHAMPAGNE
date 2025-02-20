@@ -7,7 +7,7 @@ process CONSENSUS_CORCES {
         path(chrom_sizes)
 
     output:
-        tuple val(meta), path("*.consensus_corces.bed"), emit: consensus_peaks
+        tuple val(meta), path("*.consensus_corces.bed"), emit: peaks
 
     script:
     def cat_peak_file = "${meta.id}.${meta.tool}.cat.bed"
