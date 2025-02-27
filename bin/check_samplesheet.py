@@ -62,7 +62,7 @@ def check_samplesheet(file_in, file_out):
         header_int = set(HEADER_MIN).intersection(set(header))
         if header_int != set(HEADER_MIN):
             print_error(
-                f"{','.join(header)} doesn't contain required elements from {','.join(HEADER)}",
+                f"{','.join(header)} doesn't contain required elements from {','.join(HEADER_MIN)}",
                 context="Header",
             )
 
