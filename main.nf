@@ -123,44 +123,44 @@ workflow CHIPSEQ {
                    )
         ch_multiqc = ch_multiqc.mix(CALL_PEAKS.out.plots)
         // consensus peak calling with union method
-        ch_peaks_grouped = CALL_PEAKS.out.peaks
-            .map{ meta, bed, tool ->
-                [ [ group: "${meta.sample_basename}.${tool}" ], bed ]
-            }
-        CONSENSUS_UNION( ch_peaks_grouped, params.run.normalize_peaks )
-        // retrieve sample basename and peak-calling tool from metadata
-        CONSENSUS_UNION.out.peaks
-            .map{ meta, bed ->
-                def meta_split = meta.id.tokenize('.')
-                assert meta_split.size() == 2
-                [ [ sample_basename: meta_split[0], tool: meta_split[1] ], bed ]
-            }
-            .set{ ch_consensus_union }
-
-        // consensus peak calling with corces method
-        // only works on narrowPeak files, as the 10th column is the summit coordinate
-        ch_narrow_peaks = CALL_PEAKS.out.narrow_peaks
-            .map{ meta, bed, tool ->
-                def meta2 = [tool: tool, id: meta.sample_basename]
-                [ meta2, bed ]
-            }
-            .groupTuple()
-        CONSENSUS_CORCES(ch_narrow_peaks, chrom_sizes)
-
-        ANNOTATE_CONS_UNION(CONSENSUS_UNION.out.peaks,
-                 PREPARE_GENOME.out.fasta,
-                 PREPARE_GENOME.out.meme_motifs,
-                 PREPARE_GENOME.out.bioc_txdb,
-                 PREPARE_GENOME.out.bioc_annot)
-        ch_multiqc = ch_multiqc.mix(ANNOTATE_CONS_UNION.out.plots)
-        
-        ANNOTATE_CONS_CORCES(CONSENSUS_CORCES.out.peaks,
-                 PREPARE_GENOME.out.fasta,
-                 PREPARE_GENOME.out.meme_motifs,
-                 PREPARE_GENOME.out.bioc_txdb,
-                 PREPARE_GENOME.out.bioc_annot)
-        ch_multiqc = ch_multiqc.mix(ANNOTATE_CONS_CORCES.out.plots)
-        
+        if (params.run.consensus_union) {
+            ch_peaks_grouped = CALL_PEAKS.out.peaks
+                .map{ meta, bed, tool ->
+                    [ [ group: "${meta.sample_basename}.${tool}" ], bed ]
+                }
+            CONSENSUS_UNION( ch_peaks_grouped, params.run.normalize_peaks )
+            // retrieve sample basename and peak-calling tool from metadata
+            CONSENSUS_UNION.out.peaks
+                .map{ meta, bed ->
+                    def meta_split = meta.id.tokenize('.')
+                    assert meta_split.size() == 2
+                    [ [ sample_basename: meta_split[0], tool: meta_split[1] ], bed ]
+                }
+                .set{ ch_consensus_union }
+            ANNOTATE_CONS_UNION(CONSENSUS_UNION.out.peaks,
+                    PREPARE_GENOME.out.fasta,
+                    PREPARE_GENOME.out.meme_motifs,
+                    PREPARE_GENOME.out.bioc_txdb,
+                    PREPARE_GENOME.out.bioc_annot)
+            ch_multiqc = ch_multiqc.mix(ANNOTATE_CONS_UNION.out.plots)
+        }
+        if (params.run.consensus_corces) {
+            // consensus peak calling with corces method
+            // only works on narrowPeak files, as the 10th column is the summit coordinate
+            ch_narrow_peaks = CALL_PEAKS.out.narrow_peaks
+                .map{ meta, bed, tool ->
+                    def meta2 = [tool: tool, id: meta.sample_basename]
+                    [ meta2, bed ]
+                }
+                .groupTuple()
+            CONSENSUS_CORCES(ch_narrow_peaks, chrom_sizes)
+            ANNOTATE_CONS_CORCES(CONSENSUS_CORCES.out.peaks,
+                    PREPARE_GENOME.out.fasta,
+                    PREPARE_GENOME.out.meme_motifs,
+                    PREPARE_GENOME.out.bioc_txdb,
+                    PREPARE_GENOME.out.bioc_annot)
+            ch_multiqc = ch_multiqc.mix(ANNOTATE_CONS_CORCES.out.plots)
+        }
 
         // run differential analysis
         ch_contrasts = INPUT_CHECK.out.contrasts
