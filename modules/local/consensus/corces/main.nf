@@ -3,8 +3,7 @@ process CONSENSUS_CORCES {
     tag "${meta.id}.${meta.tool}"
 
     input:
-        tuple val(meta), path(peaks)
-        path(chrom_sizes)
+        tuple val(meta), path(peaks), path(chrom_sizes)
 
     output:
         tuple val(meta), path("*.consensus_corces.bed"), emit: peaks

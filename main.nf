@@ -153,7 +153,7 @@ workflow CHIPSEQ {
                     [ meta2, bed ]
                 }
                 .groupTuple()
-            CONSENSUS_CORCES(ch_narrow_peaks, chrom_sizes)
+            CONSENSUS_CORCES(ch_narrow_peaks.combine(chrom_sizes))
             ANNOTATE_CONS_CORCES(CONSENSUS_CORCES.out.peaks,
                     PREPARE_GENOME.out.fasta,
                     PREPARE_GENOME.out.meme_motifs,
