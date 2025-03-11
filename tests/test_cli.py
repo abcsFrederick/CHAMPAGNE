@@ -1,7 +1,10 @@
 import json
 import os.path
+import pathlib
+import pytest
 import subprocess
 import tempfile
+from ccbr_tools.shell import shell_run
 
 # from champagne.src.util import run_nextflow
 
@@ -57,3 +60,23 @@ def test_forceall():
         if ":" in l
     }["cmd line"]
     assert "-preview" in cmd_line and "-resume" not in cmd_line
+
+
+def test_init():
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        output = shell_run(f"./bin/champagne init --output {tmp_dir}")
+        outdir = pathlib.Path(tmp_dir)
+        assertions = [(outdir / "nextflow.config").exists(), (outdir / "log").exists()]
+    assert all(assertions)
+
+
+def test_run_no_init():
+    with pytest.raises(Exception) as exc_info:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            output = shell_run(
+                f"./bin/champagne run --output {tmp_dir}",
+                check=True,
+                capture_output=True,
+            )
+            assertions = ["Hint: you must initialize the output directory" in output]
+            assert all(assertions)
