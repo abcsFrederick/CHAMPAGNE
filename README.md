@@ -35,12 +35,13 @@ module load ccbrpipeliner
 Initialize and run champagne with test data:
 
 ```sh
-# copy the champagne config files to your current directory
-champagne init
+# copy the champagne config files to your project directory.
+# --output is optional and defaults to your current working directory.
+champagne init --output /data/$USER/champagne_project
 # preview the champagne jobs that will run with the test dataset
-champagne run --mode local -profile test -preview
+champagne run --output /data/$USER/champagne_project --mode local -profile test -preview
 # launch a champagne run on slurm with the test dataset
-champagne run --mode slurm -profile test,biowulf
+champagne run --output /data/$USER/champagne_project --mode slurm -profile test,biowulf
 ```
 
 To run champagne on your own data, you'll need to create a sample sheet.
@@ -53,7 +54,7 @@ Once you've created a samplesheet with paths to your fastq files,
 run champagne with the `--input` option to specify the path to your sample sheet:
 
 ```sh
-champagne run --mode slurm -profile biowulf --input samplesheet.csv --genome hg38
+champagne run --output /data/$USER/champagne_project --mode slurm -profile biowulf --input samplesheet.csv --genome hg38
 ```
 
 We currently support the hg38 and mm10 genomes.
@@ -66,7 +67,8 @@ If you'd like to use a custom genome, you'll need the following files:
 Prepare your custom reference genome with:
 
 ```sh
-champagne run --mode slurm -profile biowulf \
+champagne run --output /data/$USER/champagne_project \
+    --mode slurm -profile biowulf \
     -entry MAKE_REFERENCE \
     --outdir custom_genome \
     --genome custom_genome \
@@ -80,7 +82,8 @@ The reference files and a config file for the genome will be written in `custom_
 Then you can run champagne using your custom genome:
 
 ```sh
-champagne run --mode slurm -profile biowulf \
+champagne run --output /data/$USER/champagne_project \
+    --mode slurm -profile biowulf \
     --input samplesheet.csv \
     --genome custom_genome \
     -c custom_genome/genome/custom_genome.config

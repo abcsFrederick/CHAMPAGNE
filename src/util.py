@@ -5,6 +5,7 @@ from time import localtime, strftime
 import click
 import collections.abc
 import os
+import pathlib
 import pprint
 import shutil
 import stat
@@ -54,16 +55,28 @@ def append_config_block(nf_config="nextflow.config", scope=None, **kwargs):
         f.write("}\n")
 
 
-def copy_config(config_paths, overwrite=True):
+def copy_config(config_paths, outdir: pathlib.Path, overwrite=True):
+    """
+    Copies default configuration files to the specified output directory.
+
+    Args:
+        config_paths (list): A list of paths to the local configuration files.
+        outdir (pathlib.Path): The output directory where the configuration files will be copied.
+        overwrite (bool, optional): Whether to overwrite existing files and directories. Defaults to True.
+
+    Raises:
+        FileNotFoundError: If a specified configuration file or directory does not exist.
+    """
     msg(f"Copying default config files to current working directory")
     for local_config in config_paths:
         system_config = nek_base(local_config)
+        output_config = outdir / local_config
         if os.path.isfile(system_config):
-            shutil.copyfile(system_config, local_config)
+            shutil.copyfile(system_config, output_config)
         elif os.path.isdir(system_config):
-            shutil.copytree(system_config, local_config, dirs_exist_ok=overwrite)
+            shutil.copytree(system_config, output_config, dirs_exist_ok=overwrite)
         else:
-            raise FileNotFoundError(f"Cannot copy {system_config} to {local_config}")
+            raise FileNotFoundError(f"Cannot copy {system_config} to {output_config}")
 
 
 def read_config(file):
@@ -153,6 +166,7 @@ def get_hpc():
 
 def run_nextflow(
     nextfile_path=None,
+    output_dir=pathlib.Path("."),
     mode="local",
     force_all=False,
     merge_config=None,

@@ -5,8 +5,9 @@ Check out the wiki for a detailed look at customizing this file:
 https://github.com/beardymcjohnface/Snaketool/wiki/Customising-your-Snaketool
 """
 
-import os
 import click
+import os
+import pathlib
 from .util import (
     nek_base,
     get_version,
@@ -78,6 +79,14 @@ Run with a specific tag, branch, or commit from GitHub:
     show_default=True,
 )
 @click.option(
+    "--output",
+    "-o",
+    "output_dir",
+    help="Output path for champagne init & run. Equivalient to nextflow launchDir.",
+    type=click.Path(file_okay=False, dir_okay=True, writable=True),
+    default=pathlib.Path("."),
+)
+@click.option(
     "--mode",
     "_mode",
     help="Run mode (slurm, local)",
@@ -95,7 +104,7 @@ Run with a specific tag, branch, or commit from GitHub:
     show_default=True,
 )
 @common_options
-def run(main_path, _mode, force_all, **kwargs):
+def run(main_path, output_dir, _mode, force_all, **kwargs):
     """Run the workflow"""
     if (  # this is the only acceptable github repo option for champagne
         main_path != "CCBR/CHAMPAGNE"
@@ -105,22 +114,42 @@ def run(main_path, _mode, force_all, **kwargs):
             raise FileNotFoundError(
                 f"Path to the champagne main.nf file not found: {main_path}"
             )
-
-    run_nextflow(
-        nextfile_path=main_path,
-        mode=_mode,
-        force_all=force_all,
-        **kwargs,
-    )
+    output_dir = pathlib.Path(output_dir)
+    if not output_dir.exists() or not (output_dir / "nextflow.config").exists():
+        raise FileNotFoundError(
+            f"output directory does not exist: {output_dir}. Hint: you must initialize the output directory with `champagne init --output {output_dir}`"
+        )
+    current_wd = os.getcwd()
+    try:
+        os.chdir(output_dir)
+        run_nextflow(
+            nextfile_path=main_path,
+            output_dir=output_dir,
+            mode=_mode,
+            force_all=force_all,
+            **kwargs,
+        )
+        # except Exception as exc:
+        #    raise exc
+    finally:
+        os.chdir(current_wd)
 
 
 @click.command()
-def init(**kwargs):
-    """Initialize the working directory by copying the system default config files"""
+@click.option(
+    "--output",
+    "-o",
+    "output_dir",
+    help="Output path for champagne init & run. Equivalient to nextflow launchDir.",
+    type=click.Path(file_okay=False, dir_okay=True, writable=True),
+    default=pathlib.Path("."),
+)
+def init(output_dir, **kwargs):
+    """Initialize the launch directory by copying the system default config files"""
+    output_dir = pathlib.Path(output_dir)
+    (output_dir / "log/").mkdir(parents=True, exist_ok=True)
     paths = ("nextflow.config", "conf/", "assets/")
-    copy_config(paths)
-    if not os.path.exists("log/"):
-        os.mkdir("log/")
+    copy_config(paths, outdir=output_dir)
 
 
 @click.command()
