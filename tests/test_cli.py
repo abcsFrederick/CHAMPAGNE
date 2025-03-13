@@ -70,6 +70,19 @@ def test_init():
     assert all(assertions)
 
 
+def test_init_default():
+    cwd = os.getcwd()
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        os.chdir(tmp_dir)
+        output = shell_run(f"{cwd}/bin/champagne init", check=False)
+        print(output)
+        outdir = pathlib.Path(tmp_dir)
+        assertions = [(outdir / "nextflow.config").exists(), (outdir / "log").exists()]
+
+    os.chdir(cwd)
+    assert all(assertions)
+
+
 def test_run_no_init():
     with pytest.raises(Exception) as exc_info:
         with tempfile.TemporaryDirectory() as tmp_dir:

@@ -84,7 +84,8 @@ Run with a specific tag, branch, or commit from GitHub:
     "output_dir",
     help="Output path for champagne init & run. Equivalient to nextflow launchDir.",
     type=click.Path(file_okay=False, dir_okay=True, writable=True),
-    default=pathlib.Path("."),
+    default=pathlib.Path.cwd(),
+    show_default=True,
 )
 @click.option(
     "--mode",
@@ -142,7 +143,8 @@ def run(main_path, output_dir, _mode, force_all, **kwargs):
     "output_dir",
     help="Output path for champagne init & run. Equivalient to nextflow launchDir.",
     type=click.Path(file_okay=False, dir_okay=True, writable=True),
-    default=pathlib.Path("."),
+    default=pathlib.Path.cwd(),
+    show_default=True,
 )
 def init(output_dir, **kwargs):
     """Initialize the launch directory by copying the system default config files"""
