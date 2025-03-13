@@ -11,6 +11,7 @@
 - Enable the nextflow timeline & trace reports by default. (#226, @kelly-sovacool)
 - Add `--output` argument for `champagne init` and `champagne run`. (#232, #233, @kelly-sovacool)
   - This is equivalent to the nextflow launchDir constant.
+- Fix bug in MEME AME process that caused it not to run on all samples. (#234, @kelly-sovacool)
 
 ## CHAMPAGNE 0.4.1
 
