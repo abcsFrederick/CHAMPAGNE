@@ -15,6 +15,7 @@ from .util import (
     OrderedCommands,
     run_nextflow,
     print_citation,
+    msg_box,
 )
 
 
@@ -64,6 +65,8 @@ Run with a specific tag, branch, or commit from GitHub:
 """
 
 
+# DEVELOPER NOTE: cannot use single-hyphen options e.g. -m, -o or else it may clash with nextflow's cli options
+# e.g. -profile clashed with -o (--output) and caused the command to be parsed as "-pr -o file"
 @click.command(
     epilog=help_msg_extra,
     context_settings=dict(
@@ -80,12 +83,10 @@ Run with a specific tag, branch, or commit from GitHub:
 )
 @click.option(
     "--output",
-    "-o",
-    "output_dir",
-    help="Output path for champagne init & run. Equivalient to nextflow launchDir.",
+    help="Output directory path for champagne init & run. Equivalient to nextflow launchDir. Defaults to your current working directory.",
     type=click.Path(file_okay=False, dir_okay=True, writable=True),
     default=pathlib.Path.cwd(),
-    show_default=True,
+    show_default=False,
 )
 @click.option(
     "--mode",
@@ -104,8 +105,8 @@ Run with a specific tag, branch, or commit from GitHub:
     default=False,
     show_default=True,
 )
-@common_options
-def run(main_path, output_dir, _mode, force_all, **kwargs):
+@click.argument("nextflow_args", nargs=-1)
+def run(main_path, output, _mode, force_all, **kwargs):
     """Run the workflow"""
     if (  # this is the only acceptable github repo option for champagne
         main_path != "CCBR/CHAMPAGNE"
@@ -115,10 +116,11 @@ def run(main_path, output_dir, _mode, force_all, **kwargs):
             raise FileNotFoundError(
                 f"Path to the champagne main.nf file not found: {main_path}"
             )
-    output_dir = pathlib.Path(output_dir)
-    if not output_dir.exists() or not (output_dir / "nextflow.config").exists():
+    output_dir = output if isinstance(output, pathlib.Path) else pathlib.Path(output)
+    msg_box("output directory", errmsg=str(output_dir))
+    if not output_dir.is_dir() or not (output_dir / "nextflow.config").exists():
         raise FileNotFoundError(
-            f"output directory does not exist: {output_dir}. Hint: you must initialize the output directory with `champagne init --output {output_dir}`"
+            f"output directory not initialized: {output_dir}. Hint: you must initialize the output directory with `champagne init --output {output_dir}`"
         )
     current_wd = os.getcwd()
     try:
@@ -139,16 +141,15 @@ def run(main_path, output_dir, _mode, force_all, **kwargs):
 @click.command()
 @click.option(
     "--output",
-    "-o",
-    "output_dir",
-    help="Output path for champagne init & run. Equivalient to nextflow launchDir.",
+    help="Output directory path for champagne init & run. Equivalient to nextflow launchDir. Defaults to your current working directory.",
     type=click.Path(file_okay=False, dir_okay=True, writable=True),
     default=pathlib.Path.cwd(),
-    show_default=True,
+    show_default=False,
 )
-def init(output_dir, **kwargs):
+def init(output, **kwargs):
     """Initialize the launch directory by copying the system default config files"""
-    output_dir = pathlib.Path(output_dir)
+    output_dir = output if isinstance(output, pathlib.Path) else pathlib.Path(output)
+    msg_box(f"Initializing CHAMPAGNE in {output_dir}")
     (output_dir / "log/").mkdir(parents=True, exist_ok=True)
     paths = ("nextflow.config", "conf/", "assets/")
     copy_config(paths, outdir=output_dir)
@@ -171,4 +172,5 @@ def main():
 cli(prog_name="champagne")
 
 if __name__ == "__main__":
+    msg_box(f"CWD {pathlib.Path.cwd()}")
     main()
