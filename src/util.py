@@ -20,6 +20,7 @@ def nek_base(rel_path):
 
 
 def get_version():
+    msg_box(f"CWD {pathlib.Path.cwd()}")
     with open(nek_base("VERSION"), "r") as f:
         version = f.readline()
     return version
