@@ -38,7 +38,7 @@ process MEME_AME {
     # get header row
     sed -n '1p;2q' ${prefix}/motifs/*/ame.tsv > ${prefix}.ame.tsv
     # concatenate data row from all ame output files
-    sed -sn 2p ${prefix}/motifs/*/ame.tsv | sort -k 6,6g >> ${prefix}.ame.tsv
+    sed -sn 2p ${prefix}/motifs/*/ame.tsv | sort -k 6,6g | awk 'NR==1 {print; next} {OFS="\t"; $1=NR-1; print}' >> ${prefix}.ame.tsv
     """
 
     stub:
