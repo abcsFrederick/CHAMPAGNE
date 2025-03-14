@@ -44,6 +44,7 @@ process MEME_AME {
     """
 
     stub:
+    prefix = "${meta.group}".length() > 0 ? "${meta.id}.${meta.group}" : "${meta.id}"
     """
     touch ${prefix}.ame.tsv
     """
