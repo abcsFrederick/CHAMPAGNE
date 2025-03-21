@@ -78,8 +78,8 @@ process MACS_NARROW {
 
     output:
         tuple val(meta), path("${meta.id}_peaks.narrowPeak"), val("${task.process.tokenize(':')[-1].toLowerCase()}"), emit: peak
-        path("${meta.id}_peaks.xls")
-        path("${meta.id}_summits.bed")
+        tuple val(meta), path("${meta.id}_peaks.xls"), val("${task.process.tokenize(':')[-1].toLowerCase()}"),        emit: xls
+        tuple val(meta), path("${meta.id}_summits.bed"), val("${task.process.tokenize(':')[-1].toLowerCase()}"),      emit: summits
 
     script:
     """
@@ -160,7 +160,7 @@ process CONVERT_SICER { // https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d5838
     import math
     with open("${sicer_peaks}",'r') as f:
         intxt = f.readlines()
-    # input columns if input-normalized: chrom, start, end, ChIP tag count, control tag count, p-value, fold-enrichment, q-value
+    # input columns if input-normalized: chrom, start, end, ChIP tag count, input tag count, p-value, fold-enrichment, q-value
     # input columns if no input: chrom, start, end, score
     outBroadPeak = [None] * len(intxt)
     outBed = [None] * len(intxt)

@@ -34,7 +34,7 @@ workflow CALL_PEAKS {
             .combine(deduped_tagalign)
             .map {
                 meta1, tag1, format1, meta2, tag2, format2 ->
-                    meta1.control == meta2.id && format1 == format2 ? [ meta1, tag1, tag2, format1 ]: null
+                    meta1.input == meta2.id && format1 == format2 ? [ meta1, tag1, tag2, format1 ]: null
             }
             .set{ ch_tagalign }
 
@@ -60,7 +60,7 @@ workflow CALL_PEAKS {
             .combine(tag_all_bed)
             .map {
                 meta1, tag1, meta2, tag2 ->
-                    meta1.control == meta2.id ? [ meta1, tag1, tag2 ]: null
+                    meta1.input == meta2.id ? [ meta1, tag1, tag2 ]: null
             }
             .join(frag_lengths)
             .combine(genome_frac)
@@ -76,6 +76,7 @@ workflow CALL_PEAKS {
             .set { ch_gem }
 
         ch_peaks = Channel.empty()
+        ch_narrow_peaks = Channel.empty()
         if (params.run.macs_broad) {
             ch_macs | MACS_BROAD
             ch_peaks = ch_peaks.mix(MACS_BROAD.out.peak)
@@ -83,6 +84,8 @@ workflow CALL_PEAKS {
         if (params.run.macs_narrow) {
             ch_macs | MACS_NARROW
             ch_peaks = ch_peaks.mix(MACS_NARROW.out.peak)
+            println 'adding macs peaks to ch_narrow_peaks'
+            ch_narrow_peaks = ch_narrow_peaks.mix(MACS_NARROW.out.peak)
         }
         if (params.run.sicer) {
             ch_sicer | SICER
@@ -94,6 +97,8 @@ workflow CALL_PEAKS {
             GEM.out.peak
                 .combine(chrom_sizes) | FILTER_GEM
             ch_peaks = ch_peaks.mix(FILTER_GEM.out.peak)
+            println 'adding gem peaks to ch_narrow_peaks'
+            ch_narrow_peaks = ch_narrow_peaks.mix(FILTER_GEM.out.peak)
         }
 
         // Create tag align w/ peaks
@@ -135,6 +140,7 @@ workflow CALL_PEAKS {
 
     emit:
         peaks = ch_peaks
+        narrow_peaks = ch_narrow_peaks
         bam_peaks = ch_bam_peaks
         tagalign_peaks = ch_tagalign_peaks
         plots = ch_plots

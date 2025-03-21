@@ -15,7 +15,13 @@ TODO
 
 ## Initialize
 
-Copy the configuration files to your current working directory
+Copy the configuration files to your project directory
+
+```sh
+champagne init --output /data/$USER/champagne_project
+```
+
+or if you do not use `--output`, your current working directory will be used as default:
 
 ```sh
 champagne init
@@ -30,25 +36,25 @@ TODO required params
 Run preview to view processes that will run:
 
 ```sh
-champagne run -profile test -preview
+champagne run --output /data/$USER/champagne_project -profile test -preview
 ```
 
 Launch a stub run to view processes that will run and download containers:
 
 ```sh
-champagne run -profile test,singularity -stub
+champagne run --output /data/$USER/champagne_project -profile test,singularity -stub
 ```
 
 Run the test dataset using the test profile:
 
 ```sh
-champagne run -profile test,singularity
+champagne run --output /data/$USER/champagne_project -profile test,singularity
 ```
 
-or explicitly specify the output directory and input:
+or explicitly specify the nextflow output directory and input:
 
 ```sh
-champagne run -profile singularity --outdir results/test --input assets/samplesheet_test.csv
+champagne run --output /data/$USER/champagne_project -profile singularity --outdir results/test --input assets/samplesheet_test.csv
 ```
 
 ### Custom reference genome
@@ -58,6 +64,6 @@ TODO different required params
 Create and use a custom reference genome:
 
 ```sh
-champagne run -profile test -entry MAKE_REFERENCE
-champagne run -profile test -c results/test/genome/custom_genome.config
+champagne run --output /data/$USER/champagne_project -profile test -entry MAKE_REFERENCE
+champagne run --output /data/$USER/champagne_project -profile test -c results/test/genome/custom_genome.config
 ```

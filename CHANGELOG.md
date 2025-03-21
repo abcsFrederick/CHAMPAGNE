@@ -1,5 +1,21 @@
 ## CHAMPAGNE development version
 
+- Contrasts are now specified as a TSV file instead of YAML. (#224, @kelly-sovacool)
+  - See the example contrast sheets in `assets/`.
+- Refactor checks for the sample sheet & contrast sheet to prevent unnecessary re-running. (#224, @kelly-sovacool)
+- Set `publish_dir_mode` to `link` by default.
+- Set `process.cache` to `deep` by default rather than lenient. (#224, @kelly-sovacool)
+- Fix a file name clash during input pooling. (#224, @kelly-sovacool)
+- Use `nextflow run -resume` by default, or turn it off with `champagne run --forceall`. (#224, @kelly-sovacool)
+- New consensus peak method from Corces _et al._ ([doi:10.1126/science.aav1898](https://www.science.org/doi/10.1126/science.aav1898)). (#225, @kelly-sovacool)
+- Enable the nextflow timeline & trace reports by default. (#226, @kelly-sovacool)
+- Add `--output` argument for `champagne init` and `champagne run`. (#232, #233, @kelly-sovacool)
+  - This is equivalent to the nextflow launchDir constant.
+- Fix bug in MEME AME process that caused it not to run on all samples. (#234, @kelly-sovacool)
+  - Also correct the motif rank calculation. (#234, @kopardev)
+
+## CHAMPAGNE 0.4.1
+
 - The CHAMPAGNE nextflow workflow now has a version entry in `nextflow.config`, in compliance with nf-core. (#213, @kelly-sovacool)
 - Pool input (control) reads of the same sample name by default. Any inputs that should not be pooled must have different sample names in the samplesheet. (#214, @kelly-sovacool)
 - Add histone samples to the `test_human` dataset. (#215, @kelly-sovacool)
