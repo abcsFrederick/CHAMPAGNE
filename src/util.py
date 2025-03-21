@@ -67,7 +67,7 @@ def copy_config(config_paths, outdir: pathlib.Path, overwrite=True):
     Raises:
         FileNotFoundError: If a specified configuration file or directory does not exist.
     """
-    msg(f"Copying default config files to current working directory")
+    msg("Copying default config files to current working directory")
     for local_config in config_paths:
         system_config = nek_base(local_config)
         output_config = outdir / local_config
@@ -166,11 +166,8 @@ def get_hpc():
 
 def run_nextflow(
     nextfile_path=None,
-    output_dir=pathlib.Path("."),
     mode="local",
     force_all=False,
-    merge_config=None,
-    threads=None,
     nextflow_args=None,
     debug=False,
 ):

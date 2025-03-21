@@ -19,16 +19,6 @@ from .util import (
 )
 
 
-def common_options(func):
-    """Common options decorator for use with click commands."""
-    options = [
-        click.argument("nextflow_args", nargs=-1),
-    ]
-    for option in reversed(options):
-        func = option(func)
-    return func
-
-
 @click.group(
     cls=OrderedCommands, context_settings=dict(help_option_names=["-h", "--help"])
 )
@@ -127,13 +117,10 @@ def run(main_path, output, _mode, force_all, **kwargs):
         os.chdir(output_dir)
         run_nextflow(
             nextfile_path=main_path,
-            output_dir=output_dir,
             mode=_mode,
             force_all=force_all,
             **kwargs,
         )
-        # except Exception as exc:
-        #    raise exc
     finally:
         os.chdir(current_wd)
 
