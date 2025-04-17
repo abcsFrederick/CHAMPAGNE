@@ -46,6 +46,8 @@ def print_citation_flag(ctx, param, value):
 def cli():
     """CHromAtin iMmuno PrecipitAtion sequencinG aNalysis pipEline
 
+    docs: https://ccbr.github.io/CHAMPAGNE
+
     For more options, run:
     champagne [command] --help"""
     pass
@@ -109,7 +111,11 @@ Run with a specific tag, branch, or commit from GitHub:
 )
 @click.argument("nextflow_args", nargs=-1)
 def run(main_path, output, _mode, force_all, **kwargs):
-    """Run the workflow"""
+    """
+    Run the workflow
+
+    docs: https://ccbr.github.io/CHAMPAGNE
+    """
     if (  # this is the only acceptable github repo option for champagne
         main_path != "CCBR/CHAMPAGNE"
     ):
@@ -147,7 +153,10 @@ def run(main_path, output, _mode, force_all, **kwargs):
     show_default=False,
 )
 def init(output):
-    """Initialize the launch directory by copying the system default config files"""
+    """
+    Initialize the launch directory
+
+    Copy the system default config files"""
     output_dir = output if isinstance(output, pathlib.Path) else pathlib.Path(output)
     ccbr_tools.pkg_util.msg_box(f"Initializing CHAMPAGNE in {output_dir}")
     (output_dir / "log/").mkdir(parents=True, exist_ok=True)
