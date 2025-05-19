@@ -62,10 +62,6 @@ Preview the processes that will run:
     champagne run ... --mode local -preview
 Add nextflow args (anything supported by `nextflow run`):
     champagne run ... -work-dir path/to/workDir
-Run with a specific installation of champagne:
-    champagne run --main path/to/champagne/main.nf ...
-Run with a specific tag, branch, or commit from GitHub:
-    champagne run --main CCBR/CHAMPAGNE -r v0.1.0 ...
 """
 
 
@@ -84,6 +80,7 @@ Run with a specific tag, branch, or commit from GitHub:
     type=str,
     default=repo_base("main.nf"),
     show_default=True,
+    hidden=True,
 )
 @click.option(
     "--output",
