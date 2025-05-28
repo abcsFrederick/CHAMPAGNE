@@ -11,6 +11,7 @@ include { SPLIT_REF_CHROMS
 
 workflow PREPARE_GENOME {
     main:
+        ch_genome_conf = Channel.empty()
         if (params.genomes[ params.genome ]) {
             println "Using ${params.genome} as the reference"
 
@@ -95,9 +96,10 @@ workflow PREPARE_GENOME {
                 ch_gsize,
                 meme_motif_name,
                 ch_bioc_txdb,
-                ch_bioc_annot
+                ch_bioc_annot,
+
             )
-            println "Saving custom genome config in ${params.outdir}/genome"
+            ch_genome_conf = WRITE_GENOME_CONFIG.out.conf.mix(WRITE_GENOME_CONFIG.out.files)
 
         } else {
             error "Either specify a genome in `conf/genomes.conf`, or specify a genome fasta, gtf, and blacklist file to build a custom reference."
@@ -114,4 +116,5 @@ workflow PREPARE_GENOME {
         meme_motifs = ch_meme_motifs
         bioc_txdb = ch_bioc_txdb
         bioc_annot = ch_bioc_annot
+        conf = ch_genome_conf
 }
