@@ -90,7 +90,7 @@ workflow QC {
                        effective_genome_size,
                        gene_info
                      )
-            ch_deeptools = DEEPTOOLS.out.mix(
+            ch_deeptools = ch_deeptools.mix(
                 DEEPTOOLS.out.fingerprint_matrix,
                 DEEPTOOLS.out.fingerprint_metrics,
                 DEEPTOOLS.out.corr,
