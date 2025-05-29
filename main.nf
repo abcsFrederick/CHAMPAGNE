@@ -1,3 +1,5 @@
+nextflow.enable.dsl = 2
+
 log.info """\
          CHAMPAGNE $workflow.manifest.version 🍾
          =============
@@ -28,6 +30,9 @@ include { DEDUPLICATE              } from "./subworkflows/local/deduplicate.nf"
 include { QC                       } from './subworkflows/local/qc.nf'
 include { CALL_PEAKS               } from './subworkflows/local/peaks.nf'
 include { CONSENSUS_PEAKS as CONSENSUS_UNION } from './subworkflows/CCBR/consensus_peaks/'
+include { MOTIFS as MOTIFS_PEAKS;
+          MOTIFS as MOTIFS_CONS_UNION;
+          MOTIFS as MOTIFS_CONS_CORCES       } from './subworkflows/local/motifs/'
 include { ANNOTATE as ANNOTATE_CONS_UNION;
           ANNOTATE as ANNOTATE_CONS_CORCES   } from './subworkflows/local/annotate.nf'
 include { DIFF                     } from './subworkflows/local/differential/'
@@ -74,12 +79,9 @@ workflow MAKE_REFERENCE {
     PREPARE_GENOME()
 }
 
-// MAIN WORKFLOW
-workflow {
-    CHIPSEQ()
-}
 
-workflow CHIPSEQ {
+workflow {
+    main:
     sample_sheet = Channel.fromPath(file(params.input, checkIfExists: true))
     contrast_sheet = params.contrasts ? Channel.fromPath(file(params.contrasts, checkIfExists: true)) : params.contrasts
     raw_fastqs = INPUT_CHECK(sample_sheet, params.seq_center, contrast_sheet).reads
@@ -101,8 +103,15 @@ workflow CHIPSEQ {
 
     PHANTOM_PEAKS(deduped_bam).fraglen | PPQT_PROCESS
     frag_lengths = PPQT_PROCESS.out.fraglen
+    ch_ppqt = PHANTOM_PEAKS.out.pdf.mix(
+        PHANTOM_PEAKS.out.spp,
+        PHANTOM_PEAKS.out.fraglen
+    )
 
     ch_multiqc = Channel.of()
+    fastqc_raw = Channel.empty()
+    fastqc_trimmed = Channel.empty()
+    ch_deeptools = Channel.empty()
     if (params.run.qc) {
         QC(raw_fastqs, CUTADAPT.out.reads, FILTER_BLACKLIST.out.n_surviving_reads,
            aligned_bam, ALIGN_GENOME.out.aligned_flagstat, ALIGN_GENOME.out.filtered_flagstat,
@@ -112,8 +121,14 @@ workflow CHIPSEQ {
            effective_genome_size
            )
         ch_multiqc = ch_multiqc.mix(QC.out.multiqc_input)
+        fastqc_raw = QC.out.fastqc_raw
+        fastqc_trimmed = QC.out.fastqc_trimmed
+        ch_deeptools = QC.out.deeptools
     }
-    if (params.run.call_peaks && [params.run.macs_broad, params.run.macs_narrow, params.run.gem, params.run.sicer].any()) {
+    ch_peaks = Channel.empty()
+    ch_peaks_consensus = Channel.empty()
+    ch_diffbind = Channel.empty()
+    if ([params.run.macs_broad, params.run.macs_narrow, params.run.gem, params.run.sicer].any()) {
         CALL_PEAKS(chrom_sizes,
                    PREPARE_GENOME.out.chrom_dir,
                    deduped_tagalign,
@@ -122,6 +137,7 @@ workflow CHIPSEQ {
                    effective_genome_size
                    )
         ch_multiqc = ch_multiqc.mix(CALL_PEAKS.out.plots)
+        ch_peaks = CALL_PEAKS.out.peaks
         // consensus peak calling with union method
         if (params.run.consensus_union) {
             ch_peaks_grouped = CALL_PEAKS.out.peaks
@@ -134,15 +150,18 @@ workflow CHIPSEQ {
                 .map{ meta, bed ->
                     def meta_split = meta.id.tokenize('.')
                     assert meta_split.size() == 2
-                    [ [ sample_basename: meta_split[0], tool: meta_split[1] ], bed ]
+                    [ [ sample_basename: meta_split[0], tool: meta_split[1], consensus: 'union' ], bed ]
                 }
                 .set{ ch_consensus_union }
             ANNOTATE_CONS_UNION(CONSENSUS_UNION.out.peaks,
-                    PREPARE_GENOME.out.fasta,
-                    PREPARE_GENOME.out.meme_motifs,
                     PREPARE_GENOME.out.bioc_txdb,
                     PREPARE_GENOME.out.bioc_annot)
+            MOTIFS_CONS_UNION(CONSENSUS_UNION.out.peaks,
+                    PREPARE_GENOME.out.fasta,
+                    PREPARE_GENOME.out.meme_motifs)
             ch_multiqc = ch_multiqc.mix(ANNOTATE_CONS_UNION.out.plots)
+
+            ch_peaks_consensus = ch_peaks_consensus.mix(ch_consensus_union)
         }
         if (params.run.consensus_corces) {
             // consensus peak calling with corces method
@@ -155,11 +174,14 @@ workflow CHIPSEQ {
                 .groupTuple()
             CONSENSUS_CORCES(ch_narrow_peaks.combine(chrom_sizes))
             ANNOTATE_CONS_CORCES(CONSENSUS_CORCES.out.peaks,
-                    PREPARE_GENOME.out.fasta,
-                    PREPARE_GENOME.out.meme_motifs,
                     PREPARE_GENOME.out.bioc_txdb,
                     PREPARE_GENOME.out.bioc_annot)
+            MOTIFS_CONS_CORCES(CONSENSUS_CORCES.out.peaks,
+                    PREPARE_GENOME.out.fasta,
+                    PREPARE_GENOME.out.meme_motifs)
             ch_multiqc = ch_multiqc.mix(ANNOTATE_CONS_CORCES.out.plots)
+            ch_peaks_consensus.mix(CONSENSUS_CORCES.out.peaks)
+                .mix(ANNOTATE_CONS_CORCES.out.plots)
         }
 
         // run differential analysis
@@ -182,16 +204,20 @@ workflow CHIPSEQ {
                   tagalign_peaks,
                   ch_contrasts
                 )
-
+            ch_diffbind = DIFF.out.report
         }
 
     }
 
+    ch_multiqc = ch_multiqc.collect()
+    multiqc_report = channel.empty()
     if (!workflow.stubRun) {
         MULTIQC(
             file(params.multiqc.config, checkIfExists: true),
             file(params.multiqc.logo, checkIfExists: true),
-            ch_multiqc.collect()
+            ch_multiqc
         )
+        multiqc_report = MULTIQC.out
     }
+
 }
