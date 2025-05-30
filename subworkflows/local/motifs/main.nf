@@ -1,5 +1,6 @@
-include { HOMER_MOTIFS        } from "../../modules/local/homer"
-include { MEME_AME            } from "../../modules/local/meme"
+include { HOMER_MOTIFS        } from "../../../modules/local/homer"
+include { MEME_AME            } from "../../../modules/local/meme"
+
 workflow MOTIFS {
     take:
         ch_peaks

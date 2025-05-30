@@ -271,4 +271,5 @@ output {
     diffbind {
         path { meta, report -> "peaks/${meta.tool}/diffbind_${meta.contrast}/" }
     }
+
 }

@@ -13,8 +13,6 @@ workflow PREPARE_GENOME {
     main:
         ch_genome_conf = Channel.empty()
         if (params.genomes[ params.genome ]) {
-            println "Using ${params.genome} as the reference"
-
             ch_fasta = Channel.fromPath(params.genomes[ params.genome ].fasta, checkIfExists: true)
             ch_genes_gtf = Channel.fromPath(params.genomes[ params.genome ].genes_gtf, checkIfExists: true)
 
@@ -37,7 +35,6 @@ workflow PREPARE_GENOME {
             ch_bioc_annot = Channel.value(params.genomes[ params.genome ].bioc_annot)
 
         } else if (params.genome_fasta && params.genes_gtf && params.blacklist) {
-            println "Building a reference from provided genome fasta, gtf, and blacklist files"
             fasta_file = Channel.fromPath(params.genome_fasta, checkIfExists: true)
             gtf_file = file(params.genes_gtf, checkIfExists: true)
 

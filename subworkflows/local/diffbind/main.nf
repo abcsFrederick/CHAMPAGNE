@@ -12,13 +12,13 @@ workflow DIFFBIND {
                 [ "${meta.contrast}.${meta.tool}.csv", row ]
             }
             .map{ contrast_file ->
-                params = [:]
-                meta_list = contrast_file.baseName.tokenize('.')
+                def params = [:]
+                def meta_list = contrast_file.baseName.tokenize('.')
                 params.csvfile = contrast_file.getName()
                 params.contrast = meta_list[0]
                 params.tool = meta_list[1]
 
-                meta = [:]
+                def meta = [:]
                 meta.id = "${params.contrast}.${params.tool}"
                 meta.contrast = params.contrast
                 meta.tool = params.tool
