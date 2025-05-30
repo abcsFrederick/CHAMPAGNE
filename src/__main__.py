@@ -145,6 +145,7 @@ def run(main_path, output, _mode, force_all, **kwargs):
             mode=_mode,
             force_all=force_all,
             pipeline_name="CHAMPAGNE",
+            hpc_modules="nextflow/25",
             **kwargs,
         )
     finally:
