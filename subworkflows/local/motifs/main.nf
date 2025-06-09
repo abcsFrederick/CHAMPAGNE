@@ -8,9 +8,9 @@ workflow MOTIFS {
         meme_motifs
     main:
         ch_plots = Channel.empty()
-        if (params.run.homer) {
-            HOMER_MOTIFS(ch_peaks.combine(genome_fasta).combine(Channel.fromPath(file(params.homer.jaspar_db, checkIfExists: true))),
-                         params.homer.de_novo,
+        if (params.run_homer) {
+            HOMER_MOTIFS(ch_peaks.combine(genome_fasta).combine(Channel.fromPath(file(params.homer_jaspar_db, checkIfExists: true))),
+                         params.homer_de_novo,
                         )
             HOMER_MOTIFS.out.ame
                 | branch{ meta, background, target ->
@@ -22,7 +22,7 @@ workflow MOTIFS {
                 | subscribe{ meta, background, target ->
                     println "Empty homer fasta for ${meta.id}"
                 }
-            if (params.run.meme && meme_motifs) {
+            if (params.run_meme && meme_motifs) {
                 MEME_AME(homer_ame.fasta.combine(meme_motifs))
             }
         }
