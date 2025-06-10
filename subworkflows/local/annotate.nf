@@ -11,7 +11,7 @@ workflow ANNOTATE {
 
     main:
         ch_plots = Channel.empty()
-        if (params.run.chipseeker &&
+        if (params.run_chipseeker &&
          bioc_txdb && bioc_annot) {
             CHIPSEEKER_PEAKPLOT( ch_peaks, bioc_txdb, bioc_annot  )
 
@@ -22,7 +22,6 @@ workflow ANNOTATE {
             )
 
         }
-
 
     emit:
         plots = ch_plots

@@ -1,24 +1,3 @@
-nextflow.enable.dsl = 2
-nextflow.preview.output = true
-
-log.info """\
-         CHAMPAGNE $workflow.manifest.version 🍾
-         =============
-         NF version   : $nextflow.version
-         runName      : $workflow.runName
-         username     : $workflow.userName
-         configs      : $workflow.configFiles
-         profile      : $workflow.profile
-         cmd line     : $workflow.commandLine
-         start time   : $workflow.start
-         projectDir   : $workflow.projectDir
-         launchDir    : $workflow.launchDir
-         workDir      : $workflow.workDir
-         homeDir      : $workflow.homeDir
-         input        : ${params.input}
-         genome       : ${params.genome}
-         """
-         .stripIndent()
 
 // SUBWORKFLOWS
 include { FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS as DOWNLOAD_FASTQ } from './subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/'
@@ -44,7 +23,8 @@ include { PHANTOM_PEAKS
           PPQT_PROCESS
           MULTIQC                  } from "./modules/local/qc.nf"
 include { CONSENSUS_CORCES         } from "./modules/local/consensus/corces/main.nf"
-
+// Plugins
+include { validateParameters; paramsSummaryLog } from 'plugin/nf-schema'
 
 workflow.onComplete {
     if (!workflow.stubRun && !workflow.commandLine.contains('-preview')) {
@@ -81,8 +61,27 @@ workflow MAKE_REFERENCE {
 }
 
 
+workflow LOG {
+    log.info """\
+            CHAMPAGNE $workflow.manifest.version
+            ===================================
+            cmd line     : $workflow.commandLine
+            start time   : $workflow.start
+            launchDir    : $workflow.launchDir
+            input        : ${params.input}
+            genome       : ${params.genome}
+            """
+            .stripIndent()
+
+    log.info paramsSummaryLog(workflow)
+}
+
+
+// MAIN WORKFLOW
 workflow {
-    main:
+    LOG()
+    validateParameters()
+
     sample_sheet = Channel.fromPath(file(params.input, checkIfExists: true))
     contrast_sheet = params.contrasts ? Channel.fromPath(file(params.contrasts, checkIfExists: true)) : params.contrasts
     raw_fastqs = INPUT_CHECK(sample_sheet, params.seq_center, contrast_sheet).reads
@@ -110,6 +109,7 @@ workflow {
     )
 
     ch_multiqc = Channel.of()
+
     fastqc_raw = Channel.empty()
     fastqc_trimmed = Channel.empty()
     ch_deeptools = Channel.empty()
@@ -130,6 +130,7 @@ workflow {
     ch_peaks_consensus = Channel.empty()
 
     if ([params.run.macs_broad, params.run.macs_narrow, params.run.gem, params.run.sicer].any()) {
+
         CALL_PEAKS(chrom_sizes,
                    PREPARE_GENOME.out.chrom_dir,
                    deduped_tagalign,
@@ -140,12 +141,12 @@ workflow {
         ch_multiqc = ch_multiqc.mix(CALL_PEAKS.out.plots)
         ch_peaks = CALL_PEAKS.out.peaks
         // consensus peak calling with union method
-        if (params.run.consensus_union) {
+        if (params.run_consensus_union) {
             ch_peaks_grouped = CALL_PEAKS.out.peaks
                 .map{ meta, bed, tool ->
                     [ [ group: "${meta.sample_basename}.${tool}" ], bed ]
                 }
-            CONSENSUS_UNION( ch_peaks_grouped, params.run.normalize_peaks )
+            CONSENSUS_UNION( ch_peaks_grouped, params.run_normalize_peaks )
             // retrieve sample basename and peak-calling tool from metadata
             CONSENSUS_UNION.out.peaks
                 .map{ meta, bed ->
@@ -164,7 +165,7 @@ workflow {
 
             ch_peaks_consensus = ch_peaks_consensus.mix(ch_consensus_union)
         }
-        if (params.run.consensus_corces) {
+        if (params.run_consensus_corces) {
             // consensus peak calling with corces method
             // only works on narrowPeak files, as the 10th column is the summit coordinate
             ch_narrow_peaks = CALL_PEAKS.out.narrow_peaks
@@ -213,8 +214,8 @@ workflow {
     multiqc_report = channel.empty()
     if (!workflow.stubRun) {
         MULTIQC(
-            file(params.multiqc.config, checkIfExists: true),
-            file(params.multiqc.logo, checkIfExists: true),
+            file(params.multiqc_config, checkIfExists: true),
+            file(params.multiqc_logo, checkIfExists: true),
             ch_multiqc
         )
         multiqc_report = MULTIQC.out
