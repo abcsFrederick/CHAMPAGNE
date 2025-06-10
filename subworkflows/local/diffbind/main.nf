@@ -5,10 +5,19 @@ workflow DIFFBIND {
     take:
         ch_bam_peaks_contrasts
     main:
+
+        ch_bam_peaks_contrasts
+            | view
+            | map{ meta, bam, bai, peak, ctrl_bam, ctrl_bai ->
+                def csv_text = [meta.id,     meta.rep,    meta.group,  bam,       meta.input, ctrl_bam,     peak,    meta.tool].join(',')
+                ["${meta.contrast}.${meta.tool}.csv", csv_text]
+            }
+            | groupTuple()
+            | view
         ch_bam_peaks_contrasts | PREP_DIFFBIND
 
         PREP_DIFFBIND.out.csv
-            .collectFile(storeDir: "peaks/diffbind/contrasts", newLine: false, keepHeader: true, skip: 1) { meta, row ->
+            .collectFile(storeDir: "${params.outputDir}/peaks/diffbind/contrasts", newLine: false, keepHeader: true, skip: 1) { meta, row ->
                 [ "${meta.contrast}.${meta.tool}.csv", row ]
             }
             .map{ contrast_file ->

@@ -2,7 +2,7 @@ process MANORM_PAIRWISE {
     """
     adapted from: https://github.com/CCBR/Pipeliner/blob/86c6ccaa3d58381a0ffd696bbf9c047e4f991f9e/Rules/ChIPseq.snakefile#L709-L785
     """
-    tag "${meta1.id}.${meta2.id}"
+    tag "${meta1.id}_vs_${meta2.id}"
     label 'process_single'
 
     container 'nciccbr/ccbr_manorm:v1'
@@ -11,9 +11,10 @@ process MANORM_PAIRWISE {
         tuple val(meta1), val(meta2), path(tagalign1), path(tagalign2), path(peak1), path(peak2)
 
     output:
-        path("${meta1.id}_vs_${meta2.id}/*"), emit: dir
+        tuple val(meta_out), path("${meta1.id}_vs_${meta2.id}/*")
 
     script:
+    def meta_out = [id: meta1.id, tool: meta1.tool, contrast: "${meta1.id}_vs_${meta2.id}"]
     """
     manorm \\
         --p1 ${peak1} \\

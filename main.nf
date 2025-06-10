@@ -128,7 +128,7 @@ workflow {
     }
     ch_peaks = Channel.empty()
     ch_peaks_consensus = Channel.empty()
-    ch_diffbind = Channel.empty()
+
     if ([params.run.macs_broad, params.run.macs_narrow, params.run.gem, params.run.sicer].any()) {
         CALL_PEAKS(chrom_sizes,
                    PREPARE_GENOME.out.chrom_dir,
@@ -205,7 +205,6 @@ workflow {
                   tagalign_peaks,
                   ch_contrasts
                 )
-            ch_diffbind = DIFF.out.report
         }
 
     }
@@ -230,10 +229,10 @@ workflow {
         multiqc_report = multiqc_report
         multiqc_inputs = ch_multiqc
         align_bam = DEDUPLICATE.out.bam
-        align_tagalign = DEDUPLICATE.out.tag_align
         peaks = ch_peaks
         peaks_consensus = ch_peaks_consensus
-        diffbind = ch_diffbind
+        diffbind = DIFF.out.diffbind
+        manorm = DIFF.out.manorm
 }
 output {
 
@@ -259,17 +258,17 @@ output {
     align_bam {
         path { bam -> "align/bam/" }
     }
-    align_tagalign {
-        path { tagalign -> "align/tagalign/" }
-    }
     peaks {
-        path { meta, peak, tool -> "peaks/${tool}/${meta.id}/"}
+        path { meta, peak, tool -> "peaks/${tool}/replicates/${meta.id}/"}
     }
     peaks_consensus {
-        path { meta, peak -> "peaks/${meta.tool}/consensus_${meta.consensus}/" }
+        path { meta, peak -> "peaks/${meta.tool}/consensus/${meta.consensus}/" }
     }
     diffbind {
-        path { meta, report -> "peaks/${meta.tool}/diffbind_${meta.contrast}/" }
+        path { meta, report -> "peaks/${meta.tool}/diffbind/${meta.contrast}/" }
+    }
+    manorm {
+        path { meta, files -> "peaks/${meta.tool}/manorm/${meta.contrast}/" }
     }
 
 }
