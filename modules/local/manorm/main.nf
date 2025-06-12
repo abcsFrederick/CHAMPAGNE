@@ -14,7 +14,7 @@ process MANORM_PAIRWISE {
         tuple val(meta_out), path("${meta1.id}_vs_${meta2.id}/*")
 
     script:
-    def meta_out = [id: meta1.id, tool: meta1.tool, contrast: "${meta1.id}_vs_${meta2.id}"]
+    meta_out = [id: meta1.id, tool: meta1.tool, contrast: "${meta1.id}_vs_${meta2.id}"]
     """
     manorm \\
         --p1 ${peak1} \\
