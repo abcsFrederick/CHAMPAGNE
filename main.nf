@@ -1,3 +1,5 @@
+nextflow.enable.dsl = 2
+nextflow.preview.output = true
 
 // SUBWORKFLOWS
 include { FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS as DOWNLOAD_FASTQ } from './subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/'
@@ -113,7 +115,7 @@ workflow {
     fastqc_raw = Channel.empty()
     fastqc_trimmed = Channel.empty()
     ch_deeptools = Channel.empty()
-    if (params.run.qc) {
+    if (params.run_qc) {
         QC(raw_fastqs, CUTADAPT.out.reads, FILTER_BLACKLIST.out.n_surviving_reads,
            aligned_bam, ALIGN_GENOME.out.aligned_flagstat, ALIGN_GENOME.out.filtered_flagstat,
            deduped_bam, DEDUPLICATE.out.flagstat,
@@ -129,7 +131,7 @@ workflow {
     ch_peaks = Channel.empty()
     ch_peaks_consensus = Channel.empty()
 
-    if ([params.run.macs_broad, params.run.macs_narrow, params.run.gem, params.run.sicer].any()) {
+    if ([params.run_macs_broad, params.run_macs_narrow, params.run_gem, params.run_sicer].any()) {
 
         CALL_PEAKS(chrom_sizes,
                    PREPARE_GENOME.out.chrom_dir,
@@ -235,6 +237,7 @@ workflow {
         diffbind = DIFF.out.diffbind
         manorm = DIFF.out.manorm
 }
+
 output {
 
     genome { path { conf -> "genome/" } }
