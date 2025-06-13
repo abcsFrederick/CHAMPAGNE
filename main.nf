@@ -82,7 +82,7 @@ workflow LOG {
 // MAIN WORKFLOW
 workflow {
     LOG()
-    //validateParameters()
+    // validateParameters()
 
     sample_sheet = Channel.fromPath(file(params.input, checkIfExists: true))
     contrast_sheet = params.contrasts ? Channel.fromPath(file(params.contrasts, checkIfExists: true)) : params.contrasts
@@ -130,6 +130,8 @@ workflow {
     }
     ch_peaks = Channel.empty()
     ch_peaks_consensus = Channel.empty()
+    ch_diffbind = Channel.empty()
+    ch_manorm = Channel.empty()
 
     if ([params.run_macs_broad, params.run_macs_narrow, params.run_gem, params.run_sicer].any()) {
 
@@ -208,6 +210,8 @@ workflow {
                   tagalign_peaks,
                   ch_contrasts
                 )
+            ch_diffbind = DIFF.out.diffbind
+            ch_manorm = DIFF.out.manorm
         }
 
     }
@@ -234,8 +238,8 @@ workflow {
         align_bam = DEDUPLICATE.out.bam
         peaks = ch_peaks
         peaks_consensus = ch_peaks_consensus
-        diffbind = DIFF.out.diffbind
-        manorm = DIFF.out.manorm
+        diffbind = ch_diffbind
+        manorm = ch_manorm
 }
 
 output {
