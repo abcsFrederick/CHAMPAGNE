@@ -13,10 +13,10 @@ workflow DEDUPLICATE {
             single: meta.single_end
             paired: !meta.single_end
 
-        }.set{ bam }
-        bam.single.combine(chrom_sizes).combine(effective_genome_size) | MACS2_DEDUP
+        }.set{ ch_bam }
+        ch_bam.single.combine(chrom_sizes).combine(effective_genome_size) | MACS2_DEDUP
         MACS2_DEDUP.out.bam | INDEX_SINGLE
-        bam.paired | PICARD_DEDUP
+        ch_bam.paired | PICARD_DEDUP
         PICARD_DEDUP.out.bam | INDEX_PAIRED
         INDEX_PAIRED.out.bam
             .mix(INDEX_SINGLE.out.bam)

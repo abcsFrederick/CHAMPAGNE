@@ -1,26 +1,26 @@
-process PREP_DIFFBIND {
-    tag { "${meta.id}.${meta.contrast}.${meta.tool}" }
+
+process CONCAT_CSV {
+    tag { "${csv_filename}" }
     label 'process_low'
 
     container "${params.containers_base}"
 
     input:
-        tuple val(meta), path(bam), path(bai), path(peak), path(ctrl_bam), path(ctrl_bai)
+        tuple val(csv_filename), val(csv_rows)
 
     output:
-        tuple val(meta), path("*.csv"), emit: csv
+        path(csv_filename), emit: csv
 
     script:
-    def csv_text = [
-        ['SampleID', "Replicate", 'Condition', 'bamReads', "ControlID", "bamControl", 'Peaks', 'PeakCaller'],
-        [meta.id,     meta.rep,    meta.group,  bam,       meta.input, ctrl_bam,     peak,    meta.tool]
-    ]*.join(',').join(System.lineSeparator) + '\n'
+    def csv_header = ['SampleID', "Replicate", 'Condition', 'bamReads', "ControlID", "bamControl", 'Peaks', 'PeakCaller'].join(',')
+    def csv_rows_joined = csv_rows.join(System.lineSeparator)
     """
-    echo -ne "${csv_text}" > ${meta.contrast}.${meta.tool}.${meta.id}.csv
+    echo -e "${csv_header}" > ${csv_filename}
+    echo -e "${csv_rows_joined}" >> ${csv_filename}
     """
 
     stub:
     """
-    touch ${meta.contrast}.${meta.tool}.${meta.id}.csv
+    touch ${csv_filename}
     """
 }

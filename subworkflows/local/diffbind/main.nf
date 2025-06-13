@@ -1,25 +1,32 @@
-include { PREP_DIFFBIND     } from "../../../modules/local/diffbind/prep/"
+include { CONCAT_CSV     } from "../../../modules/local/diffbind/prep/"
 include { RMARKDOWNNOTEBOOK as DIFFBIND_RMD } from '../../../modules/nf-core/rmarkdownnotebook/'
 
 workflow DIFFBIND {
     take:
         ch_bam_peaks_contrasts
     main:
-        ch_bam_peaks_contrasts | PREP_DIFFBIND
 
-        PREP_DIFFBIND.out.csv
-            .collectFile(storeDir: "${params.outdir}/diffbind/contrasts", newLine: false, keepHeader: true, skip: 1) { meta, row ->
-                [ "${meta.contrast}.${meta.tool}.csv", row ]
+        ch_bam_peaks_contrasts
+            | view
+            | map{ meta, bam, bai, peak, ctrl_bam, ctrl_bai ->
+                def csv_text = [meta.id,     meta.rep,    meta.group,  bam,       meta.input, ctrl_bam,     peak,    meta.tool].join(',')
+                [ "${meta.contrast}.${meta.tool}.csv", csv_text]
             }
+            | groupTuple()
+            | CONCAT_CSV
+
+        CONCAT_CSV.out.csv
             .map{ contrast_file ->
-                params = [:]
-                meta_list = contrast_file.baseName.tokenize('.')
+                def params = [:]
+                def meta_list = contrast_file.baseName.tokenize('.')
                 params.csvfile = contrast_file.getName()
                 params.contrast = meta_list[0]
                 params.tool = meta_list[1]
 
-                meta = [:]
+                def meta = [:]
                 meta.id = "${params.contrast}.${params.tool}"
+                meta.contrast = params.contrast
+                meta.tool = params.tool
 
                 [ meta, params, contrast_file ]
             }

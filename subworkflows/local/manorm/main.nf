@@ -13,4 +13,7 @@ workflow MANORM {
             }
             | MANORM_PAIRWISE
 
+    emit:
+        out = MANORM_PAIRWISE.out
+
 }

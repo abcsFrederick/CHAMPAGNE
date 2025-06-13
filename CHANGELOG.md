@@ -1,8 +1,7 @@
 ## CHAMPAGNE development version
 
 - CHAMPAGNE now depends on ccbr_tools v0.4 for updated jobby & spooker utilities. (#247, @kelly-sovacool)
-- fix: ensure inputs are pooled correctly for paired end reads. (#250, @kelly-sovacool)
-- fix chipseeker filename collision. (#252, @kelly-sovacool)
+- Reorganized output directory structure. (#256, @kelly-sovacool)
 - Nextflow parameters are now validated at the start of the workflow. (#257, @kelly-sovacool)
 
 ### New features
@@ -26,6 +25,8 @@
 - Fix a file name clash during input pooling. (#224, @kelly-sovacool)
 - Fix bug in MEME AME process that caused it not to run on all samples. (#234, @kelly-sovacool)
   - Also correct the motif rank calculation. (#234, @kopardev)
+- fix: ensure inputs are pooled correctly for paired end reads. (#250, @kelly-sovacool)
+- fix chipseeker filename collision. (#252, @kelly-sovacool)
 
 ### Documentation
 

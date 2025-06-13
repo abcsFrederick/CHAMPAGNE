@@ -54,6 +54,7 @@ workflow DIFF {
 
     emit:
         diff_peaks = bam_peaks
-        // TODO
+        diffbind = DIFFBIND.out.report
+        manorm = MANORM.out
 
 }
