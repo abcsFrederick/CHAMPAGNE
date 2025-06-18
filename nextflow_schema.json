@@ -32,18 +32,11 @@
                 },
                 "genome": {
                     "type": "string",
-                    "enum": [
-                        "hg38",
-                        "mm10"
-                    ]
+                    "description": "Reference genome (e.g. hg38, mm10). This can be a genome in conf/genomes.config, or see 'Custom genome options' to build a custom reference from a fasta & gtf file."
                 },
                 "spike_genome": {
                     "type": "string",
-                    "description": "Optional spike-in genome",
-                    "enum": [
-                        "dmelr6.32",
-                        "ecoli_k12"
-                    ]
+                    "description": "Optional spike-in genome (e.g. dmelr6.32, ecoli_k12)."
                 },
                 "outputDir": {
                     "type": "string",
@@ -66,7 +59,7 @@
         "custom_genome_options": {
             "title": "Custom genome options",
             "type": "object",
-            "description": "Use these to build a custom reference genome not already listed in conf/genomes.config",
+            "description": "Use these to build a custom reference genome not already listed in conf/genomes.config. For an example use-case, see conf/test.config.",
             "default": "",
             "properties": {
                 "genome_fasta": {
@@ -92,7 +85,7 @@
                 "index_dir": {
                     "type": "string",
                     "fa_icon": "fas fa-folder-open",
-                    "description": "Absolute path to directory containing pre-build reference genomes"
+                    "description": "Absolute path to directory containing pre-built reference genomes"
                 }
             }
         },
