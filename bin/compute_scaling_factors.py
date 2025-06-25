@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """
+Compute scaling factors for spike-in normalization
+
 Usage:
     python compute_scaling_factors.py <ids> <counts> [<outfilename>]
 

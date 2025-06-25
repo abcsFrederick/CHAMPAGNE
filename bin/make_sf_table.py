@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """
+Create table of spike-in scaling factors and read counts
+
 Usage:
     python make_sf_table.py scaling_factors.tsv <ids> <counts> [<outfilename>]
 

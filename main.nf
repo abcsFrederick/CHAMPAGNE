@@ -115,7 +115,7 @@ workflow {
         PHANTOM_PEAKS.out.fraglen
     )
 
-    // optional spike-in scaling factor computation
+    // optional spike-in normalization
     ch_scaling_factors = trimmed_fastqs
         | map{ meta, fq -> meta }
         | combine(Channel.of(1))

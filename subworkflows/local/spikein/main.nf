@@ -32,14 +32,14 @@ workflow ALIGN_SPIKEIN {
             | join(ch_frag_lengths)
             | combine(ch_spikein_blacklist_bed)
 
-        if (params.spike_norm_method == 'delorenzi') {
-            MULTIBAM_SUMMARY(ch_spikein_bam)
-            MULTIBAM_SUMMARY.out.sf
-                | set{ ch_sf_tsv } // https://github.com/nextflow-io/nextflow/issues/3970
-        } else if (params.spike_norm_method == 'guenther') {
+        if (params.spike_norm_method == 'guenther') {
             ch_spike_counts
                 | COMPUTE_SCALINGFACTOR
                 | set { ch_sf_tsv }
+        } else if (params.spike_norm_method == 'delorenzi') {
+            MULTIBAM_SUMMARY(ch_spikein_bam)
+            MULTIBAM_SUMMARY.out.sf
+                | set{ ch_sf_tsv } // https://github.com/nextflow-io/nextflow/issues/3970
         } else {
             error "Unknown spike-in normalization method: ${params.spike_norm_method}"
         }
