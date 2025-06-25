@@ -37,9 +37,9 @@ class Genome:
 
     @property
     def md(self):
-        md = [f"- {self.genome}"]
+        md = [f"- `{self.genome}`"]
         for key, value in self.attributes.items():
-            md.append(f"    - **{key}**: {value}")
+            md.append(f"  - {key}: `{value}`")
         return md
 
 
