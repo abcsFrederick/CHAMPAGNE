@@ -13,7 +13,6 @@ The most commonly used pipeline options
 | `input`            | Path to comma-separated file containing information about the samples in the experiment. <details><summary>Help</summary><small>You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.</small></details> | `string` |                            | True     |        |
 | `contrasts`        | Optional contrasts specification for differential analysis                                                                                                                                                                                                                                                                                                                                   | `string` |                            |          |        |
 | `genome`           | Reference genome (e.g. hg38, mm10). This can be a genome in conf/genomes.config, or see 'Custom genome options' to build a custom reference from a fasta & gtf file.                                                                                                                                                                                                                         | `string` |                            | True     |        |
-| `spike_genome`     | Optional spike-in genome (e.g. dmelr6.32, ecoli_k12).                                                                                                                                                                                                                                                                                                                                        | `string` |                            |          |        |
 | `outputDir`        |                                                                                                                                                                                                                                                                                                                                                                                              | `string` | ${launchDir}/results       |          | True   |
 | `tracedir`         |                                                                                                                                                                                                                                                                                                                                                                                              | `string` | ${outputDir}/pipeline_info |          | True   |
 | `publish_dir_mode` |                                                                                                                                                                                                                                                                                                                                                                                              | `string` | link                       |          |        |
@@ -42,18 +41,29 @@ Use these to build a custom reference genome not already listed in conf/genomes.
 | `align_min_quality`   |             | `integer` | 6       |          |        |
 | `min_fragment_length` |             | `integer` | 200     |          |        |
 
+## Spike-in options
+
+Options for experiments that use a spike-in genome
+
+| Parameter                         | Description                                                                                                                                                                                                                                                                                                                                                     | Type      | Default  | Required | Hidden |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | -------- | ------ |
+| `spike_genome`                    | Optional spike-in genome (e.g. dmelr6.32, ecoli_k12). If null, spike-in normalization will not be performed.                                                                                                                                                                                                                                                    | `string`  |          |          |        |
+| `spike_norm_method`               | Method to compute scaling factors for spike-in normalization. "guenther" uses a simple fraction of the reads aligning to the spike-in genome as described in https://doi.org/10.1016/j.celrep.2014.10.018. "delorenzi" uses deepTools multiBamSummary with --scalingFactors, which is similar to the method described in https://doi.org/10.1101/gr.168260.113. | `string`  | guenther |          |        |
+| `spike_deeptools_bin_size`        | When spike_norm_method is delorenzi, this sets --binSize in deepTools multiBamSummary                                                                                                                                                                                                                                                                           | `integer` | 5000     |          |        |
+| `spike_deeptools_min_map_quality` | When spike_norm_method is delorenzi, this sets --minMappingQuality in deepTools multiBamSummary                                                                                                                                                                                                                                                                 | `integer` | 30       |          |        |
+
 ## QC options
 
-| Parameter                   | Description | Type      | Default                    | Required | Hidden |
-| --------------------------- | ----------- | --------- | -------------------------- | -------- | ------ |
-| `fastq_screen_conf`         |             | `string`  |                            |          |        |
-| `fastq_screen_db_dir`       |             | `string`  |                            |          |        |
-| `deeptools_bin_size`        |             | `integer` | 25                         |          |        |
-| `deeptools_smooth_length`   |             | `integer` | 75                         |          |        |
-| `deeptools_normalize_using` |             | `string`  | RPGC                       |          |        |
-| `deeptools_excluded_chroms` |             | `string`  | chrM chrX chrY             |          |        |
-| `multiqc_config`            |             | `string`  | assets/multiqc_config.yaml |          |        |
-| `multiqc_logo`              |             | `string`  | assets/ccbr_logo.png       |          |        |
+| Parameter                   | Description                                                  | Type      | Default                    | Required | Hidden |
+| --------------------------- | ------------------------------------------------------------ | --------- | -------------------------- | -------- | ------ |
+| `fastq_screen_conf`         |                                                              | `string`  |                            |          |        |
+| `fastq_screen_db_dir`       |                                                              | `string`  |                            |          |        |
+| `deeptools_bin_size`        |                                                              | `integer` | 25                         |          |        |
+| `deeptools_smooth_length`   |                                                              | `integer` | 75                         |          |        |
+| `deeptools_normalize_using` | If using a spike-in genome, recommend setting this to "None" | `string`  | RPGC                       |          |        |
+| `deeptools_excluded_chroms` |                                                              | `string`  | chrM chrX chrY             |          |        |
+| `multiqc_config`            |                                                              | `string`  | assets/multiqc_config.yaml |          |        |
+| `multiqc_logo`              |                                                              | `string`  | assets/ccbr_logo.png       |          |        |
 
 ## Peak callers
 
@@ -76,6 +86,8 @@ Use these to build a custom reference genome not already listed in conf/genomes.
 | `homer_jaspar_db` |             | `string`  | assets/JASPAR2022_CORE_vertebrates_non-redundant_pfms_jaspar.txt |          |        |
 
 ## run control
+
+Toggle various steps of the pipeline on/off
 
 | Parameter              | Description | Type      | Default | Required | Hidden |
 | ---------------------- | ----------- | --------- | ------- | -------- | ------ |
