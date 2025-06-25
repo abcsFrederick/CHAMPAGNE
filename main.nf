@@ -100,15 +100,6 @@ workflow {
     chrom_sizes = PREPARE_GENOME.out.chrom_sizes
     effective_genome_size = PREPARE_GENOME.out.effective_genome_size
 
-    // optional spike-in filtering & scaling factor computation
-    ch_scaling_factors = trimmed_fastqs
-        | map{ meta, fq -> meta }
-        | combine(Channel.of(1))
-    if (params.spike_genome) {
-        ALIGN_SPIKEIN(trimmed_fastqs, params.spike_genome)
-        ch_scaling_factors = ALIGN_SPIKEIN.out.scaling_factors
-        ch_multiqc = ch_multiqc.mix(ALIGN_SPIKEIN.out.multibam_sf)
-    }
     FILTER_BLACKLIST(trimmed_fastqs, PREPARE_GENOME.out.blacklist_index)
     ALIGN_GENOME(FILTER_BLACKLIST.out.reads, PREPARE_GENOME.out.reference_index)
     aligned_bam = ALIGN_GENOME.out.bam
@@ -123,6 +114,16 @@ workflow {
         PHANTOM_PEAKS.out.spp,
         PHANTOM_PEAKS.out.fraglen
     )
+
+    // optional spike-in scaling factor computation
+    ch_scaling_factors = trimmed_fastqs
+        | map{ meta, fq -> meta }
+        | combine(Channel.of(1))
+    if (params.spike_genome) {
+        ALIGN_SPIKEIN(trimmed_fastqs, params.spike_genome, frag_lengths)
+        ch_scaling_factors = ALIGN_SPIKEIN.out.scaling_factors
+        ch_multiqc = ch_multiqc.mix(ALIGN_SPIKEIN.out.sf_tsv)
+    }
 
 
     ch_deeptools = Channel.empty()
