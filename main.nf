@@ -164,6 +164,8 @@ workflow {
     }
     ch_peaks = Channel.empty()
     ch_peaks_consensus = Channel.empty()
+    ch_annot = Channel.empty()
+    ch_motifs = Channel.empty()
     ch_diffbind = Channel.empty()
     ch_manorm = Channel.empty()
 
@@ -178,6 +180,7 @@ workflow {
                    )
         ch_multiqc = ch_multiqc.mix(CALL_PEAKS.out.plots)
         ch_peaks = CALL_PEAKS.out.peaks
+
         // consensus peak calling with union method
         if (params.run_consensus_union) {
             ch_peaks_grouped = CALL_PEAKS.out.peaks
@@ -202,6 +205,9 @@ workflow {
             ch_multiqc = ch_multiqc.mix(ANNOTATE_CONS_UNION.out.plots)
 
             ch_peaks_consensus = ch_peaks_consensus.mix(ch_consensus_union)
+
+            ch_annot = ch_annot.mix(ANNOTATE_CONS_UNION.out.plots)
+            ch_motifs = ch_motifs.mix(MOTIFS_CONS_UNION.out.homer, MOTIFS_CONS_UNION.out.meme)
         }
         if (params.run_consensus_corces) {
             // consensus peak calling with corces method
@@ -221,7 +227,9 @@ workflow {
                     PREPARE_GENOME.out.meme_motifs)
             ch_multiqc = ch_multiqc.mix(ANNOTATE_CONS_CORCES.out.plots)
             ch_peaks_consensus.mix(CONSENSUS_CORCES.out.peaks)
-                .mix(ANNOTATE_CONS_CORCES.out.plots)
+
+            ch_annot = ch_annot.mix(ANNOTATE_CONS_CORCES.out.plots)
+            ch_motifs = ch_motifs.mix(MOTIFS_CONS_CORCES.out.homer, MOTIFS_CONS_CORCES.out.meme)
         }
 
         // run differential analysis
@@ -275,6 +283,8 @@ workflow {
         align_bam = DEDUPLICATE.out.bam
         peaks = ch_peaks
         peaks_consensus = ch_peaks_consensus
+        annot = ch_annot
+        motifs = ch_motifs
         diffbind = ch_diffbind
         manorm = ch_manorm
 
@@ -316,6 +326,12 @@ output {
     }
     peaks_consensus {
         path { meta, peak -> "peaks/${meta.tool}/consensus/${meta.consensus}/" }
+    }
+    annot {
+        path { meta, file -> "peaks/${meta.tool}/consensus/${meta.consensus}/annotations/" }
+    }
+    motifs {
+        path { meta, file -> "peaks/${meta.tool}/consensus/${meta.consensus}/motifs/" }
     }
     diffbind {
         path { meta, report -> "peaks/${meta.tool}/diffbind/${meta.contrast}/" }
