@@ -87,7 +87,17 @@ workflow {
     LOG()
     // validateParameters()
 
+    // initialize output channels
     ch_multiqc = Channel.empty()
+    multiqc_report = channel.empty()
+    fastqc_raw = Channel.empty()
+    fastqc_trimmed = Channel.empty()
+    ch_peaks = Channel.empty()
+    ch_peaks_consensus = Channel.empty()
+    ch_annot = Channel.empty()
+    ch_motifs = Channel.empty()
+    ch_diffbind = Channel.empty()
+    ch_manorm = Channel.empty()
 
     sample_sheet = Channel.fromPath(file(params.input, checkIfExists: true))
     contrast_sheet = params.contrasts ? Channel.fromPath(file(params.contrasts, checkIfExists: true)) : params.contrasts
@@ -117,6 +127,7 @@ workflow {
 
     // optional spike-in normalization
     if (params.spike_genome) {
+        println "DO THE SPIKEIN PLS"
         ALIGN_SPIKEIN(trimmed_fastqs, params.spike_genome, frag_lengths)
         ch_scaling_factors = ALIGN_SPIKEIN.out.scaling_factors
         ch_multiqc = ch_multiqc.mix(ALIGN_SPIKEIN.out.sf_tsv)
@@ -150,8 +161,6 @@ workflow {
         ch_deeptools_stats = Channel.empty()
     }
 
-    fastqc_raw = Channel.empty()
-    fastqc_trimmed = Channel.empty()
     if (params.run_qc) {
         QC(raw_fastqs, CUTADAPT.out.reads, FILTER_BLACKLIST.out.n_surviving_reads,
            aligned_bam, ALIGN_GENOME.out.aligned_flagstat, ALIGN_GENOME.out.filtered_flagstat,
@@ -162,12 +171,6 @@ workflow {
         fastqc_raw = QC.out.fastqc_raw
         fastqc_trimmed = QC.out.fastqc_trimmed
     }
-    ch_peaks = Channel.empty()
-    ch_peaks_consensus = Channel.empty()
-    ch_annot = Channel.empty()
-    ch_motifs = Channel.empty()
-    ch_diffbind = Channel.empty()
-    ch_manorm = Channel.empty()
 
     if ([params.run_macs_broad, params.run_macs_narrow, params.run_gem, params.run_sicer].any()) {
 
@@ -259,7 +262,6 @@ workflow {
     }
 
     ch_multiqc = ch_multiqc.collect()
-    multiqc_report = channel.empty()
     if (!workflow.stubRun) {
         MULTIQC(
             file(params.multiqc_config, checkIfExists: true),
