@@ -101,6 +101,8 @@ workflow DEEPTOOLS {
         ch_ip_ctrl_bam_bai | PLOT_FINGERPRINT
 
     emit:
+        bigwigs             = bigwigs
+        bigwigs_input_norm  = NORMALIZE_INPUT.out.bigwig
         fingerprint_matrix  = PLOT_FINGERPRINT.out.matrix
         fingerprint_metrics = PLOT_FINGERPRINT.out.metrics
         corr                = PLOT_CORRELATION.out.tab

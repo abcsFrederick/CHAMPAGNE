@@ -116,17 +116,16 @@ workflow {
     )
 
     // optional spike-in normalization
-    ch_scaling_factors = trimmed_fastqs
-        | map{ meta, fq -> meta }
-        | combine(Channel.of(1))
     if (params.spike_genome) {
         ALIGN_SPIKEIN(trimmed_fastqs, params.spike_genome, frag_lengths)
         ch_scaling_factors = ALIGN_SPIKEIN.out.scaling_factors
         ch_multiqc = ch_multiqc.mix(ALIGN_SPIKEIN.out.sf_tsv)
+    } else {
+        ch_scaling_factors = trimmed_fastqs
+            | map{ meta, fq -> meta }
+            | combine(Channel.of(1))
     }
 
-
-    ch_deeptools = Channel.empty()
     if (params.run_deeptools) {
         DEEPTOOLS( deduped_bam,
                     frag_lengths,
@@ -134,16 +133,20 @@ workflow {
                     PREPARE_GENOME.out.gene_info,
                     ch_scaling_factors
                     )
-
-        ch_deeptools = ch_deeptools.mix(
-            DEEPTOOLS.out.fingerprint_matrix,
+        ch_deeptools_bw = DEEPTOOLS.out.bigwigs
+        ch_deeptools_bw_input_norm = DEEPTOOLS.out.bigwigs_input_norm
+        ch_deeptools_stats = DEEPTOOLS.out.fingerprint_matrix.mix(,
             DEEPTOOLS.out.fingerprint_metrics,
             DEEPTOOLS.out.corr,
             DEEPTOOLS.out.pca,
             DEEPTOOLS.out.profile,
             DEEPTOOLS.out.heatmap
         )
-        ch_multiqc = ch_multiqc.mix(ch_deeptools)
+        ch_multiqc = ch_multiqc.mix(ch_deeptools_stats)
+    } else {
+        ch_deeptools_bw = Channel.empty()
+        ch_deeptools_bw_input_norm = Channel.empty()
+        ch_deeptools_stats = Channel.empty()
     }
 
     fastqc_raw = Channel.empty()
@@ -263,7 +266,9 @@ workflow {
         fastqc_raw = fastqc_raw
         fastqc_trimmed = fastqc_trimmed
         ppqt = ch_ppqt
-        deeptools = ch_deeptools
+        deeptools_bw = ch_deeptools_bw
+        deeptools_bw_input_norm = ch_deeptools_bw_input_norm
+        deeptools_stats = ch_deeptools_stats
         multiqc_report = multiqc_report
         multiqc_inputs = ch_multiqc
         align_bam = DEDUPLICATE.out.bam
@@ -287,7 +292,13 @@ output {
     ppqt {
         path { file -> "qc/phantompeakqualtools/" }
     }
-    deeptools {
+    deeptools_bw {
+        path { bigwig -> "bigwigs/" }
+    }
+    deeptools_bw_input_norm {
+        path { bigwig -> "bigwigs/" }
+    }
+    deeptools_stats {
         path { deeptools -> "qc/deeptools/" }
     }
     multiqc_report {
