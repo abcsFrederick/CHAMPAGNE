@@ -176,7 +176,7 @@ sp:
   QC_Table:
     fn: "qc_table.tsv"
   spike_sf_table:
-    fn: "*scalingFactors.tsv"
+    fn: "spike_sf.tsv"
   NGSQC_data:
     fn: "*NGSQC.txt"
   frip_samples:
