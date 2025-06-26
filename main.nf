@@ -122,7 +122,7 @@ workflow {
         ch_multiqc = ch_multiqc.mix(ALIGN_SPIKEIN.out.sf_tsv)
     } else {
         ch_scaling_factors = trimmed_fastqs
-            | map{ meta, fq -> meta }
+            | map{ meta, fq -> meta.id }
             | combine(Channel.of(1))
     }
 
@@ -135,13 +135,14 @@ workflow {
                     )
         ch_deeptools_bw = DEEPTOOLS.out.bigwigs
         ch_deeptools_bw_input_norm = DEEPTOOLS.out.bigwigs_input_norm
-        ch_deeptools_stats = DEEPTOOLS.out.fingerprint_matrix.mix(,
-            DEEPTOOLS.out.fingerprint_metrics,
-            DEEPTOOLS.out.corr,
-            DEEPTOOLS.out.pca,
-            DEEPTOOLS.out.profile,
-            DEEPTOOLS.out.heatmap
-        )
+        ch_deeptools_stats = DEEPTOOLS.out.fingerprint_matrix
+            .mix(
+                DEEPTOOLS.out.fingerprint_metrics,
+                DEEPTOOLS.out.corr,
+                DEEPTOOLS.out.pca,
+                DEEPTOOLS.out.profile,
+                DEEPTOOLS.out.heatmap
+            )
         ch_multiqc = ch_multiqc.mix(ch_deeptools_stats)
     } else {
         ch_deeptools_bw = Channel.empty()
