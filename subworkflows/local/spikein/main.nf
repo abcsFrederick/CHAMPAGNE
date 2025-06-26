@@ -25,19 +25,23 @@ workflow ALIGN_SPIKEIN {
             | map{ idx, metas, counts -> [ metas, counts ] }
             | set{ ch_spike_counts }
 
-        ch_spikein_bam = BWA_MEM.out.bam
-            | map{ meta, bam, bai -> [1, meta, bam, bai]}
-            | groupTuple()
-            | map{ idx, metas, bams, bais -> [ metas, bams, bais ] }
-            | join(ch_frag_lengths)
-            | combine(ch_spikein_blacklist_bed)
-
         if (params.spike_norm_method == 'guenther') {
             ch_spike_counts
                 | COMPUTE_SCALINGFACTOR
                 | set { ch_sf_tsv }
         } else if (params.spike_norm_method == 'delorenzi') {
-            MULTIBAM_SUMMARY(ch_spikein_bam)
+            ch_frag_lengths
+                | map{ meta, fraglen -> fraglen}
+                | min()
+                | set{ min_fraglen }
+            BWA_MEM.out.bam
+                | map{ meta, bam, bai -> [1, meta, bam, bai]}
+                | groupTuple()
+                | map{ idx, metas, bams, bais -> [ metas, bams, bais ] }
+                | view
+                | combine(min_fraglen)
+                | combine(ch_spikein_blacklist_bed)
+                | MULTIBAM_SUMMARY
             MULTIBAM_SUMMARY.out.sf
                 | set{ ch_sf_tsv } // https://github.com/nextflow-io/nextflow/issues/3970
         } else {

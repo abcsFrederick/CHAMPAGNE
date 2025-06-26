@@ -12,7 +12,7 @@ process MULTIBAM_SUMMARY {
 
     script:
     def prefix = task.ext.prefix ?: "multiBam"
-    def args = meta.single_end ? "--extendReads ${fraglen}" : ''
+    def args = metas[0].single_end ? "--extendReads ${fraglen}" : ''
     if (blacklist_bed.exists()) {
       args = "${args} --blackListFileName ${blacklist_bed}"
     }
@@ -25,7 +25,7 @@ process MULTIBAM_SUMMARY {
                   --labels ${metas.collect{ it.id }.join(' ')} \\
                   --numberOfProcessors ${task.cpus} \\
                   --binSize ${params.spike_deeptools_bin_size} \\
-                  --minMappingQuality ${params.spike_deeptools_min_mapping_quality} \\
+                  --minMappingQuality ${params.spike_deeptools_min_map_quality} \\
                   --ignoreDuplicates \\
                   ${args} \\
                   -o multiBamSummary.npz \\
