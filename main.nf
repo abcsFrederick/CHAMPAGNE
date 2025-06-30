@@ -127,7 +127,6 @@ workflow {
 
     // optional spike-in normalization
     if (params.spike_genome) {
-        println "DO THE SPIKEIN PLS"
         ALIGN_SPIKEIN(trimmed_fastqs, params.spike_genome, frag_lengths)
         ch_scaling_factors = ALIGN_SPIKEIN.out.scaling_factors
         ch_multiqc = ch_multiqc.mix(ALIGN_SPIKEIN.out.sf_tsv)
