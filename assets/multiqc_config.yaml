@@ -130,6 +130,15 @@ custom_data:
     pconfig:
       id: "spike_sf_table"
       namespace: "Spike-in scaling factors"
+    headers:
+      sample:
+        description: "Sample ID"
+      scaling_factor:
+        description: "Scaling factor for spike-in normalization"
+        format: "{:,.4f}"
+      n_spikein_reads:
+        description: "Number of spike-in reads in the sample"
+        format: "{:,.0f}"
   NGSQC_data:
     section_name: "NGSQC plot"
     plot_type: "linegraph"
