@@ -78,43 +78,71 @@ workflow CALL_PEAKS {
         ch_peaks = Channel.empty()
         ch_narrow_peaks = Channel.empty()
         if (params.run_macs_broad) {
-            ch_macs | MACS_BROAD
-            ch_peaks = ch_peaks.mix(MACS_BROAD.out.peak)
+            ch_macs
+                | MACS_BROAD
+            MACS_BROAD.out.peak
+                | map{ meta, peak, tool ->
+                    def meta2 = meta
+                    meta2.tool = tool
+                    [ meta2, peak, tool ]
+                }
+                | set{ ch_macs_broad}
+            ch_peaks = ch_peaks.mix(ch_macs_broad)
         }
         if (params.run_macs_narrow) {
-            ch_macs | MACS_NARROW
-            ch_peaks = ch_peaks.mix(MACS_NARROW.out.peak)
-            ch_narrow_peaks = ch_narrow_peaks.mix(MACS_NARROW.out.peak)
+            ch_macs
+                | MACS_NARROW
+            MACS_NARROW.out.peak
+                | map{ meta, peak, tool ->
+                    def meta2 = meta
+                    meta2.tool = tool
+                    [ meta2, peak, tool ]
+                }
+                | set{ ch_macs_narrow }
+            ch_peaks = ch_peaks.mix(ch_macs_narrow)
+            ch_narrow_peaks = ch_narrow_peaks.mix(ch_macs_narrow)
         }
         if (params.run_sicer) {
             ch_sicer | SICER
-            SICER.out.peak | CONVERT_SICER
+            SICER.out.peak
+                | map{ meta, peak, tool ->
+                    def meta2 = meta
+                    meta2.tool = tool
+                    [ meta2, peak, tool ]
+                }
+                | CONVERT_SICER
             ch_peaks = ch_peaks.mix(CONVERT_SICER.out.peak)
         }
         if (params.run_gem) {
             ch_gem | GEM
             GEM.out.peak
-                .combine(chrom_sizes) | FILTER_GEM
+                | map{ meta, peak, tool ->
+                    def meta2 = meta
+                    meta2.tool = tool
+                    [ meta2, peak, tool ]
+                }
+                | combine(chrom_sizes)
+                | FILTER_GEM
             ch_peaks = ch_peaks.mix(FILTER_GEM.out.peak)
             ch_narrow_peaks = ch_narrow_peaks.mix(FILTER_GEM.out.peak)
         }
 
         // Create tag align w/ peaks
-        tag_all_bed.cross(ch_peaks)
+        tag_all_bed.combine(ch_peaks)
             .map{ it ->
                 it.flatten()
             }
             .map{ meta1, tagalign, meta2, peak, tool ->
-                meta1 == meta2 ? [ meta1, tagalign, peak, tool ] : null
+                meta1.id == meta2.id ? [ meta1, tagalign, peak, tool ] : null
             }
             .set{ ch_tagalign_peaks }
         // Create Channel with meta, deduped bam, peak file, peak-calling tool, and chrom sizes fasta
-        deduped_bam.cross(ch_peaks)
+        deduped_bam.combine(ch_peaks)
             .map{ it ->
                it.flatten()
             }
             .map{  meta1, bam, bai, meta2, peak, tool ->
-                meta1 == meta2 ? [ meta1, bam, bai, peak, tool ] : null
+                meta1.id == meta2.id ? [ meta1, bam, bai, peak, tool ] : null
             }
             .set{ ch_bam_peaks }
 
@@ -124,7 +152,7 @@ workflow CALL_PEAKS {
         ch_peaks
             .combine(ch_peaks) // jaccard index on all-vs-all samples & peak-calling tools
             .map{ meta1, peak1, tool1, meta2, peak2, tool2 ->
-                (meta1 != meta2 || tool1 != tool2) ? [ meta1, peak1, tool1, meta2, peak2, tool2 ] : null
+                (meta1.id != meta2.id || tool1 != tool2) ? [ meta1, peak1, tool1, meta2, peak2, tool2 ] : null
             }
             .combine(chrom_sizes) | JACCARD_INDEX
         JACCARD_INDEX.out.collect() | CONCAT_JACCARD | PLOT_JACCARD

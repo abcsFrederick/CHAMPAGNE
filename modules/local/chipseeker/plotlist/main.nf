@@ -1,24 +1,25 @@
 process CHIPSEEKER_PLOTLIST {
     label 'peaks'
     label 'process_medium'
+    tag { meta.consensus }
 
     container 'nciccbr/ccbr_chipseeker:1.1.2'
 
     input:
-        path(rds)
+        tuple val(meta), path(rds)
 
     output:
-        path("*.png"), emit: plots
+        path("${meta.consensus}_plot_anno_bar.png")
 
     script:
     """
     chipseeker_plotlist.R \\
         --annotations ${rds.join(' ')} \\
-        --outfile ${rds.baseName}_plot_anno_bar.png
+        --outfile ${meta.consensus}_plot_anno_bar.png
     """
 
     stub:
     """
-    touch plot_anno_bar.png
+    touch ${meta.consensus}_plot_anno_bar.png
     """
 }

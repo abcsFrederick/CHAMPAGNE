@@ -70,13 +70,16 @@ markdown_extensions:
 # Page Tree
 nav:
   - Home: index.md
-  - Usage:
-      - Getting Started: getting-started.md
-      - Creating Manifests: manifests.md
-      - Parameters: params.md
-      - Workflow Overview: workflow.md
+  - User Guide:
+      #- Introduction: guide/intro.md
+      - Usage: guide/usage.md
+      - Output: guide/output.md
+      - Parameters: guide/params.md
+      - Genomes: guide/genomes.md
+      - Spike-in Normalization: guide/spike-in.md
+      - Troubleshooting: guide/troubleshooting.md
   - Developer Guide:
-      - How to contribute: contributing.md
-      - Release guide: release-guide.md
-  - Contributors: contributors.md
+      - How to contribute: devs/contributing.md
+      #- Release guide: devs/release-guide.md
+      #- Contributors: devs/contributors.md
   - Changelog: changelog.md

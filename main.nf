@@ -95,7 +95,8 @@ workflow {
     ch_peaks = Channel.empty()
     ch_peaks_consensus = Channel.empty()
     ch_annot = Channel.empty()
-    ch_motifs = Channel.empty()
+    ch_motifs_homer = Channel.empty()
+    ch_motifs_meme = Channel.empty()
     ch_diffbind = Channel.empty()
     ch_manorm = Channel.empty()
 
@@ -195,21 +196,21 @@ workflow {
                 .map{ meta, bed ->
                     def meta_split = meta.id.tokenize('.')
                     assert meta_split.size() == 2
-                    [ [ sample_basename: meta_split[0], tool: meta_split[1], consensus: 'union' ], bed ]
+                    [ [ id: meta_split[0], tool: meta_split[1], consensus: 'union' ], bed ]
                 }
                 .set{ ch_consensus_union }
-            ANNOTATE_CONS_UNION(CONSENSUS_UNION.out.peaks,
+            ANNOTATE_CONS_UNION(ch_consensus_union,
                     PREPARE_GENOME.out.bioc_txdb,
                     PREPARE_GENOME.out.bioc_annot)
-            MOTIFS_CONS_UNION(CONSENSUS_UNION.out.peaks,
+            MOTIFS_CONS_UNION(ch_consensus_union,
                     PREPARE_GENOME.out.fasta,
                     PREPARE_GENOME.out.meme_motifs)
-            ch_multiqc = ch_multiqc.mix(ANNOTATE_CONS_UNION.out.plots)
-
             ch_peaks_consensus = ch_peaks_consensus.mix(ch_consensus_union)
 
-            ch_annot = ch_annot.mix(ANNOTATE_CONS_UNION.out.plots)
-            ch_motifs = ch_motifs.mix(MOTIFS_CONS_UNION.out.homer, MOTIFS_CONS_UNION.out.meme)
+            ch_multiqc = ch_multiqc.mix(ANNOTATE_CONS_UNION.out.plots)
+            ch_annot = ch_annot.mix(ANNOTATE_CONS_UNION.out.annot)
+            ch_motifs_homer = ch_motifs_homer.mix(MOTIFS_CONS_UNION.out.homer)
+            ch_motifs_meme = ch_motifs_meme.mix(MOTIFS_CONS_UNION.out.meme)
         }
         if (params.run_consensus_corces) {
             // consensus peak calling with corces method
@@ -220,18 +221,26 @@ workflow {
                     [ meta2, bed ]
                 }
                 .groupTuple()
-            CONSENSUS_CORCES(ch_narrow_peaks.combine(chrom_sizes))
+            ch_narrow_peaks.combine(chrom_sizes)
+                | CONSENSUS_CORCES
+                | map{ meta, peak ->
+                    def meta2 = meta
+                    meta2.consensus = 'corces'
+                    [ meta2, peak ]
+                }
+
             ANNOTATE_CONS_CORCES(CONSENSUS_CORCES.out.peaks,
                     PREPARE_GENOME.out.bioc_txdb,
                     PREPARE_GENOME.out.bioc_annot)
             MOTIFS_CONS_CORCES(CONSENSUS_CORCES.out.peaks,
                     PREPARE_GENOME.out.fasta,
                     PREPARE_GENOME.out.meme_motifs)
-            ch_multiqc = ch_multiqc.mix(ANNOTATE_CONS_CORCES.out.plots)
             ch_peaks_consensus.mix(CONSENSUS_CORCES.out.peaks)
 
-            ch_annot = ch_annot.mix(ANNOTATE_CONS_CORCES.out.plots)
-            ch_motifs = ch_motifs.mix(MOTIFS_CONS_CORCES.out.homer, MOTIFS_CONS_CORCES.out.meme)
+            ch_multiqc = ch_multiqc.mix(ANNOTATE_CONS_CORCES.out.plots)
+            ch_annot = ch_annot.mix(ANNOTATE_CONS_CORCES.out.annot)
+            ch_motifs_homer = ch_motifs_homer.mix(MOTIFS_CONS_CORCES.out.homer)
+            ch_motifs_meme = ch_motifs_meme.mix(MOTIFS_CONS_CORCES.out.meme)
         }
 
         // run differential analysis
@@ -285,7 +294,8 @@ workflow {
         peaks = ch_peaks
         peaks_consensus = ch_peaks_consensus
         annot = ch_annot
-        motifs = ch_motifs
+        homer = ch_motifs_homer
+        meme = ch_motifs_meme
         diffbind = ch_diffbind
         manorm = ch_manorm
 
@@ -323,7 +333,7 @@ output {
         path { bam -> "align/bam/" }
     }
     peaks {
-        path { meta, peak, tool -> "peaks/${tool}/replicates/${meta.id}/"}
+        path { meta, peak, tool -> "peaks/${meta.tool}/replicates/"}
     }
     peaks_consensus {
         path { meta, peak -> "peaks/${meta.tool}/consensus/${meta.consensus}/" }
@@ -331,14 +341,17 @@ output {
     annot {
         path { meta, file -> "peaks/${meta.tool}/consensus/${meta.consensus}/annotations/" }
     }
-    motifs {
-        path { meta, file -> "peaks/${meta.tool}/consensus/${meta.consensus}/motifs/" }
+    homer {
+        path { meta, file -> "peaks/${meta.tool}/consensus/${meta.consensus}/motifs/homer/" }
+    }
+    meme {
+        path { meta, file -> "peaks/${meta.tool}/consensus/${meta.consensus}/motifs/meme/" }
     }
     diffbind {
-        path { meta, report -> "peaks/${meta.tool}/diffbind/${meta.contrast}/" }
+        path { meta, report -> "peaks/${meta.tool}/diff/diffbind/${meta.contrast}/" }
     }
     manorm {
-        path { meta, files -> "peaks/${meta.tool}/manorm/${meta.contrast}/" }
+        path { meta, files -> "peaks/${meta.tool}/diff/manorm/${meta.contrast}/" }
     }
 
 }
