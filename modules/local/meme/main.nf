@@ -13,7 +13,7 @@ process MEME_AME {
         tuple val(meta), path("*.sequences.tsv.gz"), emit: seq
 
     script:
-    prefix = "${meta.group}".length() > 0 ? "${meta.id}.${meta.group}" : "${meta.id}"
+    prefix = "${meta.id}"
     """
     run_ame() {
         motif_file=\$1
