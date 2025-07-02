@@ -1,13 +1,6 @@
-# Genomes
-
-<!--
-This file is created by concatenating _genomes_head.md and the auto-generated genomes list.
-Do not edit guide/genomes.md manually.
--->
-
 ### Custom reference genome
 
-If you'd like to use a genome not available on Biowulf (see list below),
+If you'd like to use a genome not available on Biowulf,
 you can prepare a custom genome with the `MAKE_REFERENCE` entrypoint.
 If you'd like to use a custom genome, you'll need the following files:
 
@@ -39,7 +32,3 @@ champagne run --output /data/$USER/champagne_project \
     --genome custom_genome \
     -c results/genome/custom_genome/custom_genome.config
 ```
-
-## Available genomes
-
-These genomes are available on biowulf.
