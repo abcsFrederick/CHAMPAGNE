@@ -1,5 +1,33 @@
 # Output
 
+When you initialize champagne, the project output directory (specified with
+`--output`) is populated with `assets/`, `conf/`, and `nextflow.config`.
+After running the pipeline, the output directory will also contain `results/`,
+`log/`, `work/`, and `submit_slurm.sh` (if using `--mode slurm`).
+
+```
+/data/$USER/champagne_project
+├── assets/
+├── conf/
+├── log/
+├── nextflow.config
+├── results/
+├── submit_slurm.sh
+└── work/
+```
+
+| Directory              | Description                                                                                               |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- |
+| `assets/`              | Contains example sample sheets, contrasts, and other input files.                                         |
+| `conf/`                | Contains configuration files for the pipeline.                                                            |
+| `log/`                 | Contains log files for the pipeline run, include a slurm log if `--mode slurm` was used                   |
+| `nextflow.config`      | The Nextflow configuration file for the pipeline.                                                         |
+| [`results/`](#results) | Contains the results files from the pipeline run.                                                         |
+| `submit_slurm.sh`      | A script to submit the pipeline run to SLURM (only created if `--mode slurm` was used).                   |
+| `work/`                | Contains the working directory for Nextflow, where intermediate files are stored during the pipeline run. |
+
+## Results
+
 Workflow output files will be written to the `results/` directory by default in your pipeline run output directory.
 
 For example, if you ran champagne with `champagne run --output /data/$USER/champagne_project`, the results files will be in `/data/$USER/champagne_project/results/`.
