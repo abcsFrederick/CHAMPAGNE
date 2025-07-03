@@ -65,7 +65,6 @@ champagne run --output /data/$USER/champagne_project \
 ### Parameters
 
 You can specify workflow parameters via the command line or in a YAML file.
-
 Here's an example YAML file with some common parameters:
 
 `assets/params.yml`
