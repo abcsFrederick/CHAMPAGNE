@@ -87,12 +87,12 @@ champagne run --output /data/$USER/champagne_project \
     -params-file assets/params.yml
 ```
 
-View the [full list of parameters](https://ccbr.github.io/CHAMPAGNE/guide/params)
+View the [full list of parameters](https://ccbr.github.io/CHAMPAGNE/dev/guide/params)
 in the documentation.
 
 ### Reference Genomes
 
-View [the list of available reference genomes](https://ccbr.github.io/CHAMPAGNE/guide/genomes)
+View [the list of available reference genomes](https://ccbr.github.io/CHAMPAGNE/dev/guide/genomes)
 to see which genomes are pre-configured for use with champagne on biowulf.
 If you'd like to use a genome that's not already available, view the
 [guide on preparing a custom reference genome](https://ccbr.github.io/CHAMPAGNE/dev/guide/genomes/#custom-reference-genome).
@@ -111,7 +111,7 @@ champagne run --output /data/$USER/champagne_project \
     --deeptools_normalize_using None
 ```
 
-View [the spike-in docs](https://ccbr.github.io/CHAMPAGNE/guide/spike-in/)
+View [the spike-in docs](https://ccbr.github.io/CHAMPAGNE/dev/guide/spike-in/)
 for more information on how to use & customize spike-in controls.
 
 ## Help & Contributing
