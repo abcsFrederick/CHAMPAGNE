@@ -209,10 +209,9 @@ Options:
     champagne run --output path/to/outdir --mode slurm -profile test -params-file assets/params.yml
 ```
 
-Any [nextflow
-argument](https://www.nextflow.io/docs/latest/reference/cli.html#run) can also
-be passed to champagne run, such as `-profile`, `-preview`, or `-params-file`.
-These are always prepended with a single hyphen.
+Any [nextflow argument](https://www.nextflow.io/docs/latest/reference/cli.html#run)
+can also be passed to champagne run, such as `-profile`, `-preview`, or
+`-params-file`. These are always prepended with a single hyphen.
 
 [Pipeline parameters](guide/params.md) can also be passed via the command line.
 These are always prepended with a double-hyphen.
