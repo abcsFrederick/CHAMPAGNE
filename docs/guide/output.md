@@ -16,15 +16,15 @@ After running the pipeline, the output directory will also contain `results/`,
 └── work/
 ```
 
-| Directory              | Description                                                                                               |
-| ---------------------- | --------------------------------------------------------------------------------------------------------- |
-| `assets/`              | Contains example sample sheets, contrasts, and other input files.                                         |
-| `conf/`                | Contains configuration files for the pipeline.                                                            |
-| `log/`                 | Contains log files for the pipeline run, include a slurm log if `--mode slurm` was used                   |
-| `nextflow.config`      | The Nextflow configuration file for the pipeline.                                                         |
-| [`results/`](#results) | Contains the results files from the pipeline run.                                                         |
-| `submit_slurm.sh`      | A script to submit the pipeline run to SLURM (only created if `--mode slurm` was used).                   |
-| `work/`                | Contains the working directory for Nextflow, where intermediate files are stored during the pipeline run. |
+| Directory              | Description                                                                                                                                                                                                                                                                            |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `assets/`              | Contains example sample sheets, contrasts, and other input files.                                                                                                                                                                                                                      |
+| `conf/`                | Contains configuration files for the pipeline.                                                                                                                                                                                                                                         |
+| `log/`                 | Contains log files for the pipeline run, including a slurm log if `--mode slurm` is used.                                                                                                                                                                                              |
+| `nextflow.config`      | The Nextflow configuration file for the pipeline.                                                                                                                                                                                                                                      |
+| [`results/`](#results) | Contains the results files from the pipeline run.                                                                                                                                                                                                                                      |
+| `submit_slurm.sh`      | A script to submit the pipeline run to SLURM (only created if `--mode slurm` is used).                                                                                                                                                                                                 |
+| `work/`                | Contains the working directory for Nextflow, where intermediate files are stored during the pipeline run. If you resubmit the pipeline, the working directory will be reused. After successfully completing the pipeline run, you can delete the working directory to save disk space. |
 
 ## Results
 
