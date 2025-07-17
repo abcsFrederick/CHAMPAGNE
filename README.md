@@ -136,4 +136,5 @@ If you plan to contribute your pipeline to nf-core, don't use this template --
 instead follow nf-core's instructions[^2].
 
 [^1]: nektool https://github.com/beardymcjohnface/nektool
+
 [^2]: instructions for nf-core pipelines https://nf-co.re/docs/contributing/tutorials/creating_with_nf_core
