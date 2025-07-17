@@ -1,5 +1,7 @@
 ## CHAMPAGNE development version
 
+## CHAMPAGNE 0.5.0
+
 - CHAMPAGNE now depends on ccbr_tools v0.4 for updated jobby & spooker utilities. (#247, @kelly-sovacool)
 - Reorganized output directory structure. (#256, @kelly-sovacool)
 - Nextflow parameters are now validated at the start of the workflow. (#257, @kelly-sovacool)
