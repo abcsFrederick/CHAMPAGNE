@@ -70,7 +70,7 @@
                 "blacklist": {
                     "type": "string",
                     "fa_icon": "fas fa-file",
-                    "description": "Blacklisted sequences fasta file"
+                    "description": "Custom blacklisted sequences as a fasta file or bed file. These will be filtered out of the trimmed reads before aligning to the reference genome."
                 },
                 "read_length": {
                     "type": "integer",
