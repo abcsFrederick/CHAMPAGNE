@@ -1,5 +1,5 @@
 process MEME_AME {
-    tag "${meta.id}.${meta.group}"
+    tag "${meta.id}"
     label 'peaks'
     label 'process_medium'
 
