@@ -67,25 +67,39 @@ peak_callers <- c(
   jaccard_dat %>% pull(toolB)
 ) %>%
   unique()
-pca_per_tool <- peak_callers %>%
+dat_pca <- peak_callers %>%
   map(function(tool) {
     dat_wide <- jaccard_dat %>%
       filter(toolA == tool & toolB == tool) %>%
       select(labelA, labelB, jaccard) %>%
       pivot_wider(names_from = labelA, values_from = jaccard) %>%
       mutate(across(where(is.numeric), ~ replace_na(., 1)))
-    pca_tidy <- dat_wide %>%
-      select(-labelB) %>%
-      prcomp(scale = TRUE) %>%
-      augment(dat_wide) %>%
-      mutate(tool = tool) %>%
-      rename(label = labelB)
+    if (nrow(dat_wide) == 0) {
+      pca_tidy <- data.frame()
+    } else {
+      pca_tidy <- dat_wide %>%
+        select(-labelB) %>%
+        prcomp(scale = TRUE) %>%
+        augment(dat_wide) %>%
+        mutate(tool = tool) %>%
+        rename(label = labelB)
+    }
     return(pca_tidy)
   }) %>%
-  list_rbind() %>%
-  ggplot(aes(.fittedPC1, .fittedPC2, color = label, shape = tool)) +
-  geom_point(size = 2.5, alpha = 0.8) +
-  facet_wrap("tool") +
-  labs(x = "PC1", y = "PC2") +
-  theme_bw()
-ggsave(plot = pca_per_tool, filename = "jaccard_pca_tool.png", device = "png", dpi = 300, height = 4, width = 7)
+  list_rbind()
+if (nrow(dat_pca) > 0) {
+  pca_per_tool <- dat_pca %>%
+    ggplot(aes(.fittedPC1, .fittedPC2, color = label, shape = tool)) +
+    geom_point(size = 2.5, alpha = 0.8) +
+    facet_wrap("tool") +
+    labs(x = "PC1", y = "PC2") +
+    theme_bw()
+  ggsave(
+    plot = pca_per_tool,
+    filename = "jaccard_pca_tool.png",
+    device = "png",
+    dpi = 300,
+    height = 4,
+    width = 7
+  )
+}
