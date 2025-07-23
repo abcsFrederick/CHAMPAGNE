@@ -49,8 +49,8 @@ champagne run --output /data/$USER/champagne_project \
 To run champagne on your own data, you'll need to create a sample sheet.
 Take a look at these examples:
 
-- [assets/samplesheet_test.csv](/assets/samplesheet_test.csv) - mix of single and paired end reads downloaded from github.
-- [assets/samplesheet_full_mm10.csv](/assets/samplesheet_full_mm10.csv) - single end reads on biowulf.
+- [assets/samplesheet_test.csv](https://github.com/CCBR/CHAMPAGNE/blob/main/assets/samplesheet_test.csv) - mix of single and paired end reads downloaded from github.
+- [assets/samplesheet_full_mm10.csv](https://github.com/CCBR/CHAMPAGNE/blob/main/assets/samplesheet_full_mm10.csv) - single end reads on biowulf.
 
 Once you've created a samplesheet with paths to your fastq files,
 run champagne with the `--input` option to specify the path to your sample sheet:
@@ -136,4 +136,5 @@ If you plan to contribute your pipeline to nf-core, don't use this template --
 instead follow nf-core's instructions[^2].
 
 [^1]: nektool https://github.com/beardymcjohnface/nektool
+
 [^2]: instructions for nf-core pipelines https://nf-co.re/docs/contributing/tutorials/creating_with_nf_core
