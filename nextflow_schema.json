@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/CCBR/CHAMPAGNE//nextflow_schema.json",
+    "$id": "https://raw.githubusercontent.com/CCBR/CHAMPAGNE/main/nextflow_schema.json",
     "title": "CCBR/CHAMPAGNE pipeline parameters",
     "description": "CHromAtin iMmuno PrecipitAtion sequencinG aNalysis pipEline",
     "type": "object",
@@ -410,6 +410,7 @@
         {
             "$ref": "#/$defs/run_control"
         },
+        { "$ref": "#/$defs/platform_options" },
         {
             "$ref": "#/$defs/containers"
         }
