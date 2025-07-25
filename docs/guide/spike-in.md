@@ -5,6 +5,9 @@ The data are normalized based on the number of reads aligning to the spike-in
 genome to account for differences in sequencing depth or other technical
 variations between samples.
 
+Samples are grouped by antibody when calculating the scaling factors.
+Inputs are excluded from this calculation.
+
 ### Spike-in options
 
 You must set the `spike_genome` parameter to the name of a [supported genome](genomes.md#spike-in-genomes)

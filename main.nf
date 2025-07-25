@@ -103,9 +103,6 @@ workflow {
     sample_sheet = Channel.fromPath(file(params.input, checkIfExists: true))
     contrast_sheet = params.contrasts ? Channel.fromPath(file(params.contrasts, checkIfExists: true)) : params.contrasts
     raw_fastqs = INPUT_CHECK(sample_sheet, contrast_sheet).reads
-    raw_fastqs
-        | map{ meta, fq -> meta.input ? [ meta, fq ] : null }
-        | view
 
     CUTADAPT(raw_fastqs).reads | POOL_INPUTS
     trimmed_fastqs = POOL_INPUTS.out.reads
