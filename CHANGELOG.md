@@ -1,6 +1,7 @@
 ## CHAMPAGNE development version
 
 - Minor documentation improvements. (#273, @kelly-sovacool)
+- Set `--blacklist` to a custom bed or fasta file to override the default blacklist used by a built-in `--genome`. (#277, @kelly-sovacool)
 
 ## CHAMPAGNE 0.5.0
 

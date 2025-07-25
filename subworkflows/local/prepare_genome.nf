@@ -1,13 +1,13 @@
-include { BWA_INDEX as BWA_INDEX_BL
-          BWA_INDEX as BWA_INDEX_REF } from "../../modules/CCBR/bwa/index"
+include { BWA_INDEX as BWA_INDEX_REF } from "../../modules/CCBR/bwa/index"
 include { KHMER_UNIQUEKMERS          } from '../../modules/CCBR/khmer/uniquekmers'
-include { BEDTOOLS_GETFASTA          } from '../../modules/nf-core/bedtools/getfasta/main'
 include { SPLIT_REF_CHROMS
           RENAME_FASTA_CONTIGS as RENAME_FASTA_CONTIGS_REF
           RENAME_FASTA_CONTIGS as RENAME_FASTA_CONTIGS_BL
           RENAME_DELIM_CONTIGS
           GTF2BED
           WRITE_GENOME_CONFIG } from "../../modules/local/prepare_genome.nf"
+
+include { PREPARE_BLACKLIST } from './prepare_blacklist.nf'
 
 workflow PREPARE_GENOME {
     main:
@@ -16,11 +16,19 @@ workflow PREPARE_GENOME {
             ch_fasta = Channel.fromPath(params.genomes[ params.genome ].fasta, checkIfExists: true)
             ch_genes_gtf = Channel.fromPath(params.genomes[ params.genome ].genes_gtf, checkIfExists: true)
 
-            ch_blacklist_index = Channel.fromPath(params.genomes[ params.genome ].blacklist_index, checkIfExists: true)
-                .collect()
-                .map{ file ->
-                    [file.baseName, file]
-                }
+            if (!params.blacklist) {
+                ch_blacklist_index = Channel.fromPath(params.genomes[ params.genome ].blacklist_index, checkIfExists: true)
+                    .collect()
+                    .map{ file ->
+                        [file.baseName, file]
+                    }
+            } else {
+                ch_blacklist_index = PREPARE_BLACKLIST(file(params.blacklist, checkIfExists: true),
+                                                       ch_fasta,
+                                                       params.rename_contigs
+                                                       ).index
+            }
+
             ch_reference_index = Channel.fromPath(params.genomes[ params.genome ].reference_index, checkIfExists: true)
                 .collect()
                 .map{ file ->
@@ -38,32 +46,23 @@ workflow PREPARE_GENOME {
             fasta_file = Channel.fromPath(params.genome_fasta, checkIfExists: true)
             gtf_file = file(params.genes_gtf, checkIfExists: true)
 
-            // blacklist bed to fasta
-            blacklist_file = file(params.blacklist, checkIfExists: true)
-            if (blacklist_file.endsWith('.bed')) {
-                BEDTOOLS_GETFASTA(blacklist_file, fasta_file)
-                ch_blacklist_input = BEDTOOLS_GETFASTA.out.fasta
-            } else {
-                ch_blacklist_input = Channel.fromPath(blacklist_file)
-            }
-
             // rename contigs from ensembl to UCSC if needed
             if (params.rename_contigs) {
                 contig_map = file(params.rename_contigs, checkIfExists: true)
                 ch_fasta = RENAME_FASTA_CONTIGS_REF(fasta_file, contig_map).fasta
-                ch_blacklist_fasta = RENAME_FASTA_CONTIGS_BL(ch_blacklist_input, contig_map).fasta
                 ch_gtf = RENAME_DELIM_CONTIGS(gtf_file, contig_map).delim
             } else {
                 ch_fasta = fasta_file
-                ch_blacklist_fasta = ch_blacklist_input
                 ch_gtf = gtf_file
             }
 
-            blacklist_meta = ch_blacklist_fasta.map{ it -> [it.baseName, it]}
             fasta_meta = ch_fasta.map{ it -> [it.baseName, it]}
 
             ch_genes_gtf = Channel.fromPath(gtf_file)
-            ch_blacklist_index =  BWA_INDEX_BL(blacklist_meta).index.collect()
+            ch_blacklist_index =  PREPARE_BLACKLIST(file(params.blacklist, checkIfExists: true),
+                                                    ch_fasta,
+                                                    params.rename_contigs
+                                                    ).index
             ch_reference_index = BWA_INDEX_REF(fasta_meta).index.collect()
             KHMER_UNIQUEKMERS(ch_fasta, params.read_length)
             ch_gsize = KHMER_UNIQUEKMERS.out.kmers.map { it.text.trim() }

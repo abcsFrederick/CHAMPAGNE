@@ -1,3 +1,18 @@
+### Custom blacklist
+
+If you'd like to override the default blacklist used by one of the built-in genomes,
+you can provide a custom blacklist bed file or fasta file:
+
+```sh
+champagne run --output /data/$USER/champagne_project \
+    --mode slurm \
+    --genome hg38 \
+    --blacklist /path/to/blacklist.bed
+```
+
+If you're providing a custom blacklist bed file, make sure its regions refer to
+the genome version you're using.
+
 ### Custom reference genome
 
 If you'd like to use a genome not available on Biowulf,
@@ -12,7 +27,7 @@ Prepare your custom reference genome with:
 
 ```sh
 champagne run --output /data/$USER/champagne_project \
-    --mode slurm -profile biowulf \
+    --mode slurm \
     -entry MAKE_REFERENCE \
     --genome custom_genome \
     --genome_fasta genome.fasta \
