@@ -11,11 +11,13 @@ workflow PREPARE_BLACKLIST {
     main:
 
         // blacklist bed to fasta
-        if (blacklist_file.endsWith('.bed')) {
+        if (blacklist_file.extension == 'bed') {
             BEDTOOLS_GETFASTA(blacklist_file, genome_fasta)
             ch_blacklist_input = BEDTOOLS_GETFASTA.out.fasta
-        } else {
+        } else if (blacklist_file.extension == 'fasta' || blacklist_file.extension == 'fa') {
             ch_blacklist_input = Channel.fromPath(blacklist_file)
+        } else {
+            error "Unsupported blacklist file format extension: ${blacklist_file.extension}. Expected .bed or .fasta/.fa"
         }
         if (rename_contigs) {
             contig_map = file(rename_contigs, checkIfExists: true)
