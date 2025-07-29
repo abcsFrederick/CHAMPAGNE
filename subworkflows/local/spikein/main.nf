@@ -46,8 +46,7 @@ workflow ALIGN_SPIKEIN {
         } else {
             error "Unknown spike-in normalization method: ${params.spike_norm_method}"
         }
-
-        MAKE_TABLE( ch_sf_tsv, ch_spike_counts )
+        MAKE_TABLE( ch_sf_tsv.collect(), ch_spike_counts.collect() )
         ch_sf_tsv
             | splitCsv(header: true, sep: '\t')
             | map{ row -> [ row.sample, row.scalingFactor ] }

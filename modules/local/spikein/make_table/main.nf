@@ -16,6 +16,7 @@ process MAKE_TABLE {
         task.ext.when == null || task.ext.when
 
     script:
+    sf_tsvs = sf_tsv.join(',')
     ids = metas.collect{ it.id }.join(',')
     counts_joined = spikein_counts.join(',')
     """
