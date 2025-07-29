@@ -20,6 +20,6 @@ process MAKE_TABLE {
     ids = metas.collect{ it.id }.join(',')
     counts_joined = spikein_counts.join(',')
     """
-    make_sf_table.py ${sf_tsv} ${ids} ${counts_joined}
+    make_sf_table.py ${sf_tsvs} ${ids} ${counts_joined}
     """
 }
