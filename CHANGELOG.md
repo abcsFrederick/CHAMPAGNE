@@ -1,7 +1,8 @@
 ## CHAMPAGNE development version
 
 - Minor documentation improvements. (#273, @kelly-sovacool)
-- Set `--blacklist` to a custom bed or fasta file to override the default blacklist used by a built-in `--genome`. (#277, @kelly-sovacool)
+- Set `--blacklist` to a custom bed or fasta file to override the default blacklist used by a built-in `--genome`. (#278, @kelly-sovacool)
+    - Also add support for the hg19 genome on biowulf.
 - Fix spike-in normalization: (#279, @kelly-sovacool)
     - Do not include inputs in the scale factor calculation.
     - Group samples by antibody for scale factor calculation.
