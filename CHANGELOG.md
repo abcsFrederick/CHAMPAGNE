@@ -1,3 +1,5 @@
+## CHAMPAGNE development version
+
 ## CHAMPAGNE 0.5.1
 
 - Minor documentation improvements. (#273, @kelly-sovacool)
