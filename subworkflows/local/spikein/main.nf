@@ -1,15 +1,18 @@
 
-include { BWA_MEM                } from '../../../modules/CCBR/bwa/mem'
-include { SAMTOOLS_COUNT } from '../../../modules/local/samtools/count'
+include { BWA_MEM               } from '../../../modules/CCBR/bwa/mem'
+include { DEDUPLICATE           } from "../../../subworkflows/local/deduplicate.nf"
+include { SAMTOOLS_COUNT        } from '../../../modules/local/samtools/count'
 include { COMPUTE_SCALINGFACTOR } from '../../../modules/local/spikein/compute_scalingFactor'
-include { MULTIBAM_SUMMARY } from "../../../modules/local/deeptools.nf"
-include { MAKE_TABLE } from '../../../modules/local/spikein/make_table'
+include { MULTIBAM_SUMMARY      } from "../../../modules/local/deeptools.nf"
+include { MAKE_TABLE            } from '../../../modules/local/spikein/make_table'
 
 workflow ALIGN_SPIKEIN {
     take:
         ch_fastq
-        spike_genome
+        ch_deduped_bam
         ch_frag_lengths
+        spike_genome
+
     main:
         ch_spikein_fasta = Channel.fromPath(params.genomes[spike_genome].fasta, checkIfExists: true)
         ch_spikein_index = Channel.fromPath(params.genomes[spike_genome].reference_index, checkIfExists: true)
@@ -18,7 +21,12 @@ workflow ALIGN_SPIKEIN {
         ch_spikein_blacklist_bed = Channel.fromPath(params.genomes[spike_genome].blacklist_bed)
 
         BWA_MEM( ch_fastq, ch_spikein_index )
-        SAMTOOLS_COUNT( BWA_MEM.out.bam )
+        DEDUPLICATE(BWA_MEM.out.bam.map{ meta, bam, bai -> [ meta, bam ] },
+                    Channel.fromPath(params.genomes[spike_genome].chrom_sizes, checkIfExists: true),
+                    Channel.of(params.genomes[spike_genome].effective_genome_size)
+                    )
+        DEDUPLICATE.out.bam | view
+        SAMTOOLS_COUNT( DEDUPLICATE.out.bam )
         SAMTOOLS_COUNT.out.count
             | map{ meta, count -> [meta.antibody, meta, count]}
             | groupTuple()
