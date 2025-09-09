@@ -69,6 +69,8 @@ These genomes can be passed to the `--spike_genome` parameter.
 - reference_index: `${params.index_dir}/dmelr6.32/indexes/bwa/Drosophila_melanogaster.*`
 - blacklist_index: `${params.index_dir}/dmelr6.32/indexes/blacklist/dmelr6.32.blacklist.*`
 - blacklist_bed: `${params.index_dir}/dmelr6.32/indexes/dm6-blacklist.v2.no_chr.bed.gz`
+- effective_genome_size: `142573017`
+- chrom_sizes: `${params.index_dir}/dmelr6.32/chrom_dmelr6.28.sizes`
 
 #### `ecoli_k12`
 
@@ -76,6 +78,8 @@ These genomes can be passed to the `--spike_genome` parameter.
 - fasta: `${params.index_dir}/ecoli_k12/indexes/ecoli_k12.fa`
 - reference_index: `${params.index_dir}/ecoli_k12/indexes/ecoli_k12.*`
 - blacklist_bed: `NO_FILE`
+- effective_genome_size: `4641652`
+- chrom_sizes: `${params.index_dir}/ecoli_k12/Chromosomes/chrom.sizes`
 
 ### Custom blacklist
 
