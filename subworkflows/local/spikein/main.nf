@@ -54,7 +54,13 @@ workflow ALIGN_SPIKEIN {
         } else {
             error "Unknown spike-in normalization method: ${params.spike_norm_method}"
         }
-        MAKE_TABLE( ch_sf_tsv.collect(), ch_spike_counts.collect() )
+        ch_spike_counts
+            | transpose
+            | map{ meta, count -> [1, meta, count]}
+            | groupTuple()
+            | map{ _x, metas, counts -> [ metas.flatten(), counts.flatten() ] }
+            | set{ ch_spike_counts_flat }
+        MAKE_TABLE( ch_sf_tsv.collect(), ch_spike_counts_flat )
         ch_sf_tsv
             | splitCsv(header: true, sep: '\t')
             | map{ row -> [ row.sample, row.scalingFactor ] }
