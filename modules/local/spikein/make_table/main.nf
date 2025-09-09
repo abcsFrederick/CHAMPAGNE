@@ -18,8 +18,9 @@ process MAKE_TABLE {
     script:
     sf_tsvs = sf_tsv.join(',')
     ids = metas.collect{ it.id }.join(',')
+    antibodies = metas.collect{ it.antibody }.join(',')
     counts_joined = spikein_counts.join(',')
     """
-    make_sf_table.py ${sf_tsvs} ${ids} ${counts_joined}
+    make_sf_table.py ${sf_tsvs} ${ids} ${antibodies} ${counts_joined}
     """
 }
