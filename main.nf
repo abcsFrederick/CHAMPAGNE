@@ -135,7 +135,10 @@ workflow {
         | set{ fastq_branch }
     // optional spike-in normalization
     if (params.spike_genome) {
-        ALIGN_SPIKEIN(fastq_branch.sample, params.spike_genome, frag_lengths)
+        ALIGN_SPIKEIN(fastq_branch.sample,
+            deduped_bam,
+            frag_lengths,
+            params.spike_genome)
         ch_scaling_factors = ALIGN_SPIKEIN.out.scaling_factors
         fastq_branch.input
             | map{ meta, fq -> meta.id }
