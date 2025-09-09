@@ -135,7 +135,7 @@ try(dba.plotPCA(DBAnalysisDeseq2, contrast = 1, method = DBA_DESEQ2), silent = T
 ```
 
 
-### MANorm
+### MA plot
 ```{r MA, echo=FALSE, warning=FALSE,message=FALSE,fig.width=10,fig.height=4,fig.align="center"}
 
 try(dba.plotMA(DBAnalysisDeseq2, method = DBA_DESEQ2), silent = TRUE)
