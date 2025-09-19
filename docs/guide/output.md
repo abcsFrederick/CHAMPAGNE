@@ -61,7 +61,7 @@ timestamp of the pipeline run.
 report for the entire run, which summarizes the quality control results for all
 samples.
 
-View an example multiqc report [here](/examples/multiqc_report_human.html).
+View an example multiqc report [here](../examples/multiqc_report_human.html).
 
 Input files passed to multiqc are in `qc/multiqc/input/`.
 
