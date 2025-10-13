@@ -139,8 +139,10 @@ styled correctly and will attempt to make corrections if needed.
 >
 > - hook id: trailing-whitespace <br>
 > - exit code: 1 <br>
-> - files were modified by this hook <br> > <br>
->   Fixing path/to/changed/files/file.txt <br> > <br>
+> - files were modified by this hook <br>
+> - > <br>
+>   Fixing path/to/changed/files/file.txt <br>
+>   > <br>
 >   codespell................................................................Passed <br>
 >   style-files..........................................(no files to check)Skipped <br>
 >   readme-rmd-rendered..................................(no files to check)Skipped <br>
@@ -169,7 +171,8 @@ will appear after the pre-commit messages showing that the commit was created.
 > style-files..........................................(no files to check)Skipped <br>
 > readme-rmd-rendered..................................(no files to check)Skipped <br>
 > use-tidy-description.................................(no files to check)Skipped <br>
-> Conventional Commit......................................................Passed <br> > [iss-10 9ff256e] feat: create function for awesome feature <br>
+> Conventional Commit......................................................Passed <br>
+> [iss-10 9ff256e] feat: create function for awesome feature <br>
 > 1 file changed, 22 insertions(+), 3 deletions(-) <br>
 
 Finally, push your changes to GitHub:
