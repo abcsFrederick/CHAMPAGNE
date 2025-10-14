@@ -1,6 +1,9 @@
 ## CHAMPAGNE development version
 
-- Increase memory for diffbind.
+- Increase memory for: (#298, @kelly-sovacool)
+    - main slurm job
+    - diffbind
+    - deeptools plot_heatmap
 
 ## CHAMPAGNE 0.5.2
 
