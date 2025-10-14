@@ -310,7 +310,7 @@ process COMPUTE_MATRIX {
 process PLOT_HEATMAP {
   label 'qc'
   label 'deeptools'
-  label 'process_medium'
+  label 'process_high'
 
   container "${params.containers_deeptools}"
 
