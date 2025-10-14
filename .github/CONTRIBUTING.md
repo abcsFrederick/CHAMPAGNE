@@ -140,13 +140,13 @@ styled correctly and will attempt to make corrections if needed.
 > - hook id: trailing-whitespace <br>
 > - exit code: 1 <br>
 > - files were modified by this hook <br>
-> - > <br>
->   > Fixing path/to/changed/files/file.txt <br>
->   > <br>
->   > codespell................................................................Passed <br>
->   > style-files..........................................(no files to check)Skipped <br>
->   > readme-rmd-rendered..................................(no files to check)Skipped <br>
->   > use-tidy-description.................................(no files to check)Skipped <br>
+> - <br>
+>   Fixing path/to/changed/files/file.txt <br>
+>   <br>
+>   codespell................................................................Passed <br>
+>   style-files..........................................(no files to check)Skipped <br>
+>   readme-rmd-rendered..................................(no files to check)Skipped <br>
+>   use-tidy-description.................................(no files to check)Skipped <br>
 
 In the example above, one of the hooks modified a file in the proposed commit,
 so the pre-commit check failed. You can run `git diff` to see the changes that
@@ -171,7 +171,8 @@ will appear after the pre-commit messages showing that the commit was created.
 > style-files..........................................(no files to check)Skipped <br>
 > readme-rmd-rendered..................................(no files to check)Skipped <br>
 > use-tidy-description.................................(no files to check)Skipped <br>
-> Conventional Commit......................................................Passed <br> > [iss-10 9ff256e] feat: create function for awesome feature <br>
+> Conventional Commit......................................................Passed <br>
+> [iss-10 9ff256e] feat: create function for awesome feature <br>
 > 1 file changed, 22 insertions(+), 3 deletions(-) <br>
 
 Finally, push your changes to GitHub:
@@ -198,7 +199,9 @@ git push --set-upstream origin iss-10
 > remote: Create a pull request for 'iss-10' on GitHub by visiting: <br>
 > remote: https://github.com/CCBR/CHAMPAGNE/pull/new/iss-10 <br>
 > remote: <br>
-> To https://github.com/CCBR/CHAMPAGNE <br> > <br> > [new branch] iss-10 -> iss-10 <br>
+> To https://github.com/CCBR/CHAMPAGNE <br>
+> <br>
+> [new branch] iss-10 -> iss-10 <br>
 > branch 'iss-10' set up to track 'origin/iss-10'. <br>
 
 We recommend pushing your commits often so they will be backed up on GitHub.
