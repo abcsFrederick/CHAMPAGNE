@@ -141,12 +141,12 @@ styled correctly and will attempt to make corrections if needed.
 > - exit code: 1 <br>
 > - files were modified by this hook <br>
 > - > <br>
->   Fixing path/to/changed/files/file.txt <br>
+>   > Fixing path/to/changed/files/file.txt <br>
 >   > <br>
->   codespell................................................................Passed <br>
->   style-files..........................................(no files to check)Skipped <br>
->   readme-rmd-rendered..................................(no files to check)Skipped <br>
->   use-tidy-description.................................(no files to check)Skipped <br>
+>   > codespell................................................................Passed <br>
+>   > style-files..........................................(no files to check)Skipped <br>
+>   > readme-rmd-rendered..................................(no files to check)Skipped <br>
+>   > use-tidy-description.................................(no files to check)Skipped <br>
 
 In the example above, one of the hooks modified a file in the proposed commit,
 so the pre-commit check failed. You can run `git diff` to see the changes that
@@ -171,8 +171,7 @@ will appear after the pre-commit messages showing that the commit was created.
 > style-files..........................................(no files to check)Skipped <br>
 > readme-rmd-rendered..................................(no files to check)Skipped <br>
 > use-tidy-description.................................(no files to check)Skipped <br>
-> Conventional Commit......................................................Passed <br>
-> [iss-10 9ff256e] feat: create function for awesome feature <br>
+> Conventional Commit......................................................Passed <br> > [iss-10 9ff256e] feat: create function for awesome feature <br>
 > 1 file changed, 22 insertions(+), 3 deletions(-) <br>
 
 Finally, push your changes to GitHub:
