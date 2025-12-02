@@ -1,4 +1,4 @@
-## CHAMPAGNE development version
+## CHAMPAGNE 0.5.3
 
 - CHAMPAGNE now requires nextflow version 25.10.0 or later. (#303, @kelly-sovacool)
 - Increase memory for: (#298, @kelly-sovacool)
