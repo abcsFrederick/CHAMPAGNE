@@ -5,9 +5,9 @@ You will need nextflow and either singularity or docker installed.
 In this case you don't need to run `champagne init` first,
 as the config files will be accessed directly from the GitHub repo.
 
-```[!NOTE]
-CHAMPAGNE requires nextflow v25.10.0 or later.
-```
+> [!NOTE]
+>
+> CHAMPAGNE requires nextflow v25.10.0 or later.
 
 ```sh
 nextflow run CCBR/CHAMPAGNE -profile test,singularity
