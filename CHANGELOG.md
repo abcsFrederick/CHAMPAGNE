@@ -1,5 +1,6 @@
 ## CHAMPAGNE development version
 
+- CHAMPAGNE now requires nextflow version 25.10.0 or later. (#303, @kelly-sovacool)
 - Increase memory for: (#298, @kelly-sovacool)
     - main slurm job
     - diffbind
