@@ -54,6 +54,14 @@ jobs:
         run: |
           python .github/contributors.py > docs/devs/contributors.md
 
+      - name: Render Mermaid diagram SVG
+        run: |
+          npm install -g @mermaid-js/mermaid-cli
+          for input in $(find docs -name "*.mermaid"); do
+            output="${input%.mermaid}.svg"
+            mmdc -i "$input" -o "$output"
+          done
+
       - name: Format
         uses: pre-commit/action@v3.0.1
         continue-on-error: true
