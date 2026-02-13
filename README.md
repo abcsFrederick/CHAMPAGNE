@@ -9,10 +9,15 @@
 
 View the full documentation website: <https://ccbr.github.io/CHAMPAGNE>
 
-[![](./docs/diagram/overview.svg)](https://ccbr.github.io/CHAMPAGNE/latest/diagram/)
-
-View a detailed version of the workflow diagram on the documentation website:
-<https://ccbr.github.io/CHAMPAGNE/latest/diagram/>
+<a href="https://ccbr.github.io/CHAMPAGNE/latest/diagram/">
+<figure>
+  <img src="./docs/diagram/overview.svg" alt="CHAMPAGNE workflow overview diagram">
+  <figcaption>
+    <strong>CHAMPAGNE Workflow Overview.</strong>
+    View a detailed version of the workflow diagram on the documentation website.
+  </figcaption>
+</figure>
+</a>
 
 ## Set up
 
