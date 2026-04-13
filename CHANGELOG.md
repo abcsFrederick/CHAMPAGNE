@@ -1,9 +1,10 @@
 ## CHAMPAGNE development version
 
+- Support uncompressed fastq files -- they will be gzipped after the samplesheet check. (#306, @kelly-sovacool)
 - Add configurable correlation method parameter for deeptools plotCorrelation. (#307, @kelly-sovacool)
   - Users can now set `--deeptools_corr_method` to `pearson` or `spearman` (default).
 - Add workflow diagram to the documentation. (#309, @JWrows2014, @kelly-sovacool)
-- Add an intro the workflow and a description of the workflow steps to the docs. (#310, @kelly-sovacool)
+- Add an intro and description of the workflow steps to the docs. (#310, @kelly-sovacool)
 - Output deduplicated tagalign files to `results/align/tagalign/`. (#313, @kelly-sovacool)
 
 ## CHAMPAGNE 0.5.3
