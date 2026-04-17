@@ -1,5 +1,7 @@
 ## CHAMPAGNE development version
 
+## CHAMPAGNE 0.6.0
+
 - Support uncompressed fastq files -- they will be gzipped after the samplesheet check. (#306, @kelly-sovacool)
 - Add configurable correlation method parameter for deeptools plotCorrelation. (#307, @kelly-sovacool)
   - Users can now set `--deeptools_corr_method` to `pearson` or `spearman` (default).
