@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Open checklist issue
-        uses: caffiendFrog/repo-to-go@main
+        uses: caffiendFrog/repo-to-go/open-checklist@main
         with:
           repo: ${{ github.event.inputs.repo || github.repository }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
