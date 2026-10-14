@@ -1,6 +1,8 @@
 include { BWA_INDEX as BWA_INDEX_REF } from "../../modules/CCBR/bwa/index"
 include { KHMER_UNIQUEKMERS          } from '../../modules/CCBR/khmer/uniquekmers'
-include { SPLIT_REF_CHROMS
+include { GUNZIP_REFERENCE as GUNZIP_FASTA
+          GUNZIP_REFERENCE as GUNZIP_GTF
+          SPLIT_REF_CHROMS
           RENAME_FASTA_CONTIGS as RENAME_FASTA_CONTIGS_REF
           RENAME_FASTA_CONTIGS as RENAME_FASTA_CONTIGS_BL
           RENAME_DELIM_CONTIGS
@@ -45,7 +47,14 @@ workflow PREPARE_GENOME {
 
         } else if (params.genome_fasta && params.genes_gtf) {
             fasta_file = Channel.fromPath(params.genome_fasta, checkIfExists: true)
-            gtf_file = file(params.genes_gtf, checkIfExists: true)
+            gtf_file = Channel.fromPath(params.genes_gtf, checkIfExists: true)
+
+            if (file(params.genome_fasta).extension == 'gz') {
+                fasta_file = GUNZIP_FASTA(fasta_file).uncompressed
+            }
+            if (file(params.genes_gtf).extension == 'gz') {
+                gtf_file = GUNZIP_GTF(gtf_file).uncompressed
+            }
 
             // rename contigs from ensembl to UCSC if needed
             if (params.rename_contigs) {
@@ -59,7 +68,7 @@ workflow PREPARE_GENOME {
 
             fasta_meta = ch_fasta.map{ it -> [it.baseName, it]}
 
-            ch_genes_gtf = Channel.fromPath(gtf_file)
+            ch_genes_gtf = ch_gtf
             ch_blacklist_index = Channel.empty()
             if (params.blacklist) {
                 ch_blacklist_index =  PREPARE_BLACKLIST(file(params.blacklist, checkIfExists: true),
@@ -102,7 +111,7 @@ workflow PREPARE_GENOME {
             ch_genome_conf = WRITE_GENOME_CONFIG.out.conf.mix(WRITE_GENOME_CONFIG.out.files)
 
         } else {
-            error "Either specify a genome in `conf/genomes.conf`, or specify a genome fasta, gtf, and blacklist file to build a custom reference."
+            error "No reference available for genome '${params.genome}'. Either choose a genome configured in conf/genomes.config (${params.genomes.keySet().sort().join(', ')}), or supply --genome_fasta and --genes_gtf to build a custom reference."
         }
 
     emit:

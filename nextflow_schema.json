@@ -67,6 +67,11 @@
             "description": "Use these to build a custom reference genome not already listed in conf/genomes.config. For an example, see conf/test.config.",
             "default": "",
             "properties": {
+                "build_reference": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Build the custom genome reference and stop without running sample analysis."
+                },
                 "genome_fasta": {
                     "type": "string",
                     "fa_icon": "fas fa-file",
@@ -90,6 +95,19 @@
                     "type": "string",
                     "fa_icon": "fas fa-file",
                     "description": "File with map to translate chromosome names (see assets/R64-1-1_ensembl2UCSC.txt as an example)"
+                },
+                "meme_motifs": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file",
+                    "description": "Motif file in MEME format. If null, MEME motif analysis will be skipped."
+                },
+                "bioc_txdb": {
+                    "type": "string",
+                    "description": "Bioconductor TxDb annotation package name used by ChIPseeker (e.g. TxDb.Hsapiens.UCSC.hg38.knownGene). If null, ChIPseeker annotation will be skipped."
+                },
+                "bioc_annot": {
+                    "type": "string",
+                    "description": "Bioconductor OrgDb annotation package name used by ChIPseeker (e.g. org.Hs.eg.db). If null, ChIPseeker annotation will be skipped."
                 }
             }
         },
@@ -130,6 +148,16 @@
                 "spike_genome": {
                     "type": "string",
                     "description": "Optional spike-in genome (e.g. dmelr6.32, ecoli_k12). If null, spike-in normalization will not be performed."
+                },
+                "spike_genome_fasta": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file",
+                    "description": "Spike-in genome fasta file. Use this to build a custom spike-in reference when spike_genome is not listed in conf/genomes.config. Requires read_length."
+                },
+                "spike_blacklist_bed": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file",
+                    "description": "Blacklisted regions of the custom spike-in genome as a bed file, excluded by deepTools multiBamSummary. If null, no regions are excluded."
                 },
                 "spike_norm_method": {
                     "type": "string",
