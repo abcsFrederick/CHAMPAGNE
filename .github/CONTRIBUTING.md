@@ -98,6 +98,55 @@ Run the tests with `python -m pytest`.
 If you change the **workflow**, please run the workflow with the test profile
 and make sure your new feature or bug fix works as intended.
 
+Nextflow module tests use [nf-test](https://www.nf-test.com/).
+On Biowulf, load the dependencies and run from the repository root:
+
+```sh
+module load ccbrpipeliner nextflow python/3.12
+nf-test test --profile "+singularity"
+```
+
+On Apple Silicon macOS, install Pixi, Podman, and nf-test. Start the
+Podman machine, then run from the repository root:
+
+```sh
+podman machine start
+pixi run -e test test-podman
+```
+
+Pixi supplies Nextflow. The Podman test profile runs AMD64 containers, so the
+Podman machine must support AMD64 emulation. Test fixtures and container images
+require internet access. If Java reports certificate verification errors while
+connected to a VPN, retry off the VPN or configure Java to trust your
+organization's CA; do not disable certificate verification.
+
+CI runs the same tests with `--profile "+docker"`, and only runs the tests
+affected by a pull request. Add new module tests in each module's `tests/`
+directory; test data paths are defined in `tests/test-data.config`.
+
+Run only local module and subworkflow tests with:
+
+```sh
+pixi run -e test nf-test test modules/local subworkflows/local --profile +podman
+```
+
+Real-execution cases are in `main.real.nf.test` and tagged `real`; the existing
+stub cases remain in `main.nf.test`. Real cases use the production processes
+with small local fixtures or reproducible generated datasets. Containers match
+the pipeline, except peak-workflow plotting uses the smaller pinned
+`rocker/tidyverse:4.3.0` image to run the same R scripts.
+Run the real cases alone with:
+
+```sh
+pixi run -e test nf-test test modules/local/**/tests/*.real.nf.test subworkflows/local/**/tests/*.real.nf.test --profile +podman
+```
+
+The shared generator in `tests/helpers/chipseq.nf` creates small indexed BAMs,
+FASTQs, peak sets, references, and motif databases. It runs during test setup;
+no large generated alignments are committed. Initial container pulls can be
+large even though the test datasets are small. Keep the real scientific-output
+assertions separate from the faster stub metadata and wiring checks.
+
 #### document
 
 If you have added a new feature or changed the API of an existing feature,
