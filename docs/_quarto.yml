@@ -72,7 +72,7 @@ website:
 filters:
   - version-selector
 version-selector:
-  placement: sidebar
+  placement: navbar-left
 
 format:
   fnl-html:
